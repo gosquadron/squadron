@@ -28,22 +28,22 @@ class DirectoryRender:
         """
         items = os.listdir(os.path.join(self.basedir, currpath))
 
-        for f in items:
-            path = os.path.join(currpath, f)
-            cur = os.path.join(self.basedir, path)
-            dest = os.path.join(destdir, path)
+        for filename in items:
+            relpath = os.path.join(currpath, filename)
+            cur = os.path.join(self.basedir, relpath)
+            dest = os.path.join(destdir, relpath)
             if os.path.isdir(cur):
                 print "Making directory {}".format(dest)
                 mkdirp(dest)
-                self.render(destdir, inputhash, path)
+                self.render(destdir, inputhash, relpath)
             else:
                 print "cur {} is not a directory".format(cur)
-                if f.endswith('.tpl'):
-                    template = self.loader.load_template(path)
+                if filename.endswith('.tpl'):
+                    template = self.loader.load_template(relpath)
                     output = template.render(inputhash, loader=self.loader)
                     with open(dest.rstrip('.tpl'), 'w') as outfile:
                         outfile.write(output)
-                elif f.endswith('.download'):
+                elif filename.endswith('.download'):
                     with open(cur, 'r') as downloadfile:
                         (url, checksum) = downloadfile.read().split(None, 3)
 
