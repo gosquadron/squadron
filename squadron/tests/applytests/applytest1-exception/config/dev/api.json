@@ -1,0 +1,7 @@
+{
+    "version" : "0.0.1",
+    "config" : {
+        "port" : "fifty-five",
+        "dbhostname" : "example.com"
+    }
+}

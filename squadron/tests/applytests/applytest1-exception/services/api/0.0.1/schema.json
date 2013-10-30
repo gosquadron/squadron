@@ -1,0 +1,22 @@
+{
+    "type" : "object",
+    "properties" : {
+        "port" : {
+            "description" : "which port to run the API on",
+            "type" : "integer",
+            "minimum" : 0,
+            "maximum" : 65535,
+            "default" : 7777
+        },
+        "dbhostname" : {
+            "description" : "hostname for the database connection",
+            "type" : "string"
+        },
+        "database" : {
+            "description" : "which database to connect to",
+            "type" : "string",
+            "default" : "api"
+        }
+    },
+    "required": ["dbhostname"]
+}
