@@ -5,8 +5,7 @@
             "description" : "which port to run the API on",
             "type" : "integer",
             "minimum" : 0,
-            "maximum" : 65535,
-            "default" : 7777
+            "maximum" : 65535
         },
         "dbhostname" : {
             "description" : "hostname for the database connection",
@@ -14,8 +13,7 @@
         },
         "database" : {
             "description" : "which database to connect to",
-            "type" : "string",
-            "default" : "api"
+            "type" : "string"
         }
     },
     "required": ["dbhostname"]
