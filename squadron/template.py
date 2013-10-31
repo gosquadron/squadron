@@ -12,6 +12,21 @@ def mkdirp(dirname):
             print "dir already exists {}".format(dirname)
             pass
 
+def ext_template(loader, inputhash, relpath, cur, dest):
+    template = loader.load_template(relpath)
+    output = template.render(inputhash, loader=loader)
+    with open(dest.rstrip('.tpl'), 'w') as outfile:
+        outfile.write(output)
+
+def ext_download(loader, inputhash, relpath, cur, dest):
+    with open(cur, 'r') as downloadfile:
+        (url, checksum) = downloadfile.read().split(None, 3)
+
+        print "Downloading {} to {}".format(url, dest)
+        urllib.urlretrieve(url, dest.rstrip('.download'))
+
+extension_handles = {'tpl' : ext_template, 'download' : ext_download}
+
 class DirectoryRender:
     def __init__(self, basedir):
         self.loader = FileLoader(basedir)
@@ -38,17 +53,9 @@ class DirectoryRender:
                 self.render(destdir, inputhash, relpath)
             else:
                 print "cur {} is not a directory".format(cur)
-                if filename.endswith('.tpl'):
-                    template = self.loader.load_template(relpath)
-                    output = template.render(inputhash, loader=self.loader)
-                    with open(dest.rstrip('.tpl'), 'w') as outfile:
-                        outfile.write(output)
-                elif filename.endswith('.download'):
-                    with open(cur, 'r') as downloadfile:
-                        (url, checksum) = downloadfile.read().split(None, 3)
-
-                        print "Downloading {} to {}".format(url, dest)
-                        urllib.urlretrieve(url, dest.rstrip('.download'))
+                ext = os.path.splitext(filename)[1][1:].strip().lower()
+                if ext in extension_handles:
+                    extension_handles[ext](self.loader, inputhash, relpath, cur, dest)
                 else:
                     copyfile(cur, dest)
 
