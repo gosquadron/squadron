@@ -27,6 +27,15 @@ def ext_download(loader, inputhash, relpath, cur, dest):
 
 extension_handles = {'tpl' : ext_template, 'download' : ext_download}
 
+def get_ext(filename):
+    root,ext = os.path.splitext(filename)
+    if ext.lower() in ['.gz', '.bz2', '.xz']:
+        other = os.path.splitext(root)[1]
+        if other.lower() in ['.tar']:
+            return (other[1:] + ext).lower()
+
+    return ext[1:].lower()
+
 class DirectoryRender:
     def __init__(self, basedir):
         self.loader = FileLoader(basedir)
@@ -53,7 +62,7 @@ class DirectoryRender:
                 self.render(destdir, inputhash, relpath)
             else:
                 print "cur {} is not a directory".format(cur)
-                ext = os.path.splitext(filename)[1][1:].strip().lower()
+                ext = get_ext(filename)
                 if ext in extension_handles:
                     extension_handles[ext](self.loader, inputhash, relpath, cur, dest)
                 else:

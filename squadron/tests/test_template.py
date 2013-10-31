@@ -16,3 +16,12 @@ def test_template(tmpdir):
     test.render(dirname, {'name':'user'})
 
     assert are_dir_trees_equal(dirname, 'test1result')
+
+def test_extensions():
+    assert template.get_ext('filename.txt') == 'txt'
+    assert template.get_ext('filename.txt.gz') == 'gz'
+    assert template.get_ext('filename.tar') == 'tar'
+    assert template.get_ext('filename.tar.gz') == 'tar.gz'
+    assert template.get_ext('filename.tar.bz2') == 'tar.bz2'
+    assert template.get_ext('filename') == ''
+
