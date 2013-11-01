@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+from squadron import main
+from argparse import ArgumentParser
+import json
+
+if __name__ == "__main__":
+    parser = ArgumentParser(
+                description='Easy configuration management tool',
+                epilog="http://gosquadron.com"
+            )
+    
+    parser.add_argument('-i', '--directory', help='Input directory', required=True)
+    parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information', required=True)
+
+    args = parser.parse_args()
+
+    node_info = json.loads(args.node_info)
+
+    print "dir {} node_info {}".format(args.directory, node_info)
+    result = main.apply(args.directory, node_info)
+
+    for k,v in result.items():
+        print "{} -> {}".format(k, v)
+
