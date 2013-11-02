@@ -11,7 +11,7 @@ def get_service_json(squadron_dir, service_name, service_ver, filename):
     with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
         return json.loads(jsonfile.read())
 
-def apply(squadron_dir, node_info):
+def apply(squadron_dir, node_info, dry_run=False):
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
     result = {}
@@ -31,13 +31,15 @@ def apply(squadron_dir, node_info):
 
             jsonschema.validate(cfg, get_service_json(squadron_dir, service, version, 'schema'))
 
-        service_dir = os.path.join(squadron_dir, 'services',
-                                   service, version, 'root')
-        render = DirectoryRender(service_dir)
+        if not dry_run:
+            service_dir = os.path.join(squadron_dir, 'services',
+                                    service, version, 'root')
+            render = DirectoryRender(service_dir)
 
-        tmpdir = tempfile.mkdtemp('.sq')
-        render.render(tmpdir, cfg)
+            tmpdir = tempfile.mkdtemp('.sq')
+            render.render(tmpdir, cfg)
 
-        result[service] = tmpdir
+            result[service] = tmpdir
 
     return result
+

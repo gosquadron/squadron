@@ -11,14 +11,15 @@ if __name__ == "__main__":
     
     parser.add_argument('-i', '--directory', help='Input directory', required=True)
     parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information', required=True)
+    parser.add_argument('command', choices=['check','apply'], help='Which action to execute')
 
     args = parser.parse_args()
 
     node_info = json.loads(args.node_info)
 
-    print "dir {} node_info {}".format(args.directory, node_info)
-    result = main.apply(args.directory, node_info)
+    print "{}: dir {} node_info {}".format(args.command, args.directory, node_info)
+
+    result = main.apply(args.directory, node_info, args.command == 'check')
 
     for k,v in result.items():
         print "{} -> {}".format(k, v)
-
