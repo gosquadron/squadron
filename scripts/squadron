@@ -2,6 +2,7 @@
 from squadron import main
 from argparse import ArgumentParser
 import json
+import os
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -9,11 +10,14 @@ if __name__ == "__main__":
                 epilog="http://gosquadron.com"
             )
     
-    parser.add_argument('-i', '--directory', help='Input directory', required=True)
+    parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information', required=True)
     parser.add_argument('command', choices=['check','apply'], help='Which action to execute')
 
     args = parser.parse_args()
+
+    if args.directory is None:
+        args.directory = os.getcwd()
 
     node_info = json.loads(args.node_info)
 
