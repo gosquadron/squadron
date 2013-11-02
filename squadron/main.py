@@ -29,7 +29,8 @@ def apply(squadron_dir, node_info, dry_run=False):
                 pass
             cfg.update(metadata['config'])
 
-            jsonschema.validate(cfg, get_service_json(squadron_dir, service, version, 'schema'))
+
+        jsonschema.validate(cfg, get_service_json(squadron_dir, service, version, 'schema'))
 
         if not dry_run:
             service_dir = os.path.join(squadron_dir, 'services',
