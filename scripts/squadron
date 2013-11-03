@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from squadron import main
+from squadron import main,initialize
 from argparse import ArgumentParser
 import json
 import os
@@ -11,13 +11,17 @@ if __name__ == "__main__":
             )
     
     parser.add_argument('-i', '--directory', help='Input directory')
-    parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information', required=True)
-    parser.add_argument('command', choices=['check','apply'], help='Which action to execute')
+    parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information')
+    parser.add_argument('command', choices=['init','check','apply'], help='Which action to execute')
 
     args = parser.parse_args()
 
     if args.directory is None:
         args.directory = os.getcwd()
+
+    if(args.command == 'init'):
+        initialize.init(args.directory)
+        exit(0)
 
     node_info = json.loads(args.node_info)
 
