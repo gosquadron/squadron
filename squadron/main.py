@@ -8,6 +8,15 @@ from state import StateHandler
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
+    """
+    Grabs the named JSON file in a service directory
+
+    Keyword arguments:
+        squadron_dir -- base directory
+        service_name -- the name of the service
+        service_ver -- the version of the service
+        filename -- the name of the JSON file without the .json extension
+    """
     serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
     with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
         return json.loads(jsonfile.read())
@@ -26,22 +35,27 @@ def apply(squadron_dir, node_info, dry_run=False):
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
     result = {}
+
+    # handle the state of the system via the library
     library_dir = os.path.join(squadron_dir, 'library')
     state = StateHandler(library_dir)
+
     for service in node_info['services']:
         with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
-            metadata = json.loads(cfile.read())
-            version = metadata['version']
+            configdata = json.loads(cfile.read())
+            version = configdata['version']
 
+            # defaults file is optional
             try:
                 cfg = get_service_json(squadron_dir, service, version, 'defaults')
             except IOError:
                 cfg = {}
                 # TODO warn?
                 pass
-            cfg.update(metadata['config'])
+            cfg.update(configdata['config'])
 
 
+        # validate each schema
         jsonschema.validate(cfg, get_service_json(squadron_dir, service, version, 'schema'))
 
         if not dry_run:

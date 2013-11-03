@@ -9,6 +9,15 @@ class StateHandler:
         self.library_dir = library_dir
 
     def apply(self, library_name, inputhash, dry_run = False):
+        """
+        Changes the state of the system according to what the module
+        specified does
+
+        Keyword arguments:
+            library_name -- the python module to load
+            inputhash -- the list of dictionaries of config for the library
+            dry_run -- whether or not to actually change the system
+        """
         if library_name not in sys.modules:
             try:
                 imp.acquire_lock()
