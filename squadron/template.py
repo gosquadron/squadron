@@ -3,6 +3,7 @@ import errno
 from shutil import copyfile
 from quik import Template, FileLoader
 import urllib
+import autotest
 
 def mkdirp(dirname):
     try:
@@ -14,14 +15,20 @@ def mkdirp(dirname):
 def ext_template(loader, inputhash, relpath, cur, dest):
     template = loader.load_template(relpath)
     output = template.render(inputhash, loader=loader)
-    with open(dest.rstrip('.tpl'), 'w') as outfile:
+
+    finalfile = dest.rstrip('.tpl')
+    with open(finalfile, 'w') as outfile:
         outfile.write(output)
+        return finalfile
 
 def ext_download(loader, inputhash, relpath, cur, dest):
     with open(cur, 'r') as downloadfile:
+        # split on whitespace
         (url, checksum) = downloadfile.read().split(None, 3)
 
-        urllib.urlretrieve(url, dest.rstrip('.download'))
+        finalfile = dest.rstrip('.download')
+        urllib.urlretrieve(url, finalfile)
+        return finalfile
 
 extension_handles = {'tpl' : ext_template, 'download' : ext_download}
 
@@ -60,7 +67,12 @@ class DirectoryRender:
             else:
                 ext = get_ext(filename)
                 if ext in extension_handles:
-                    extension_handles[ext](self.loader, inputhash, relpath, cur, dest)
+                    finalfile = extension_handles[ext](self.loader, inputhash, relpath, cur, dest)
+                    finalext = get_ext(finalfile)
+
+                    if finalext in autotest.testable:
+                        if not autotest.testable[finalext](finalfile):
+                            raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
                 else:
                     copyfile(cur, dest)
 

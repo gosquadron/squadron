@@ -23,7 +23,7 @@ class StateHandler:
 
         library = importlib.import_module(library_name)
         schema = library.schema()
-        
+
         for item in inputhash:
             jsonschema.validate(item, schema)
 

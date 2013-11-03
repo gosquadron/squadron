@@ -26,6 +26,11 @@ def verify(inputhashes):
     return failed
 
 def apply(inputhashes):
+    failed = []
     for ih in inputhashes:
-        with open(ih['tmpfile'], 'w') as tmpfile:
-            tmpfile.write(str(ih['num']))
+        try:
+            with open(ih['tmpfile'], 'w') as tmpfile:
+                tmpfile.write(str(ih['num']))
+        except:
+            failed.append(ih)
+            pass
