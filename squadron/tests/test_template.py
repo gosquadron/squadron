@@ -57,3 +57,22 @@ def test_parse_config(tmpdir):
     assert result[1].user == 'sean'
     assert result[1].group == 'dudes'
     assert result[1].mode == '0644'
+
+def test_parse_config_error(tmpdir):
+    conf_file = os.path.join(str(tmpdir), 'config.sq')
+    with open(conf_file, 'w') as wfile:
+        print('conf.d', file=wfile)
+
+    with pytest.raises(ValueError) as ex:
+        template.parse_config(conf_file)
+
+    assert ex is not None
+
+    conf_file = os.path.join(str(tmpdir), 'config2.sq')
+    with open(conf_file, 'w') as wfile:
+        print('conf.d atomic:true mdoe:0000', file=wfile)
+
+    with pytest.raises(ValueError) as ex:
+        template.parse_config(conf_file)
+
+    assert ex is not None
