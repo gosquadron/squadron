@@ -13,7 +13,12 @@ def init(squadron_dir, skeleton, gitrepro):
 
     os.makedirs(squadron_dir)
     ret = True
+    if skeleton == True and gitrepro != None:
+        print "Can't do skeleton and gitrepro at the same time"
+        return False
+
     if skeleton == True:
+        print "Creating skeleton..."
         os.makedirs(os.path.join(squadron_dir, 'libraries'))
         os.makedirs(os.path.join(squadron_dir, 'config'))
         os.makedirs(os.path.join(squadron_dir, 'services'))
@@ -21,7 +26,7 @@ def init(squadron_dir, skeleton, gitrepro):
         os.makedirs(os.path.join(squadron_dir, 'inputchecks'))
         repo = True
     elif gitrepro == None:
-        print "Using community repro..."
+        print "Using community repo..."
         repo = Repo.clone_from("https://github.com/guscatalano/squadron-init.git", squadron_dir)
     else:
         print "Using custom repro"

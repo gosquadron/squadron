@@ -12,7 +12,7 @@ if __name__ == "__main__":
     
     parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information')
-    parser.add_argument('-sk', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true')
+    parser.add_argument('-sk', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
     parser.add_argument('-git', '--gitrepro', help='Git repro to use for INIT command')
     parser.add_argument('command', choices=['init','check','apply'], help='Which action to execute')
 
