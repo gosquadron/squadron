@@ -8,7 +8,7 @@ from git import *
 def init(squadron_dir, skeleton, gitrepro):
     if(os.path.exists(squadron_dir)):
         print "Directory already exists, please provide a new directory"
-        exit(1)
+        return False
         #TODO: Consider adding a FORCE flag if it matters
 
     os.makedirs(squadron_dir)
@@ -22,16 +22,17 @@ def init(squadron_dir, skeleton, gitrepro):
         repo = True
     elif gitrepro == None:
         print "Using community repro..."
-        repo = Repo.clone_from("git@github.com:guscatalano/squadron-init.git", squadron_dir)
+        repo = Repo.clone_from("https://github.com/guscatalano/squadron-init.git", squadron_dir)
     else:
         print "Using custom repro"
         repo = Repo.clone_from(gitrepro, squadron_dir)
 
-    ret = repo != None
-    if ret:
-        print "Squadron has been initialized"   
+    if repo != None:
+        print "Squadron has been initialized"  
+        return True
     else:
         print "Squadron init seems to have failed"
+        return False
 
 
 def initService(squadron_dir, service_name):
