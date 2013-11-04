@@ -12,6 +12,8 @@ if __name__ == "__main__":
     
     parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information')
+    parser.add_argument('-sk', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true')
+    parser.add_argument('-git', '--gitrepro', help='Git repro to use for INIT command')
     parser.add_argument('command', choices=['init','check','apply'], help='Which action to execute')
 
     args = parser.parse_args()
@@ -20,7 +22,7 @@ if __name__ == "__main__":
         args.directory = os.getcwd()
 
     if(args.command == 'init'):
-        initialize.init(args.directory)
+        initialize.init(args.directory, args.skeleton, args.gitrepro)
         exit(0)
 
     node_info = json.loads(args.node_info)
