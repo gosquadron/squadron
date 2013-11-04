@@ -4,6 +4,7 @@ from shutil import copyfile
 from quik import Template, FileLoader
 import urllib
 import autotest
+from collections import namedtuple
 
 def mkdirp(dirname):
     try:
@@ -49,6 +50,40 @@ def get_ext(filename):
             return (other[1:] + ext).lower()
 
     return ext[1:].lower()
+
+
+FileConfig = namedtuple('FileConfig', 'filepath atomic user group mode')
+def parse_config(filename):
+    """
+    Parses a config.sq file which contains metadata about files in this
+    directory.
+
+    Keyword arguments:
+        filename -- the config.sq file to open
+    """
+    # Conversion functions from string to the correct type, str is identity
+    convert = {'atomic': bool, 'user':str, 'group':str, 'mode':str}
+    result = []
+    with open(filename) as cfile:
+        for line in cfile:
+            # These are the default values
+            item = {'atomic': False, 'user':None, 'group':None, 'mode':None}
+
+            args = line.split()
+            if len(args) < 2:
+                raise ValueError('Line "{}" in file {} isn\'t formatted correctly'.format(line, filename))
+
+            filepath = args[0]
+            for arg in args[1:]:
+                (key, value) = arg.split(':', 2)
+                #Only do work if we know about this parameter
+                if key in convert:
+                    item[key] = convert[key](value)
+                else:
+                    raise ValueError('Unknown config.sq value {} in file {}'.format(key, filename))
+            result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
+    return result
+
 
 class DirectoryRender:
     def __init__(self, basedir):
