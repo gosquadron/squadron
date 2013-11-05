@@ -1,10 +1,12 @@
 from __future__ import print_function
 from .. import template
+from ..template import FileConfig, get_config, apply_config
 from tempfile import mkdtemp
 from shutil import rmtree
 import pytest
 from helper import are_dir_trees_equal
 import os
+import stat
 
 def test_template(tmpdir):
     dirname = str(tmpdir)
@@ -76,3 +78,24 @@ def test_parse_config_error(tmpdir):
         template.parse_config(conf_file)
 
     assert ex is not None
+
+def test_get_config():
+    config = {'conf.d/' : FileConfig('conf.d/', True, None, None, 0755),
+              'conf.d/config' : FileConfig('conf.d/config', False, 'user', 'group', None)}
+
+    assert get_config('conf.d/', config) == config['conf.d/']
+    assert get_config('conf.d/config', config) == config['conf.d/config']
+    assert get_config('conf.d/non-existant-file', config) == config['conf.d/']
+    assert get_config('non-exist', config) == FileConfig('non-exist',
+            False, None, None, None)
+
+def test_apply_config(tmpdir):
+    tmpdir = str(tmpdir)
+
+    filepath = os.path.join(tmpdir, 'test.txt')
+    with open(filepath, 'w') as cfile:
+        cfile.write('test')
+
+    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'))
+    st = os.stat(filepath)
+    assert stat.S_IMODE(st.st_mode) == 0777

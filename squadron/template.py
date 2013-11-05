@@ -1,4 +1,6 @@
 import os
+import pwd
+import grp
 import errno
 from shutil import copyfile
 from quik import Template, FileLoader
@@ -84,13 +86,41 @@ def parse_config(filename):
             result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
     return result
 
+def get_config(filename, config):
+    path_items = filename.split('/')
+    accum = ""
+    file_setting = FileConfig(filename, False, None, None, None)
+    for item in path_items[:-1]:
+        # loop over all the directories, but not the filename
+        path = os.path.join(accum, item)
+        if path + '/' in config:
+            file_setting = config[path + '/']
+
+    if filename in config:
+        file_setting = config[filename]
+
+    return file_setting
+
+def apply_config(filepath, file_config):
+    uid = -1
+    gid = -1
+    if file_config.user is not None:
+        uid = pwd.getpwnam(file_config.user).pw_uid
+    if file_config.group is not None:
+        gid = grp.getgrnam(file_config.group).gr_gid
+
+    os.chown(filepath, uid, gid)
+
+    if file_config.mode is not None:
+        os.chmod(filepath, int(file_config.mode, 8))
+
 
 class DirectoryRender:
     def __init__(self, basedir):
         self.loader = FileLoader(basedir)
         self.basedir = basedir
 
-    def render(self, destdir, inputhash, currpath = ""):
+    def render(self, destdir, inputhash, currpath = "", config = {}):
         """
         Transforms all templates and downloads all files in the directory
         supplied with the input values supplied. Output goes in destdir.
@@ -99,7 +129,17 @@ class DirectoryRender:
             destdir -- the directory to put the rendered files into
             inputhash -- the dictionary of input values
         """
-        items = os.listdir(os.path.join(self.basedir, currpath))
+        items = sorted(os.listdir(os.path.join(self.basedir, currpath)))
+
+        if currpath == "" and 'config.sq' in items:
+            # do config.sq stuff only in the top level directory
+            config_items = parse_config(os.path.join(self.basedir, 'config.sq'))
+            real_config = {}
+            for config_item in config_items:
+                real_config[config_item.filepath] = config_item
+
+            config = real_config
+            items.remove('config.sq')
 
         for filename in items:
             # the path of the source file relative to the basedir
@@ -112,13 +152,15 @@ class DirectoryRender:
             dest = os.path.join(destdir, relpath)
             if os.path.isdir(abs_source):
                 mkdirp(dest)
-                self.render(destdir, inputhash, relpath)
+                self.render(destdir, inputhash, relpath, config)
             else:
                 ext = get_ext(filename)
                 if ext in extension_handles:
                     # call the specific handler for this file extension
                     finalfile = extension_handles[ext](self.loader, inputhash, relpath, abs_source, dest)
                     finalext = get_ext(finalfile)
+
+                    apply_config(finalfile, get_config(finalfile.lstrip(destdir), config))
 
                     # if there's an automatic way to test this type of file,
                     # try it
