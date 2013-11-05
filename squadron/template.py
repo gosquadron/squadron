@@ -158,17 +158,18 @@ class DirectoryRender:
                 if ext in extension_handles:
                     # call the specific handler for this file extension
                     finalfile = extension_handles[ext](self.loader, inputhash, relpath, abs_source, dest)
-                    finalext = get_ext(finalfile)
-
-                    apply_config(finalfile, get_config(finalfile.lstrip(destdir), config))
-
-                    # if there's an automatic way to test this type of file,
-                    # try it
-                    if finalext in autotest.testable:
-                        if not autotest.testable[finalext](finalfile):
-                            raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
                 else:
                     # otherwise, just copy the file
                     copyfile(abs_source, dest)
+                    finalfile = dest
 
+                finalext = get_ext(finalfile)
+                stripped = finalfile[len(destdir)+1:]
+                apply_config(finalfile, get_config(stripped, config))
+
+                # if there's an automatic way to test this type of file,
+                # try it
+                if finalext in autotest.testable:
+                    if not autotest.testable[finalext](finalfile):
+                        raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
 

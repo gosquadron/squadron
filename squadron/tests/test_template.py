@@ -15,6 +15,22 @@ def test_template(tmpdir):
 
     assert are_dir_trees_equal(dirname, 'template_tests/test1result')
 
+def test_template_with_config(tmpdir):
+    dirname = str(tmpdir)
+    test = template.DirectoryRender('template_tests/test2')
+    test.render(dirname, {'name':'user'})
+
+    assert are_dir_trees_equal(dirname, 'template_tests/test2result')
+
+    st_file = os.stat(os.path.join(dirname, 'file'))
+    assert stat.S_IMODE(st_file.st_mode) == 0642
+
+    st_test3 = os.stat(os.path.join(dirname, 'test3'))
+    assert stat.S_IMODE(st_test3.st_mode) == 0775
+
+    st_test3_file = os.stat(os.path.join(dirname, 'test3', 'hello.txt'))
+    assert stat.S_IMODE(st_test3_file.st_mode) == 0775
+
 def test_extensions():
     assert template.get_ext('filename.txt') == 'txt'
     assert template.get_ext('filename.txt.gz') == 'gz'
