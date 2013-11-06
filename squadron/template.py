@@ -65,6 +65,7 @@ def parse_config(filename):
     """
     # Conversion functions from string to the correct type, str is identity
     convert = {'atomic': bool, 'user':str, 'group':str, 'mode':str}
+    require_dir = set(['atomic'])
     result = []
     with open(filename) as cfile:
         for line in cfile:
@@ -78,6 +79,13 @@ def parse_config(filename):
             filepath = args[0]
             for arg in args[1:]:
                 (key, value) = arg.split(':', 2)
+
+                if key in require_dir:
+                    # if this key requires us to be a directory, check
+                    if not filepath.endswith('/'):
+                        raise ValueError('Key {} requires entry {} to end with' +
+                                ' a slash (must be directory) in file {}'.format(key, filepath, filename))
+
                 #Only do work if we know about this parameter
                 if key in convert:
                     item[key] = convert[key](value)
@@ -141,6 +149,7 @@ class DirectoryRender:
             config = real_config
             items.remove('config.sq')
 
+        result = {}
         for filename in items:
             # the path of the source file relative to the basedir
             relpath = os.path.join(currpath, filename)
@@ -152,7 +161,10 @@ class DirectoryRender:
             dest = os.path.join(destdir, relpath)
             if os.path.isdir(abs_source):
                 mkdirp(dest)
-                self.render(destdir, inputhash, relpath, config)
+                result.update(self.render(destdir, inputhash, relpath, config))
+
+                if relpath+'/' in config:
+                    result[relpath+'/'] = config[relpath+'/'].atomic
             else:
                 ext = get_ext(filename)
                 if ext in extension_handles:
@@ -172,4 +184,6 @@ class DirectoryRender:
                 if finalext in autotest.testable:
                     if not autotest.testable[finalext](finalfile):
                         raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
+
+        return result
 
