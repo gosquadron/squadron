@@ -7,13 +7,8 @@ from quik import Template, FileLoader
 import urllib
 import autotest
 from collections import namedtuple
+from dirio import mkdirp
 
-def mkdirp(dirname):
-    try:
-        os.mkdir(dirname)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(dirname):
-            pass
 
 def ext_template(loader, inputhash, relpath, cur, dest):
     """ Renders a .tpl file"""

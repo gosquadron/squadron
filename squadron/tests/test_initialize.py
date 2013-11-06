@@ -3,7 +3,7 @@ import os
 
 def test_basic(tmpdir):
     tmpdir = str(tmpdir)
-    initialize.init(tmpdir)
+    initialize.init(tmpdir, True, None)
 
     items = os.listdir(tmpdir)
     assert len(items) > 0
