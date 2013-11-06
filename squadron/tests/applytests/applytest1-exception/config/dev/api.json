@@ -3,5 +3,6 @@
     "config" : {
         "port" : "fifty-five",
         "dbhostname" : "example.com"
-    }
+    },
+    "base_dir" : "/tmp/applytest1-exception"
 }

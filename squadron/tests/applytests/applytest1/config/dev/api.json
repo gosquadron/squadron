@@ -2,5 +2,6 @@
     "version" : "0.0.1",
     "config" : {
         "dbhostname" : "example.com"
-    }
+    },
+    "base_dir" : "/tmp/applytest1"
 }

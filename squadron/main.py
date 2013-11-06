@@ -5,6 +5,8 @@ from jsonschema import Draft4Validator, validators
 import tempfile
 from template import DirectoryRender
 from state import StateHandler
+from distutils.dir_util import copy_tree
+import shutil
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
@@ -44,6 +46,7 @@ def apply(squadron_dir, node_info, dry_run=False):
         with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
             configdata = json.loads(cfile.read())
             version = configdata['version']
+            base_dir = configdata['base_dir']
 
             # defaults file is optional
             try:
@@ -64,9 +67,9 @@ def apply(squadron_dir, node_info, dry_run=False):
             render = DirectoryRender(service_dir)
 
             tmpdir = tempfile.mkdtemp('.sq')
-            render.render(tmpdir, cfg)
+            atomic = render.render(tmpdir, cfg)
 
-            result[service] = tmpdir
+            result[service] = {'base_dir': base_dir, 'dir': tmpdir, 'atomic': atomic}
 
         statejson = get_service_json(squadron_dir, service, version, 'state')
         for library, items in statejson.items():
@@ -74,4 +77,34 @@ def apply(squadron_dir, node_info, dry_run=False):
 
 
     return result
+
+
+def commit(dir_info):
+    for service in dir_info:
+        # copy the directory
+        serv_dir = dir_info[service]['dir']
+        base_dir = dir_info[service]['base_dir']
+        files = set(os.listdir(serv_dir))
+        done_files = set()
+        for dirname, atomic in dir_info[service]['atomic'].items():
+            srcdir = os.path.join(serv_dir, dirname)
+            destdir = os.path.join(base_dir, dirname)
+            # Delete existing dir
+            if atomic:
+                shutil.rmtree(destdir, ignore_errors=True)
+                os.symlink(srcdir, destdir)
+            else:
+                # Copy
+                copy_tree(srcdir, destdir)
+
+            done_files.add(srcdir)
+
+        # Do the remaining files
+        for name in files.difference(done_files):
+            src = os.path.join(serv_dir, name)
+            dst = os.path.join(base_dir, name)
+            if os.path.isdir(src):
+                copy_tree(src, dst)
+            else:
+                shutil.copyfile(src, dst)
 
