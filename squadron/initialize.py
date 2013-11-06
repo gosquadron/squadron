@@ -6,7 +6,11 @@ import subprocess
 from git import *
 from dirio import makedirsp
 
-def init(squadron_dir, skeleton, gitrepro):
+def init(squadron_dir, skeleton, gitrepro, force=False):
+    if(os.path.exists(squadron_dir) and not force):
+        print "Directory already exists, please provide a new directory"
+        return False
+
     makedirsp(squadron_dir)
     ret = True
     if skeleton == True and gitrepro != None:
