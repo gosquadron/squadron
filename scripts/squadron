@@ -31,5 +31,5 @@ if __name__ == "__main__":
 
     result = main.apply(args.directory, node_info, args.command == 'check')
 
-    for k,v in result.items():
-        print "{} -> {}".format(k, v)
+    if args.command == 'apply':
+        main.commit(result)
