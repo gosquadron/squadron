@@ -92,7 +92,8 @@ def commit(dir_info):
             # Delete existing dir
             if atomic:
                 shutil.rmtree(destdir, ignore_errors=True)
-                os.symlink(srcdir, destdir)
+                print "{} -> {}".format(srcdir, destdir.rstrip('/'))
+                os.symlink(srcdir, destdir.rstrip('/'))
             else:
                 # Copy
                 copy_tree(srcdir, destdir)

@@ -5,11 +5,13 @@ from helper import are_dir_trees_equal
 import os
 import shutil
 
+from ..dirio import makedirsp
+
 def checkfile(filename, compare):
     with open(filename) as ofile:
         assert compare == ofile.read()
 
-def test_basic():
+def test_apply_only():
     node = {'services' : ['api'], 'env' : 'dev'}
     results = main.apply('applytests/applytest1', node)
 
@@ -21,6 +23,30 @@ def test_basic():
     os.remove('/tmp/test1.out')
     os.remove('/tmp/test2.out')
     shutil.rmtree(results['api']['dir'])
+    # Don't need to delete base_dir as it hasn't been created yet
+
+def test_apply_commit(tmpdir):
+    # Need to delete this first in case of bad test run
+    shutil.rmtree('/tmp/applytest2', ignore_errors=True)
+
+    tmpdir = str(tmpdir)
+    node = {'services' : ['api'], 'env' : 'dev'}
+    results = main.apply('applytests/applytest2', node)
+
+    assert len(results) == 1
+    assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest2result')
+
+    makedirsp(results['api']['base_dir'])
+    main.commit(results)
+
+    assert are_dir_trees_equal(results['api']['base_dir'], 'applytests/applytest2result')
+
+    checkfile('/tmp/test1.out', '55')
+    checkfile('/tmp/test2.out', '0')
+    os.remove('/tmp/test1.out')
+    os.remove('/tmp/test2.out')
+    shutil.rmtree(results['api']['dir'])
+    shutil.rmtree(results['api']['base_dir'])
 
 def test_schema_validation_error():
     node = {'services' : ['api'], 'env' : 'dev'}
