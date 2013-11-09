@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from squadron import main,initialize
+from squadron import main,initialize,daemon
 from argparse import ArgumentParser
 import json
 import os
@@ -14,7 +14,8 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information')
     parser.add_argument('-sk', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
     parser.add_argument('-git', '--gitrepro', help='Git repro to use for INIT command')
-    parser.add_argument('command', choices=['init','check','apply'], help='Which action to execute')
+    parser.add_argument('-hub', '--hub', help='Specify a hub to register with')
+    parser.add_argument('command', choices=['init','check','apply', 'daemon'], help='Which action to execute')
 
     args = parser.parse_args()
 
@@ -23,6 +24,10 @@ if __name__ == "__main__":
 
     if(args.command == 'init'):
         initialize.init(args.directory, args.skeleton, args.gitrepro)
+        exit(0)
+    
+    if(args.command == 'daemon'):
+        daemon.run(args.directory, args.directory)
         exit(0)
 
     node_info = json.loads(args.node_info)
