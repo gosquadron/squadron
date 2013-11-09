@@ -39,7 +39,7 @@ def apply(squadron_dir, node_info, dry_run=False):
     result = {}
 
     # handle the state of the system via the library
-    library_dir = os.path.join(squadron_dir, 'library')
+    library_dir = os.path.join(squadron_dir, 'libraries')
     state = StateHandler(library_dir)
 
     for service in node_info['services']:
