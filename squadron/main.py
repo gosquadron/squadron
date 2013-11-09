@@ -7,6 +7,7 @@ from template import DirectoryRender
 from state import StateHandler
 from distutils.dir_util import copy_tree
 import shutil
+from nodes import get_node_info
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
@@ -23,17 +24,38 @@ def get_service_json(squadron_dir, service_name, service_ver, filename):
     with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
         return json.loads(jsonfile.read())
 
-def apply(squadron_dir, node_info, dry_run=False):
+def check_node_info(node_info):
+    if node_info is None:
+        print "Couldn't find any node information for node {}".format(node_name)
+        return False
+
+    if 'env' not in node_info:
+        print "No environment specified in node_info: {}".format(node_info)
+        return False
+
+    if 'services' not in node_info or len(node_info['services']) < 1:
+        print "No services configured in node_info: {}".format(node_info)
+        return False
+
+    return True
+
+def apply(squadron_dir, node_name, dry_run=False):
     """
     This method takes input from the given squadron_dir and configures
     a temporary directory according to that information
 
     Keyword arguments:
         squadron_dir -- configuration directory for input
-        node_info -- dictionary of this node's information
+        node_name -- this node's name
         dry_run -- whether or not to actually create the temp directory
             or change any system-wide configuration via state.json
     """
+    node_info = get_node_info(os.path.join(squadron_dir, 'nodes'), node_name)
+
+    if not check_node_info(node_info):
+        # Return early if there's an error
+        return False
+
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
     result = {}
