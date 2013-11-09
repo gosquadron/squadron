@@ -27,7 +27,7 @@ if __name__ == "__main__":
         exit(0)
     
     if(args.command == 'daemon'):
-        daemon.run(args.directory, args.directory)
+        daemon.run(args.directory, args.hub)
         exit(0)
 
     node_info = json.loads(args.node_info)
