@@ -1,0 +1,21 @@
+[   
+    {
+        "execute": ["start", "apache2.restart"],
+        "when" : {
+            "command": "service apache2 status",
+            "exitcode": 1
+        }
+    },
+    {
+        "execute" : ["reload"],
+        "when" : {
+            "files" : ["*.conf", "conf.d/*", "magic"]
+        }
+    },
+    {
+        "execute" : ["restart"],
+        "when" : {
+            "files" : ["mods-enabled/*"]
+        }
+    }
+]

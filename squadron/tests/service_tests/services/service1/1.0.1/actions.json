@@ -1,0 +1,13 @@
+{
+    "start" : {
+        "command" : "service apache2 start"
+    },
+    "reload" : {
+        "command" : "service apache2 reload",
+        "not_after" : ["start", "restart"]
+    },
+    "restart" : {
+        "command" : "service apache2 restart",
+        "not_after" : ["start"]
+    }
+}
