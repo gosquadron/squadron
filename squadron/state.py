@@ -3,10 +3,12 @@ import jsonschema
 import imp
 import importlib
 import sys
+from distutils.sysconfig import get_python_lib
 
 class StateHandler:
     def __init__(self, library_dir):
         self.library_dir = library_dir
+        self.community_dir = os.path.join(get_python_lib(), "squadron", "community", "libraries")
 
     def apply(self, library_name, inputhash, dry_run = False):
         """
@@ -21,7 +23,7 @@ class StateHandler:
         if library_name not in sys.modules:
             try:
                 imp.acquire_lock()
-                mod = imp.find_module(library_name, [self.library_dir])
+                mod = imp.find_module(library_name, [self.library_dir, self.community_dir])
                 imp.load_module(library_name, *mod)
             except ImportError:
                 print "Couldn't find module in dir {}".format(self.library_dir)
