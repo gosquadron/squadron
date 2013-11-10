@@ -5,6 +5,7 @@ import template
 import subprocess
 from git import *
 from dirio import makedirsp
+import shutil
 
 def init(squadron_dir, skeleton, gitrepro, force=False):
     if(os.path.exists(squadron_dir) and not force):
@@ -25,16 +26,8 @@ def init(squadron_dir, skeleton, gitrepro, force=False):
         makedirsp(os.path.join(squadron_dir, 'nodes'))
         makedirsp(os.path.join(squadron_dir, 'inputchecks'))
         repo = True
-    elif gitrepro == None:
-        print "Using community repo..."
-        repo = Repo.clone_from("https://github.com/guscatalano/squadron-init.git", squadron_dir
-)
-        for root, dirs, files in os.walk(squadron_dir):
-            for name in dirs:
-                if(name.lower() == '.git'):
-                    shutil.rmtree(os.path.join(root, name))
-    else:
-        print "Using custom repro"
+        
+    if gitrepro != None:
         repo = Repo.clone_from(gitrepro, squadron_dir)
 
     if repo != None:
