@@ -27,7 +27,12 @@ def init(squadron_dir, skeleton, gitrepro, force=False):
         repo = True
     elif gitrepro == None:
         print "Using community repo..."
-        repo = Repo.clone_from("https://github.com/guscatalano/squadron-init.git", squadron_dir)
+        repo = Repo.clone_from("https://github.com/guscatalano/squadron-init.git", squadron_dir
+)
+        for root, dirs, files in os.walk(squadron_dir):
+            for name in dirs:
+                if(name.lower() == '.git'):
+                    shutil.rmtree(os.path.join(root, name)
     else:
         print "Using custom repro"
         repo = Repo.clone_from(gitrepro, squadron_dir)
