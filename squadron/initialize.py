@@ -32,7 +32,7 @@ def init(squadron_dir, skeleton, gitrepro, force=False):
         for root, dirs, files in os.walk(squadron_dir):
             for name in dirs:
                 if(name.lower() == '.git'):
-                    shutil.rmtree(os.path.join(root, name)
+                    shutil.rmtree(os.path.join(root, name))
     else:
         print "Using custom repro"
         repo = Repo.clone_from(gitrepro, squadron_dir)
