@@ -3,6 +3,7 @@ from squadron import main,initialize,daemon
 from argparse import ArgumentParser
 import json
 import os
+import socket
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -11,7 +12,7 @@ if __name__ == "__main__":
             )
     
     parser.add_argument('-i', '--directory', help='Input directory')
-    parser.add_argument('-n', '--node-info', help='JSON representation of the node\'s information')
+    parser.add_argument('-n', '--node-name', help='Override this node\'s name', default=socket.getfqdn())
     parser.add_argument('-sk', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
     parser.add_argument('-git', '--gitrepro', help='Git repro to use for INIT command')
     parser.add_argument('-hub', '--hub', help='Specify a hub to register with')
@@ -30,11 +31,9 @@ if __name__ == "__main__":
         daemon.run(args.directory, args.hub, args.git)
         exit(0)
 
-    node_info = json.loads(args.node_info)
+    print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
 
-    print "{}: dir {} node_info {}".format(args.command, args.directory, node_info)
-
-    result = main.apply(args.directory, node_info, args.command == 'check')
+    result = main.apply(args.directory, args.node_name, args.command == 'check')
 
     if args.command == 'apply':
         main.commit(result)
