@@ -93,7 +93,7 @@ def apply(squadron_dir, node_name, dry_run=False):
             tmpdir = tempfile.mkdtemp('.sq')
             atomic = render.render(tmpdir, cfg)
 
-            result[service] = {'base_dir': base_dir, 'dir': tmpdir, 'atomic': atomic}
+            result[service] = {'base_dir': base_dir, 'dir': tmpdir, 'atomic': atomic, 'version':version}
 
         statejson = get_service_json(squadron_dir, service, version, 'state')
         for library, items in statejson.items():

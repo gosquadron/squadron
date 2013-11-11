@@ -33,7 +33,4 @@ if __name__ == "__main__":
 
     print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
 
-    result = main.apply(args.directory, args.node_name, args.command == 'check')
-
-    if args.command == 'apply':
-        main.commit(result)
+    main.go(args.directory, args.node_name, args.command == 'check')
