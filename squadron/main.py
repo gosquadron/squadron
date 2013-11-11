@@ -8,6 +8,7 @@ from state import StateHandler
 from distutils.dir_util import copy_tree
 import shutil
 from nodes import get_node_info
+from collections import defaultdict
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
@@ -101,9 +102,26 @@ def apply(squadron_dir, node_name, dry_run=False):
     return result
 
 
+
 def commit(dir_info):
+    """
+    Moves files from the temp directory to the final directory based
+    on the input given. Returns list of modified files
+
+    Keyword arguments:
+        dir_info -- dictionary of service to dir_info hash
+    """
+    def walk_file_list(srcdir, resultdir):
+        result = []
+        for root, dirnames, filenames in os.walk(srcdir):
+            for filename in filenames:
+                result.append(os.path.join(resultdir, filename))
+        return result
+
+    result = defaultdict(list)
     for service in dir_info:
         # copy the directory
+        print "Doing service {}".format(service)
         serv_dir = dir_info[service]['dir']
         base_dir = dir_info[service]['base_dir']
         files = set(os.listdir(serv_dir))
@@ -114,20 +132,29 @@ def commit(dir_info):
             # Delete existing dir
             if atomic:
                 shutil.rmtree(destdir, ignore_errors=True)
-                print "{} -> {}".format(srcdir, destdir.rstrip('/'))
                 os.symlink(srcdir, destdir.rstrip('/'))
             else:
                 # Copy
                 copy_tree(srcdir, destdir)
 
-            done_files.add(srcdir)
+            print "Before ATOM: {}".format(result[service])
+            result[service].extend(walk_file_list(srcdir, dirname))
+            print "After ATOM: {}".format(result[service])
 
+            done_files.add(dirname)
+
+        print "Done_files: {}, files: {}".format(done_files, files)
         # Do the remaining files
         for name in files.difference(done_files):
             src = os.path.join(serv_dir, name)
             dst = os.path.join(base_dir, name)
+            print "Before list: {}".format(result[service])
             if os.path.isdir(src):
                 copy_tree(src, dst)
+                result[service].extend(walk_file_list(src, name))
             else:
                 shutil.copyfile(src, dst)
+                result[service].append(name)
+            print "After list: {}".format(result[service])
+    return result
 

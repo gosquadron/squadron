@@ -79,11 +79,16 @@ def test_commit(tmpdir):
     with open(os.path.join(serv_dir, 'non-atom.txt'), 'w') as wfile:
         wfile.write('non-atomic update')
 
-    main.commit(dir_info)
+    result = main.commit(dir_info)
 
     assert are_dir_trees_equal(base_dir, serv_dir)
 
     assert os.path.islink(os.path.join(base_dir, atom_yes)) == True
     assert os.path.islink(os.path.join(base_dir, atom_no)) == False
 
-
+    assert len(result) == 1
+    assert 'api' in result
+    assert len(result['api']) == 3
+    assert 'atomic/atom.txt' in result['api']
+    assert 'atomic-no/atom-no.txt' in result['api']
+    assert 'non-atom.txt' in result['api']
