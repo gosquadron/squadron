@@ -3,19 +3,19 @@
         "execute": ["start", "apache2.restart"],
         "when" : {
             "command": "true",
-            "exitcode": 0
-        }
-    },
-    {
-        "execute" : ["reload"],
-        "when" : {
-            "files" : ["*.conf", "conf.d/*", "magic"]
+            "exitcode": 1
         }
     },
     {
         "execute" : ["restart"],
         "when" : {
             "files" : ["mods-enabled/*"]
+        }
+    },
+    {
+        "execute" : ["reload"],
+        "when" : {
+            "files" : ["*.conf", "conf.d/*", "magic"]
         }
     }
 ]

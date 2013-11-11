@@ -1,6 +1,7 @@
 from main import get_service_json
 import jsonschema
 import subprocess
+import fnmatch
 
 _action_schema = {
     'type': 'object',
@@ -104,11 +105,24 @@ def get_reactions(service_dir, service_name, service_ver):
     return reactions_desc
 
 
-def _checkfiles(filepattern, deploy_dir, temp_dir):
-    #TODO
+def _checkfiles(filepatterns, paths_changed):
+    """
+    Checks to see if any of the files changed match any of the file
+    patterns given. File patterns implicitly start at the root of the
+    deployment directory.
+
+    Keyword arguments:
+        filepatterns -- list of glob-style patterns
+        paths_changed -- list of paths changed, each item is relative to the
+            base deployment directory
+    """
+    for pattern in filepatterns:
+        if fnmatch.filter(paths_changed, pattern):
+            return True
+
     return False
 
-def react(actions, reactions, deploy_dir, temp_dir):
+def react(actions, reactions, paths_changed):
     done_actions = set()
     for reaction in reactions:
         if 'when' in reaction:
@@ -117,15 +131,11 @@ def react(actions, reactions, deploy_dir, temp_dir):
                 command = when['command']
                 exitcode = when['exitcode']
                 ret = subprocess.call(command)
-                if str(ret) != exitcode:
+                if ret != exitcode:
                     continue
             elif 'files' in when:
-                for filepattern in when['files']:
-                    if _checkfiles(filepattern, deploy_dir, temp_dir):
-                        break
-                else:
-                    # if no patterns matched, don't run this action
-                    continue
+                if not _checkfiles(when['files'], paths_changed):
+                    continue #no files matched, skip this
             else:
                 raise ValueError('When block with neither command nor files')
 
@@ -144,7 +154,7 @@ def react(actions, reactions, deploy_dir, temp_dir):
                         command = action_item['command']
 
                         try:
-                            subprocess.check_call(command)
+                            subprocess.check_call(command.split())
                             done_actions.add(action)
                         except subprocess.CalledProcessError as e:
                             print "Command {} errored with code {}".format(command, e.returncode)
