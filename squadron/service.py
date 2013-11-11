@@ -62,6 +62,14 @@ _reaction_schema = {
 }
 
 def get_service_actions(service_dir, service_name, service_ver):
+    """
+    Gets the actions supported by a service
+
+    Keyword arguments:
+        service_dir -- top level service directory
+        service_name -- name of service
+        service_ver -- service version
+    """
     action_desc = get_service_json(service_dir, service_name, service_ver, 'actions')
 
     result = {}
@@ -88,6 +96,14 @@ def get_service_actions(service_dir, service_name, service_ver):
     return result
 
 def get_reactions(service_dir, service_name, service_ver):
+    """
+    Gets the reaction description from a service.
+
+    Keyword arguments:
+        service_dir -- top level service directory
+        service_name -- name of service
+        service_ver -- service version
+    """
     reactions_desc = get_service_json(service_dir, service_name, service_ver, 'react')
 
     jsonschema.validate(reactions_desc, _reaction_schema)
@@ -123,6 +139,15 @@ def _checkfiles(filepatterns, paths_changed):
     return False
 
 def react(actions, reactions, paths_changed):
+    """
+    Performs actions based on reaction criteria. Each action is only performed
+    once, and reactions are handled in order.
+
+    Keyword arguments:
+        actions -- map of action names to action descriptions
+        reactions -- list of reactions to check for
+        paths_changes -- list of files that were updated
+    """
     done_actions = set()
     for reaction in reactions:
         if 'when' in reaction:
