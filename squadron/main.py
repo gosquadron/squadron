@@ -9,6 +9,7 @@ from distutils.dir_util import copy_tree
 import shutil
 from nodes import get_node_info
 from collections import defaultdict
+from dirio import makedirsp
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
@@ -111,17 +112,24 @@ def commit(dir_info):
     Keyword arguments:
         dir_info -- dictionary of service to dir_info hash
     """
-    def walk_file_list(srcdir, resultdir):
+    def walk_file_list(base_dir, srcdir, resultdir, done_files=set()):
+        """ Gets files that haven't been seen yet """
         result = []
+        if not base_dir.endswith(os.sep):
+            # For stripping the slash
+            base_dir = base_dir + os.sep
+
         for root, dirnames, filenames in os.walk(srcdir):
-            for filename in filenames:
-                result.append(os.path.join(resultdir, filename))
+            after_base = root[len(base_dir):] #strip absolute
+            if after_base not in done_files:
+                for filename in filenames:
+                    if os.path.join(after_base, filename) not in done_files:
+                        result.append(os.path.join(resultdir, filename))
         return result
 
     result = defaultdict(list)
     for service in dir_info:
         # copy the directory
-        print "Doing service {}".format(service)
         serv_dir = dir_info[service]['dir']
         base_dir = dir_info[service]['base_dir']
         files = set(os.listdir(serv_dir))
@@ -132,29 +140,26 @@ def commit(dir_info):
             # Delete existing dir
             if atomic:
                 shutil.rmtree(destdir, ignore_errors=True)
-                os.symlink(srcdir, destdir.rstrip('/'))
+                stripped = destdir.rstrip(os.sep)
+                makedirsp(os.path.dirname(stripped))
+                os.symlink(srcdir, stripped)
             else:
                 # Copy
                 copy_tree(srcdir, destdir)
 
-            print "Before ATOM: {}".format(result[service])
-            result[service].extend(walk_file_list(srcdir, dirname))
-            print "After ATOM: {}".format(result[service])
+            result[service].extend(walk_file_list(serv_dir, srcdir, dirname))
 
             done_files.add(dirname)
 
-        print "Done_files: {}, files: {}".format(done_files, files)
         # Do the remaining files
         for name in files.difference(done_files):
             src = os.path.join(serv_dir, name)
             dst = os.path.join(base_dir, name)
-            print "Before list: {}".format(result[service])
             if os.path.isdir(src):
                 copy_tree(src, dst)
-                result[service].extend(walk_file_list(src, name))
+                result[service].extend(walk_file_list(serv_dir, src, name, done_files))
             else:
                 shutil.copyfile(src, dst)
                 result[service].append(name)
-            print "After list: {}".format(result[service])
     return result
 
