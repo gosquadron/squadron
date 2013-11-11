@@ -1,4 +1,4 @@
-from main import get_service_json
+from commit import get_service_json
 import jsonschema
 import subprocess
 import fnmatch

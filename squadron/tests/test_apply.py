@@ -1,4 +1,4 @@
-from .. import main
+from .. import commit
 import pytest
 import jsonschema
 from helper import are_dir_trees_equal
@@ -12,7 +12,7 @@ def checkfile(filename, compare):
         assert compare == ofile.read()
 
 def test_apply_only():
-    results = main.apply('applytests/applytest1', 'node')
+    results = commit.apply('applytests/applytest1', 'node')
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest1result')
@@ -29,13 +29,13 @@ def test_apply_commit(tmpdir):
     shutil.rmtree('/tmp/applytest2', ignore_errors=True)
 
     tmpdir = str(tmpdir)
-    results = main.apply('applytests/applytest2', 'node')
+    results = commit.apply('applytests/applytest2', 'node')
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest2result')
 
     makedirsp(results['api']['base_dir'])
-    main.commit(results)
+    commit.commit(results)
 
     assert are_dir_trees_equal(results['api']['base_dir'], 'applytests/applytest2result')
 
@@ -48,7 +48,7 @@ def test_apply_commit(tmpdir):
 
 def test_schema_validation_error():
     with pytest.raises(jsonschema.ValidationError) as ex:
-        main.apply('applytests/applytest1-exception', 'node')
+        commit.apply('applytests/applytest1-exception', 'node')
 
     assert ex.value.cause is None # make sure it was a validation error
     assert ex.value.validator_value == 'integer'
@@ -79,7 +79,7 @@ def test_commit_basic(tmpdir):
     with open(os.path.join(serv_dir, 'non-atom.txt'), 'w') as wfile:
         wfile.write('non-atomic update')
 
-    result = main.commit(dir_info)
+    result = commit.commit(dir_info)
 
     assert are_dir_trees_equal(base_dir, serv_dir)
 
@@ -124,7 +124,7 @@ def test_commit_deep(tmpdir):
     with open(os.path.join(serv_dir, 'non-atom.txt'), 'w') as wfile:
         wfile.write('non-atomic update')
 
-    result = main.commit(dir_info)
+    result = commit.commit(dir_info)
 
     assert are_dir_trees_equal(base_dir, serv_dir)
 
