@@ -8,7 +8,7 @@ from helper import are_dir_trees_equal
 import os
 import stat
 
-def test_template(tmpdir):
+def test_template_basic(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender('template_tests/test1')
     test.render(dirname, {'name':'user'})

@@ -10,7 +10,7 @@ from collections import namedtuple
 from dirio import mkdirp
 
 
-def ext_template(loader, inputhash, relpath, cur, dest):
+def ext_template(loader, inputhash, relpath, abs_source, dest):
     """ Renders a .tpl file"""
     template = loader.load_template(relpath)
     output = template.render(inputhash, loader=loader)
@@ -20,15 +20,18 @@ def ext_template(loader, inputhash, relpath, cur, dest):
         outfile.write(output)
         return finalfile
 
-def ext_download(loader, inputhash, relpath, cur, dest):
+def ext_download(loader, inputhash, relpath, abs_source, dest):
     """ Downloads a .download file"""
-    with open(cur, 'r') as downloadfile:
-        # split on whitespace
-        (url, checksum) = downloadfile.read().split(None, 3)
+    template = loader.load_template(abs_source)
+    output = template.render(inputhash, loader=loader)
 
-        finalfile = dest.rstrip('.download')
-        urllib.urlretrieve(url, finalfile)
-        return finalfile
+    # split on whitespace
+    (url, checksum) = output.split(None, 3)
+
+    finalfile = dest.rstrip('.download')
+    urllib.urlretrieve(url, finalfile)
+
+    return finalfile
 
 extension_handles = {'tpl' : ext_template, 'download' : ext_download}
 
@@ -120,6 +123,8 @@ def apply_config(filepath, file_config):
 
 class DirectoryRender:
     def __init__(self, basedir):
+        if not os.path.isabs(basedir):
+            basedir = os.path.abspath(basedir)
         self.loader = FileLoader(basedir)
         self.basedir = basedir
 
