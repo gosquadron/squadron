@@ -1,4 +1,4 @@
-mport urllib2
+import urllib2
 import socket
 from git import *
 import os
