@@ -1,20 +1,20 @@
-import urllib2
+mport urllib2
 import socket
 from git import *
 import os
 from squadron import main
 import time
 
-def run(home_dir, gitrepro, hub="http://provehito.com:8081"):
+def run(home_dir, gitrepo, hub="http://provehito.com:8081"):
 
-    if(gitrepro == None):
-        print "please pass a git repro to poll"
+    if(gitrepo == None):
+        print "please pass a git repo to poll"
         exit(1)
 
     if not(os.path.exists(os.path.join(home_dir, ".git"))):
-        repro = Repo.clone_from(gitrepro, home_dir)
+        repo = Repo.clone_from(gitrepro, home_dir)
     else:
-        repro = Repo(home_dir)
+        repo = Repo(home_dir)
     
 
     if(hub == None or hub.find('http://') == -1):
@@ -33,8 +33,8 @@ def run(home_dir, gitrepro, hub="http://provehito.com:8081"):
     lastCommit = ""
     while(True):
         
-        repro.remote(name='origin').pull(refspec="refs/heads/master:refs/remotes/origin/master")
-        currentCommit = repro.iter_commits().next()
+        repo.remote(name='origin').pull(refspec="refs/heads/master:refs/remotes/origin/master")
+        currentCommit = repo.iter_commits().next()
         if(currentCommit != lastCommit):
             lastCommit = currentCommit
             print "updating node"
