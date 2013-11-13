@@ -37,6 +37,8 @@ def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
     else:
         init_service(squadron_dir, 'example')
         print "We have init an example service for you, please check out services/example"
+
+    repo = Repo.init(squadron_dir) # initialize repo
     return True
 
 

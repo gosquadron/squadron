@@ -8,6 +8,8 @@ def test_basic(tmpdir):
     items = os.listdir(tmpdir)
     assert len(items) > 0
 
+    assert '.git' in items
+
 def test_service(tmpdir):
     tmpdir = str(tmpdir)
     initialize.init_service(tmpdir, 'api')
