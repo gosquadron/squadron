@@ -10,8 +10,8 @@ def test_basic(tmpdir):
 
 def test_service(tmpdir):
     tmpdir = str(tmpdir)
-    initialize.initService(tmpdir, 'api')
+    initialize.init_service(tmpdir, 'api')
 
-    items = os.listdir(os.path.join(tmpdir, 'api'))
+    items = os.listdir(os.path.join(tmpdir, 'services', 'api'))
 
     assert len(items) > 0
