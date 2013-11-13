@@ -45,3 +45,18 @@ def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
 def init_service(squadron_dir, service_name, service_ver='0.0.1'):
     """ Initializes a service with the given name and version """
     makedirsp(os.path.join(squadron_dir, 'services', service_name, service_ver,'root'))
+    if(service_name == None):
+        print "Please specify service name"
+        exit(1)
+    if(squadron_dir == None):
+        print "Please specify squadron dir"
+        exit(1)
+    if(service_ver == None):
+        version = "0.0.1"
+    service_dir = os.path.join(squadron_dir, "services", service_name, service_ver)
+    makedirsp(os.path.join(service_dir, 'root'))
+    open(os.path.join(service_dir, 'actions.json'), 'w+').close()
+    open(os.path.join(service_dir, 'defaults.json'), 'w+').close()
+    open(os.path.join(service_dir, 'react.json'), 'w+').close()
+    open(os.path.join(service_dir, 'schema.json'), 'w+').close()
+    open(os.path.join(service_dir, 'state.json'), 'w+').close()

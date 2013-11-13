@@ -17,8 +17,9 @@ if __name__ == "__main__":
     parser.add_argument('-git', '--gitrepro', help='Git repro to use for INIT command')
     parser.add_argument('-hub', '--hub', help='Specify a hub to register with')
     parser.add_argument('-f', '--force', help='Force a particular command to happen', action='store_true')
-    parser.add_argument('command', choices=['init','check','apply', 'daemon'], help='Which action to execute')
+    parser.add_argument('command', choices=['init','check','apply', 'daemon', 'init-service'], help='Which action to execute')
     parser.add_argument('-sv', '--service', help='name of service to initialize')
+    parser.add_argument('-v', '--version', help='version of the service to initialize')
     parser.add_argument('-ex', '--example', help='initialize with an example', action='store_true')
 
     args = parser.parse_args()
@@ -26,11 +27,15 @@ if __name__ == "__main__":
     if args.directory is None:
         args.directory = os.getcwd()
 
+    if(args.command == 'init-service'):
+        if(args.service is None):
+            print "Please specify service name"
+            exit(1)
+        initialize.init_service(args.directory, args.service, args.version)
+        exit(0)
+
     if(args.command == 'init'):
-        if(args.service != None):
-            initialize.init_service(args.directory, args.service)
-        else:
-            initialize.init(args.directory, args.skeleton, args.gitrepro, args.force, args.example)
+        initialize.init(args.directory, args.skeleton, args.gitrepro, args.force, args.example)
         exit(0)
     
     if(args.command == 'daemon'):
