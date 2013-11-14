@@ -33,17 +33,20 @@ class FileLockException(Exception):
     pass
  
 class FileLock(object):
-    """ A file locking mechanism that has context-manager support so 
+    """ A file locking mechanism that has context-manager support so
         you can use it in a with statement. This should be relatively cross
         compatible as it doesn't rely on msvcrt or fcntl for the locking.
     """
  
-    def __init__(self, file_name, timeout=10, delay=.05):
+    def __init__(self, file_name, lockfile = None, timeout=10, delay=.05):
         """ Prepare the file locker. Specify the file to lock and optionally
             the maximum timeout and the delay between each attempt to lock.
         """
         self.is_locked = False
-        self.lockfile = os.path.join(os.getcwd(), "%s.lock" % file_name)
+        if lockfile is None:
+            self.lockfile = os.path.join(os.getcwd(), "%s.lock" % file_name)
+        else:
+            self.lockfile = lockfile
         self.file_name = file_name
         self.timeout = timeout
         self.delay = delay
