@@ -45,12 +45,31 @@ def test_template_with_config_dir_error(tmpdir):
     assert ex is not None
 
 def test_extensions():
-    assert template.get_ext('filename.txt') == 'txt'
-    assert template.get_ext('filename.txt.gz') == 'gz'
-    assert template.get_ext('filename.tar') == 'tar'
-    assert template.get_ext('filename.tar.gz') == 'tar.gz'
-    assert template.get_ext('filename.tar.bz2') == 'tar.bz2'
-    assert template.get_ext('filename') == ''
+    assert template.get_sq_ext('filename.txt') == ''
+    assert template.get_sq_ext('filename.txt~gz') == 'gz'
+    assert template.get_sq_ext('filename~tar') == 'tar'
+    assert template.get_sq_ext('filename~~~tar.gz') == 'tar.gz'
+    assert template.get_sq_ext('filename~tar.bz2') == 'tar.bz2'
+    assert template.get_sq_ext('filename') == ''
+
+    assert template.get_filename('filename.txt') == 'filename.txt'
+    assert template.get_filename('filename.txt~gz') == 'filename.txt'
+    assert template.get_filename('filename~tar') == 'filename'
+    assert template.get_filename('filename~~~tar.gz') == 'filename'
+    assert template.get_filename('filename~tar.bz2') == 'filename'
+    assert template.get_filename('filename') == 'filename'
+
+    assert template.get_file_ext('filename.txt') == 'txt'
+    assert template.get_file_ext('filename.txt.gz') == 'gz'
+    assert template.get_file_ext('filename.tar') == 'tar'
+    assert template.get_file_ext('filename.tar.gz') == 'tar.gz'
+    assert template.get_file_ext('filename.tar.bz2') == 'tar.bz2'
+    assert template.get_file_ext('filename') == ''
+
+
+    with pytest.raises(ValueError) as ex:
+        template.get_filename('~tpl')
+    assert ex is not None
 
 def test_autotest(tmpdir):
     dirname = str(tmpdir)

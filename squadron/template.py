@@ -15,7 +15,7 @@ def ext_template(loader, inputhash, relpath, abs_source, dest):
     template = loader.load_template(relpath)
     output = template.render(inputhash, loader=loader)
 
-    finalfile = dest.rstrip('.tpl')
+    finalfile = get_filename(dest)
     with open(finalfile, 'w') as outfile:
         outfile.write(output)
         return finalfile
@@ -28,14 +28,43 @@ def ext_download(loader, inputhash, relpath, abs_source, dest):
     # split on whitespace
     (url, checksum) = output.split(None, 3)
 
-    finalfile = dest.rstrip('.download')
+    finalfile = get_filename(dest)
     urllib.urlretrieve(url, finalfile)
 
     return finalfile
 
 extension_handles = {'tpl' : ext_template, 'download' : ext_download}
 
-def get_ext(filename):
+def get_filename(filename):
+    """
+    Gets the filename from a filename~ext combination. Throws a ValueError
+    if there seems to be no filename.
+
+    Keyword arguments:
+        filename -- the file to get the base filename from
+    """
+    try:
+        result = filename[:filename.index('~')]
+    except ValueError:
+        result = filename
+
+    if len(result) == 0:
+        raise ValueError('Filename of "{}" is nothing'.format(filename))
+
+    return result
+
+def get_sq_ext(filename):
+    """
+    Gets the squadron extension from filename.
+    Keyword arguments:
+        filename -- the file to get the extension from
+    """
+    try:
+        return filename[filename.rindex('~')+1:]
+    except ValueError:
+        return ''
+
+def get_file_ext(filename):
     """
     Gets the extension (or compound extension) from a filename
 
@@ -166,7 +195,7 @@ class DirectoryRender:
                 if relpath+'/' in config:
                     result[relpath+'/'] = config[relpath+'/'].atomic
             else:
-                ext = get_ext(filename)
+                ext = get_sq_ext(filename)
                 if ext in extension_handles:
                     # call the specific handler for this file extension
                     finalfile = extension_handles[ext](self.loader, inputhash, relpath, abs_source, dest)
@@ -175,7 +204,7 @@ class DirectoryRender:
                     copyfile(abs_source, dest)
                     finalfile = dest
 
-                finalext = get_ext(finalfile)
+                finalext = get_file_ext(finalfile)
                 stripped = finalfile[len(destdir)+1:]
                 apply_config(finalfile, get_config(stripped, config))
 
