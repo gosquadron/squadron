@@ -5,7 +5,7 @@ from helper import are_dir_trees_equal
 import os
 import shutil
 
-from ..dirio import makedirsp
+from ..fileio.dirio import makedirsp
 
 def checkfile(filename, compare):
     with open(filename) as ofile:
