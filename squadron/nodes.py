@@ -15,8 +15,8 @@ def get_node_info(node_dir, node_name):
         node_name = 'dev-sea1.api.example.com'
 
         files = os.listdir(node_dir)
-        # Returns ['dev*','dev*.api.example.com', 'staging*']
-        get_node_info(node_dir, node_name) = json of 'dev*.api.example.com'
+        # Returns ['dev#','dev#.api.example.com', 'staging#']
+        get_node_info(node_dir, node_name) = json of 'dev#.api.example.com'
 
     Keyword arguments:
         node_dir -- the directory to start
@@ -24,20 +24,18 @@ def get_node_info(node_dir, node_name):
     """
     result = _descend(node_dir, node_name)
 
-    len_closest = -1
-    closest = None
-    for r in result:
-        base_str = os.path.basename(r).translate(None, '*') # remove all asterisks
-        if len(base_str) > len_closest:
-            closest = r
-            len_closest = len(base_str)
+    # sort by length with only the basename and with all hashes removed
+    result.sort(lambda x,y: cmp(
+        len(os.path.basename(x).translate(None, '#*')), # remove all hashes
+        len(os.path.basename(y).translate(None, '#*'))))# and asterisks
 
-    if closest == None:
-        # No match
-        return None
-    else:
-        with open(closest) as node_file:
-            return json.loads(node_file.read())
+
+    ret = {}
+    for r in result:
+        with open(r) as node_file:
+            ret.update(json.loads(node_file.read()))
+
+    return ret
 
 def _descend(base_dir, node_name):
     """
@@ -55,7 +53,7 @@ def _descend(base_dir, node_name):
         if os.path.isdir(srcfile):
             result.extend(_descend(srcfile, node_name))
         else:
-            if fnmatch.filter([node_name], f):
+            if fnmatch.filter([node_name], f.replace('#','*')):
                 result.append(srcfile)
     return result
 
