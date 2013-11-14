@@ -4,7 +4,7 @@ import jsonschema
 import template
 import subprocess
 from git import *
-from dirio import makedirsp
+from fileio.dirio import makedirsp
 import shutil
 
 def init(squadron_dir, skeleton, gitrepo, force=False, example=False):

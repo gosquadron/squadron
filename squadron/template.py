@@ -7,7 +7,7 @@ from quik import Template, FileLoader
 import urllib
 import autotest
 from collections import namedtuple
-from dirio import mkdirp
+from fileio.dirio import mkdirp
 
 
 def ext_template(loader, inputhash, relpath, abs_source, dest):

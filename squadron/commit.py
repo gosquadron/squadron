@@ -9,7 +9,7 @@ from distutils.dir_util import copy_tree
 import shutil
 from nodes import get_node_info
 from collections import defaultdict
-from dirio import makedirsp
+from fileio.dirio import makedirsp
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename):
