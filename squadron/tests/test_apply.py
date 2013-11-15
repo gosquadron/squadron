@@ -12,7 +12,7 @@ def checkfile(filename, compare):
         assert compare == ofile.read()
 
 def test_apply_only():
-    results = commit.apply('applytests/applytest1', 'node')
+    (results, tmpdir) = commit.apply('applytests/applytest1', 'node')
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest1result')
@@ -21,7 +21,7 @@ def test_apply_only():
     checkfile('/tmp/test2.out', '0')
     os.remove('/tmp/test1.out')
     os.remove('/tmp/test2.out')
-    shutil.rmtree(results['api']['dir'])
+    shutil.rmtree(tmpdir)
     # Don't need to delete base_dir as it hasn't been created yet
 
 def test_apply_commit(tmpdir):
@@ -29,7 +29,7 @@ def test_apply_commit(tmpdir):
     shutil.rmtree('/tmp/applytest2', ignore_errors=True)
 
     tmpdir = str(tmpdir)
-    results = commit.apply('applytests/applytest2', 'node')
+    (results, top_level_tmp) = commit.apply('applytests/applytest2', 'node')
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest2result')
@@ -43,7 +43,7 @@ def test_apply_commit(tmpdir):
     checkfile('/tmp/test2.out', '0')
     os.remove('/tmp/test1.out')
     os.remove('/tmp/test2.out')
-    shutil.rmtree(results['api']['dir'])
+    shutil.rmtree(top_level_tmp)
     shutil.rmtree(results['api']['base_dir'])
 
 def test_schema_validation_error():

@@ -60,6 +60,7 @@ def apply(squadron_dir, node_name, dry_run=False):
 
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
+    tmpdir = tempfile.mkdtemp('.sq')
     result = {}
 
     # handle the state of the system via the library
@@ -90,24 +91,25 @@ def apply(squadron_dir, node_name, dry_run=False):
                                     service, version, 'root')
             render = DirectoryRender(service_dir)
 
-            tmpdir = tempfile.mkdtemp('.sq')
-            atomic = render.render(tmpdir, cfg)
+            tmp_serv_dir = os.path.join(tmpdir, service)
+            makedirsp(tmp_serv_dir)
+            atomic = render.render(tmp_serv_dir, cfg)
 
-            result[service] = {'base_dir': base_dir, 'dir': tmpdir, 'atomic': atomic, 'version':version}
+            result[service] = {'base_dir': base_dir, 'dir': tmp_serv_dir, 'atomic': atomic, 'version':version}
 
         statejson = get_service_json(squadron_dir, service, version, 'state')
         for library, items in statejson.items():
             state.apply(library, items, dry_run)
 
 
-    return result
+    return (result, tmpdir)
 
 
 
 def commit(dir_info):
     """
     Moves files from the temp directory to the final directory based
-    on the input given. Returns list of modified files
+    on the input given. Returns list of all files
 
     Keyword arguments:
         dir_info -- dictionary of service to dir_info hash
