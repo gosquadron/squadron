@@ -53,6 +53,10 @@ _reaction_schema = {
                         'items':{
                             'type':'string'
                         }
+                    },
+                    'always':{
+                        'description':'run always',
+                        'type':'string'
                     }
                 }
             }
@@ -161,7 +165,7 @@ def react(actions, reactions, paths_changed):
             elif 'files' in when:
                 if not _checkfiles(when['files'], paths_changed):
                     continue #no files matched, skip this
-            else:
+            elif 'always' not in when:
                 raise ValueError('When block with neither command nor files')
 
         # Run action
