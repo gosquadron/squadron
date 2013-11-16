@@ -21,6 +21,7 @@ if __name__ == "__main__":
     parser.add_argument('-sv', '--service', help='name of service to initialize')
     parser.add_argument('-v', '--version', help='version of the service to initialize')
     parser.add_argument('-ex', '--example', help='initialize with an example', action='store_true')
+    parser.add_argument('-sys', '--sysdir', help='Directory to store Squadron state in', default='/var/squadron')
 
     args = parser.parse_args()
 
@@ -44,4 +45,4 @@ if __name__ == "__main__":
 
     print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
 
-    main.go(args.directory, args.node_name, args.command == 'check')
+    main.go(args.sysdir, args.directory, args.node_name, args.command == 'check')
