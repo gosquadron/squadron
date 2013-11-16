@@ -5,6 +5,9 @@ import runinfo
 from fileio.walkhash import walk_hash, hash_diff
 import shutil
 
+def strip_prefix(paths, prefix):
+    return [x[len(prefix)+1:] for x in paths]
+
 def go(squadron_state_dir, squadron_dir, node_name, dry_run):
     last_run = runinfo.get_last_run_info(squadron_state_dir)
 
@@ -20,10 +23,15 @@ def go(squadron_state_dir, squadron_dir, node_name, dry_run):
     this_run_sum = walk_hash(new_dir)
 
     if this_run_sum != last_run_sum:
-        paths_changed = hash_diff(last_run_sum, this_run_sum)
+        paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
+
+        # Remove the temp directory from the front
+        paths_changed = strip_prefix(paths_changed, new_dir)
+        new_paths = strip_prefix(new_paths, new_dir)
+
         if not dry_run:
             print "Applying changes"
-            paths_changed = commit.commit(result)
+            files_commited = commit.commit(result)
 
             actions = {}
             reactions = []
@@ -34,9 +42,9 @@ def go(squadron_state_dir, squadron_dir, node_name, dry_run):
                 reactions.extend(service.get_reactions(
                     squadron_dir, service_name, result[service_name]['version']))
 
-            service.react(actions, reactions, paths_changed)
+            service.react(actions, reactions, paths_changed, new_paths, new_dir)
         else:
-            print "Dry run changes: {}".format(paths_changed)
+            print "Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths)
     else:
         print "Nothing changed."
 

@@ -86,7 +86,7 @@ def apply(squadron_dir, node_name, dry_run=False):
 
 
         # validate each schema
-        schema = get_service_json(squadron_dir, service, version, 'schema')
+        schema = get_service_json(squadron_dir, service, version, 'schema', True)
         if schema:
             jsonschema.validate(cfg, schema)
 
@@ -101,7 +101,7 @@ def apply(squadron_dir, node_name, dry_run=False):
 
             result[service] = {'base_dir': base_dir, 'dir': tmp_serv_dir, 'atomic': atomic, 'version':version}
 
-        statejson = get_service_json(squadron_dir, service, version, 'state')
+        statejson = get_service_json(squadron_dir, service, version, 'state', True)
         for library, items in statejson.items():
             state.apply(library, items, dry_run)
 

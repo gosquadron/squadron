@@ -22,6 +22,7 @@ def test_basic_hash_diff():
         'other.txt':'always'
     }
 
-    ret = ['dir2/b.txt','other.txt']
+    paths_changed = ['dir2/b.txt']
+    new_paths = ['other.txt']
 
-    assert ret == hash_diff(old, new_hash)
+    assert (paths_changed, new_paths) == hash_diff(old, new_hash)

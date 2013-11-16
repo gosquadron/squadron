@@ -1,6 +1,8 @@
 from ..service import get_service_actions, get_reactions, react, _checkfiles
 import glob
 import os
+from ..fileio.dirio import makedirsp
+import shutil
 
 def test_get_service_actions():
     actions = get_service_actions('service_tests', 'service1', '1.0.1')
@@ -50,15 +52,19 @@ def test_checkfiles():
     assert _checkfiles([], files) == False
     assert _checkfiles(['test*'], []) == False
 
-def delete_react_temp():
-    """ Delete temporary files for this test """
-    tmpfiles = glob.glob('/tmp/service1.test.*')
-    for f in tmpfiles:
-        os.remove(f)
+
+def make_react_tmp():
+    makedirsp('/tmp/service1')
+    makedirsp('/tmp/apache2')
+
+def delete_react_tmp():
+    shutil.rmtree('/tmp/service1', ignore_errors=True)
+    shutil.rmtree('/tmp/apache2', ignore_errors=True)
 
 def test_react_basic():
-    delete_react_temp()
+    delete_react_tmp()
 
+    make_react_tmp()
     try:
         args = {'service_dir':'service_tests',
                 'service_name':'service1',
@@ -66,22 +72,23 @@ def test_react_basic():
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
-            'commands':['touch /tmp/service1.test.apache2.restart']
+            'commands':['touch /tmp/service1/test.apache2.restart']
         }})
-        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'], [])
+        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'], [], '/tmp')
 
-        assert os.path.exists('/tmp/service1.test.start') == True
-        assert os.path.exists('/tmp/service1.test.apache2.restart') == True
+        assert os.path.exists('/tmp/service1/test.start') == True
+        assert os.path.exists('/tmp/service1/test.apache2.restart') == True
         # Don't run reload after starting
-        assert os.path.exists('/tmp/service1.test.reload') == False
+        assert os.path.exists('/tmp/service1/test.reload') == False
         # Don't run restart after starting
-        assert os.path.exists('/tmp/service1.test.restart') == False
+        assert os.path.exists('/tmp/service1/test.restart') == False
     finally:
-        delete_react_temp()
+        delete_react_tmp()
 
 def test_react_precendence():
-    delete_react_temp()
+    delete_react_tmp()
 
+    make_react_tmp()
     try:
         args = {'service_dir':'service_tests',
                 'service_name':'service1',
@@ -89,23 +96,25 @@ def test_react_precendence():
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
-            'commands':['touch /tmp/service1.test.apache2.restart']
+            'commands':['touch /tmp/service1/test.apache2.restart']
         }})
 
-        paths_changed = ['conf.d/new-virtual-host', 'mods-enabled/new-mod']
-        react(actions, get_reactions(**args), paths_changed, [])
+        paths_changed = ['service1/conf.d/new-virtual-host', 'service1/mods-enabled/new-mod']
+        react(actions, get_reactions(**args), paths_changed, [], '/tmp')
 
-        assert os.path.exists('/tmp/service1.test.start') == False
-        assert os.path.exists('/tmp/service1.test.apache2.restart') == False
-        assert os.path.exists('/tmp/service1.test.reload') == False
-        assert os.path.exists('/tmp/service1.test.restart') == True
+        assert os.path.exists('/tmp/service1/test.start') == False
+        assert os.path.exists('/tmp/service1/test.apache2.restart') == False
+        assert os.path.exists('/tmp/service1/test.reload') == False
+        assert os.path.exists('/tmp/service1/test.restart') == True
 
-        delete_react_temp()
-        react(actions, get_reactions(**args), paths_changed[:1], [])
+        delete_react_tmp()
+        make_react_tmp()
 
-        assert os.path.exists('/tmp/service1.test.start') == False
-        assert os.path.exists('/tmp/service1.test.apache2.restart') == False
-        assert os.path.exists('/tmp/service1.test.reload') == True
-        assert os.path.exists('/tmp/service1.test.restart') == False
+        react(actions, get_reactions(**args), paths_changed[:1], [], '/tmp')
+
+        assert os.path.exists('/tmp/service1/test.start') == False
+        assert os.path.exists('/tmp/service1/test.apache2.restart') == False
+        assert os.path.exists('/tmp/service1/test.reload') == True
+        assert os.path.exists('/tmp/service1/test.restart') == False
     finally:
-        delete_react_temp()
+        delete_react_tmp()

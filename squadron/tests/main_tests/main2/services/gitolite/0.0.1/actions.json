@@ -1,0 +1,12 @@
+{
+    "install" : {
+        "commands" : ["gitolite/install",
+                      "touch second-command"],
+        "user": "git"
+    },
+    "upgrade": {
+        "commands" : ["touch upgraded"],
+        "user": "git",
+        "not_after" : ["install"]
+    }
+}

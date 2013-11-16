@@ -29,12 +29,13 @@ def hash_diff(old_hash, new_hash):
         old_hash -- the dictionary of hashes for the old directory
         new_hash -- the dictionary of hashes for the new directory
     """
-    ret = []
+    paths_changed = []
+    new_paths = []
     for key, value in new_hash.items():
         if key in old_hash:
             if value != old_hash[key]:
-                ret.append(key)
+                paths_changed.append(key)
         else:
-            ret.append(key)
+            new_paths.append(key)
 
-    return ret
+    return (paths_changed, new_paths)

@@ -2,6 +2,8 @@ from commit import get_service_json
 import jsonschema
 import subprocess
 import fnmatch
+import os
+from fileio import dirio
 
 _action_schema = {
     'type': 'object',
@@ -116,6 +118,15 @@ def get_service_actions(service_dir, service_name, service_ver):
 
     return result
 
+def _prepend_service_name(service_name, files):
+    ret = []
+    for f in files:
+        if not os.path.isabs(f):
+            ret.append(os.path.join(service_name, f))
+        else:
+            ret.append(f)
+    return ret
+
 def get_reactions(service_dir, service_name, service_ver):
     """
     Gets the reaction description from a service.
@@ -137,6 +148,16 @@ def get_reactions(service_dir, service_name, service_ver):
             else:
                 actions.append(action)
 
+        when = reaction['when']
+
+        # Prepend service name if relative path
+        if 'files_modified' in when:
+            when['files_modified'] = _prepend_service_name(service_name, when['files_modified'])
+        if 'files_created' in when:
+            when['files_created'] = _prepend_service_name(service_name, when['files_created'])
+        if 'files' in when:
+            when['files'] = _prepend_service_name(service_name, when['files'])
+
         reaction['execute'] = actions
 
     return reactions_desc
@@ -153,17 +174,20 @@ def _checkfiles(filepatterns, paths_changed):
         paths_changed -- list of paths changed, each item is relative to the
             base deployment directory
     """
+    print "_checkfiles({}, {})".format(filepatterns, paths_changed)
     for pattern in filepatterns:
         if fnmatch.filter(paths_changed, pattern):
+            print "Match on pattern {}".format(pattern)
             return True
 
+    print "no match"
     return False
 
 def _runcommand(command, retcode):
     ret = subprocess.call(command)
     return ret == retcode
 
-def react(actions, reactions, paths_changed, new_files):
+def react(actions, reactions, paths_changed, new_files, base_dir):
     """
     Performs actions based on reaction criteria. Each action is only performed
     once, and reactions are handled in order.
@@ -177,26 +201,27 @@ def react(actions, reactions, paths_changed, new_files):
     done_actions = set()
     for reaction in reactions:
         run_action = False
-        if 'when' in reaction:
-            # While loop so we can break out early
-            when = reaction['when']
 
-            if 'always' in when and when['always']:
-                run_action = True
-            elif 'command' in when and _runcommand(when['command'], when['exitcode']):
-                run_action = True
-            elif 'files' in when and _checkfiles(when['files'], paths_changed + new_files):
-                run_action = True
-            elif 'files_modified' in when and _checkfiles(when['files_modified'], paths_changed):
-                run_action = True
-            elif 'files_created' in when and _checkfiles(when['files_created'], new_files):
-                run_action = True
+        when = reaction['when']
+
+        if 'always' in when and when['always']:
+            run_action = True
+        elif 'command' in when and _runcommand(when['command'], when['exitcode']):
+            run_action = True
+        elif 'files' in when and _checkfiles(when['files'], paths_changed + new_files):
+            run_action = True
+        elif 'files_modified' in when and _checkfiles(when['files_modified'], paths_changed):
+            run_action = True
+        elif 'files_created' in when and _checkfiles(when['files_created'], new_files):
+            run_action = True
 
         if not run_action:
+            print "Not running reaction {}".format(reaction)
             continue
 
         # Run action
         for action in reaction['execute']:
+            print "Running action {} in reaction {}".format(action, reaction)
             if action in actions:
                 if action not in done_actions:
                     # Actions must be unique
@@ -207,12 +232,17 @@ def react(actions, reactions, paths_changed, new_files):
 
                     if len(done_actions.intersection(not_after)) == 0:
                         # Let's do this
-                        for command in action_item['commands']:
-                            try:
-                                subprocess.check_call(command.split())
-                            except subprocess.CalledProcessError as e:
-                                print "Command {} errored with code {}".format(command, e.returncode)
-                                raise e
+                        service_name = os.path.splitext(action)[0]
+
+                        # For the commands, put us in the service directory
+                        # so that relative commands will work
+                        with dirio.SafeChdir(os.path.join(base_dir, service_name)):
+                            for command in action_item['commands']:
+                                try:
+                                    subprocess.check_call(command.split())
+                                except subprocess.CalledProcessError as e:
+                                    print "Command {} errored with code {}".format(command, e.returncode)
+                                    raise e
                         done_actions.add(action)
             else:
                 raise ValueError(
