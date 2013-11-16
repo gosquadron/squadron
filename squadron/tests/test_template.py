@@ -156,3 +156,19 @@ def test_apply_config(tmpdir):
     apply_config(filepath, FileConfig(filepath, False, None, None, '0777'))
     st = os.stat(filepath)
     assert stat.S_IMODE(st.st_mode) == 0777
+
+def test_git_repo(tmpdir):
+    dirname = str(tmpdir)
+    test = template.DirectoryRender('template_tests/test-git')
+    test.render(dirname, {})
+
+    assert are_dir_trees_equal(dirname, 'template_tests/test-git-result')
+
+def test_create_dir(tmpdir):
+    dirname = str(tmpdir)
+    test = template.DirectoryRender('template_tests/test-create-dir')
+    test.render(dirname, {})
+
+    result = os.path.join(dirname, 'testdir')
+    assert os.path.isdir(result) == True
+    assert len(os.listdir(result)) == 0 # Should be empty

@@ -8,10 +8,12 @@ import urllib
 import autotest
 from collections import namedtuple
 from fileio.dirio import mkdirp
+import git
+import shutil
 
 
 def ext_template(loader, inputhash, relpath, abs_source, dest):
-    """ Renders a .tpl file"""
+    """ Renders a ~tpl file"""
     template = loader.load_template(relpath)
     output = template.render(inputhash, loader=loader)
 
@@ -21,7 +23,7 @@ def ext_template(loader, inputhash, relpath, abs_source, dest):
         return finalfile
 
 def ext_download(loader, inputhash, relpath, abs_source, dest):
-    """ Downloads a .download file"""
+    """ Downloads a ~download file"""
     template = loader.load_template(abs_source)
     output = template.render(inputhash, loader=loader)
 
@@ -33,7 +35,28 @@ def ext_download(loader, inputhash, relpath, abs_source, dest):
 
     return finalfile
 
-extension_handles = {'tpl' : ext_template, 'download' : ext_download}
+def ext_git(loader, inputhash, relpath, abs_source, dest):
+    """ Clones a git repository """
+    with open(abs_source) as gitfile:
+        url = gitfile.read().strip()
+
+    finalfile = get_filename(dest)
+    repo = git.Repo.clone_from(url, finalfile)
+    # get rid of the .git dir
+    shutil.rmtree(os.path.join(finalfile, '.git'))
+    return finalfile
+
+def ext_dir(loader, inputhash, relpath, abs_source, dest):
+    finalfile = get_filename(dest)
+    os.mkdir(finalfile)
+    return finalfile
+
+extension_handles = {
+    'tpl' : ext_template,
+    'download' : ext_download,
+    'git' : ext_git,
+    'dir' : ext_dir,
+}
 
 def get_filename(filename):
     """
