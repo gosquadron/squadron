@@ -10,9 +10,10 @@ import shutil
 from nodes import get_node_info
 from collections import defaultdict
 from fileio.dirio import makedirsp
+import errno
 
 # This will be easy to memoize if need be
-def get_service_json(squadron_dir, service_name, service_ver, filename):
+def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False):
     """
     Grabs the named JSON file in a service directory
 
@@ -22,9 +23,15 @@ def get_service_json(squadron_dir, service_name, service_ver, filename):
         service_ver -- the version of the service
         filename -- the name of the JSON file without the .json extension
     """
-    serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
-    with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
-        return json.loads(jsonfile.read())
+    try:
+        serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
+        with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
+            return json.loads(jsonfile.read())
+    except IOError as e:
+        if e.errno == errno.ENOENT and empty_on_error:
+            return {}
+        else:
+            raise e
 
 def check_node_info(node_info):
     if node_info is None:
@@ -74,17 +81,14 @@ def apply(squadron_dir, node_name, dry_run=False):
             base_dir = configdata['base_dir']
 
             # defaults file is optional
-            try:
-                cfg = get_service_json(squadron_dir, service, version, 'defaults')
-            except IOError:
-                cfg = {}
-                # TODO warn?
-                pass
+            cfg = get_service_json(squadron_dir, service, version, 'defaults', True)
             cfg.update(configdata['config'])
 
 
         # validate each schema
-        jsonschema.validate(cfg, get_service_json(squadron_dir, service, version, 'schema'))
+        schema = get_service_json(squadron_dir, service, version, 'schema')
+        if schema:
+            jsonschema.validate(cfg, schema)
 
         if not dry_run:
             service_dir = os.path.join(squadron_dir, 'services',
