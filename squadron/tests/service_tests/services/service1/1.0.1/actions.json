@@ -1,13 +1,13 @@
 {
     "start" : {
-        "command" : "touch /tmp/service1.test.start"
+        "commands" : ["touch /tmp/service1.test.start"]
     },
     "reload" : {
-        "command" : "touch /tmp/service1.test.reload",
+        "commands" : ["touch /tmp/service1.test.reload"],
         "not_after" : ["start", "restart"]
     },
     "restart" : {
-        "command" : "touch /tmp/service1.test.restart",
+        "commands" : ["touch /tmp/service1.test.restart"],
         "not_after" : ["start"]
     }
 }

@@ -11,9 +11,9 @@ def test_get_service_actions():
     assert 'service1.reload' in actions
     assert 'service1.restart' in actions
 
-    assert len(actions['service1.start']['command']) > 0
-    assert len(actions['service1.reload']['command']) > 0
-    assert len(actions['service1.restart']['command']) > 0
+    assert len(actions['service1.start']['commands']) > 0
+    assert len(actions['service1.reload']['commands']) > 0
+    assert len(actions['service1.restart']['commands']) > 0
 
     assert len(actions['service1.reload']['not_after']) == 2
     assert len(actions['service1.restart']['not_after']) == 1
@@ -66,9 +66,9 @@ def test_react_basic():
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
-            'command':'touch /tmp/service1.test.apache2.restart'
+            'commands':['touch /tmp/service1.test.apache2.restart']
         }})
-        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'])
+        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'], [])
 
         assert os.path.exists('/tmp/service1.test.start') == True
         assert os.path.exists('/tmp/service1.test.apache2.restart') == True
@@ -89,11 +89,11 @@ def test_react_precendence():
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
-            'command':'touch /tmp/service1.test.apache2.restart'
+            'commands':['touch /tmp/service1.test.apache2.restart']
         }})
 
         paths_changed = ['conf.d/new-virtual-host', 'mods-enabled/new-mod']
-        react(actions, get_reactions(**args), paths_changed)
+        react(actions, get_reactions(**args), paths_changed, [])
 
         assert os.path.exists('/tmp/service1.test.start') == False
         assert os.path.exists('/tmp/service1.test.apache2.restart') == False
@@ -101,7 +101,7 @@ def test_react_precendence():
         assert os.path.exists('/tmp/service1.test.restart') == True
 
         delete_react_temp()
-        react(actions, get_reactions(**args), paths_changed[:1])
+        react(actions, get_reactions(**args), paths_changed[:1], [])
 
         assert os.path.exists('/tmp/service1.test.start') == False
         assert os.path.exists('/tmp/service1.test.apache2.restart') == False

@@ -6,9 +6,12 @@ import fnmatch
 _action_schema = {
     'type': 'object',
     'properties': {
-        'command': {
-            'description': 'shell command to run',
-            'type': 'string'
+        'commands': {
+            'description': 'commands to run',
+            'type': 'array',
+            'items': {
+                'type':'string'
+            }
         },
         'not_after': {
             'description': 'don\'t run this after any of these actions',
@@ -19,7 +22,7 @@ _action_schema = {
             'uniqueItems': True
         }
     },
-    'required': ['command']
+    'required': ['commands']
 }
 
 _reaction_schema = {
@@ -48,6 +51,20 @@ _reaction_schema = {
                         'type':'integer'
                     },
                     'files':{
+                        'description':'if any of these files were created or modified',
+                        'type':'array',
+                        'items':{
+                            'type':'string'
+                        }
+                    },
+                    'files_created':{
+                        'description':'if any of these files were created',
+                        'type':'array',
+                        'items':{
+                            'type':'string'
+                        }
+                    },
+                    'files_modified':{
                         'description':'if any of these files were modified',
                         'type':'array',
                         'items':{
@@ -56,12 +73,12 @@ _reaction_schema = {
                     },
                     'always':{
                         'description':'run always',
-                        'type':'string'
+                        'type':'boolean'
                     }
                 }
             }
         },
-        'required': ['execute']
+        'required': ['execute', 'when']
     }
 }
 
@@ -142,7 +159,11 @@ def _checkfiles(filepatterns, paths_changed):
 
     return False
 
-def react(actions, reactions, paths_changed):
+def _runcommand(command, retcode):
+    ret = subprocess.call(command)
+    return ret == retcode
+
+def react(actions, reactions, paths_changed, new_files):
     """
     Performs actions based on reaction criteria. Each action is only performed
     once, and reactions are handled in order.
@@ -151,22 +172,28 @@ def react(actions, reactions, paths_changed):
         actions -- map of action names to action descriptions
         reactions -- list of reactions to check for
         paths_changes -- list of files that were updated
+        new_files -- list of files that are new this run
     """
     done_actions = set()
     for reaction in reactions:
+        run_action = False
         if 'when' in reaction:
+            # While loop so we can break out early
             when = reaction['when']
-            if 'command' in when:
-                command = when['command']
-                exitcode = when['exitcode']
-                ret = subprocess.call(command)
-                if ret != exitcode:
-                    continue
-            elif 'files' in when:
-                if not _checkfiles(when['files'], paths_changed):
-                    continue #no files matched, skip this
-            elif 'always' not in when:
-                raise ValueError('When block with neither command nor files')
+
+            if 'always' in when and when['always']:
+                run_action = True
+            elif 'command' in when and _runcommand(when['command'], when['exitcode']):
+                run_action = True
+            elif 'files' in when and _checkfiles(when['files'], paths_changed + new_files):
+                run_action = True
+            elif 'files_modified' in when and _checkfiles(when['files_modified'], paths_changed):
+                run_action = True
+            elif 'files_created' in when and _checkfiles(when['files_created'], new_files):
+                run_action = True
+
+        if not run_action:
+            continue
 
         # Run action
         for action in reaction['execute']:
@@ -180,14 +207,13 @@ def react(actions, reactions, paths_changed):
 
                     if len(done_actions.intersection(not_after)) == 0:
                         # Let's do this
-                        command = action_item['command']
-
-                        try:
-                            subprocess.check_call(command.split())
-                            done_actions.add(action)
-                        except subprocess.CalledProcessError as e:
-                            print "Command {} errored with code {}".format(command, e.returncode)
-                            raise e
+                        for command in action_item['commands']:
+                            try:
+                                subprocess.check_call(command.split())
+                            except subprocess.CalledProcessError as e:
+                                print "Command {} errored with code {}".format(command, e.returncode)
+                                raise e
+                        done_actions.add(action)
             else:
                 raise ValueError(
                         'Action {} from reaction {} not in action list'.format(
