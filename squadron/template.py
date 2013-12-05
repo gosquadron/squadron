@@ -170,6 +170,7 @@ def apply_config(filepath, file_config):
     os.chown(filepath, uid, gid)
 
     if file_config.mode is not None:
+        mode = int(file_config.mode, 8)
         os.chmod(filepath, int(file_config.mode, 8))
 
 
@@ -213,6 +214,10 @@ class DirectoryRender:
             dest = os.path.join(destdir, relpath)
             if os.path.isdir(abs_source):
                 mkdirp(dest)
+                # Needs a slash because this is a directory
+                stripped = dest[len(destdir)+1:] + '/'
+
+                apply_config(dest, get_config(stripped, config))
                 result.update(self.render(destdir, inputhash, relpath, config))
 
                 if relpath+'/' in config:
