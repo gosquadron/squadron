@@ -5,23 +5,20 @@ import os
 from squadron import main
 import time
 
-def run(home_dir, gitrepo, hub="http://provehito.com:8081"):
+def run(home_dir, gitrepo, hub):
 
     if(gitrepo == None):
         print "please pass a git repo to poll"
         exit(1)
 
     if not(os.path.exists(os.path.join(home_dir, ".git"))):
-        repo = Repo.clone_from(gitrepro, home_dir)
+        repo = Repo.clone_from(gitrepo, home_dir)
     else:
         repo = Repo(home_dir)
-    
 
-    if(hub == None or hub.find('http://') == -1):
-        hub = "http://provehito.com:8081"
     url = (hub + "/register/" + str(socket.gethostname()))
     response = ':('
-    try: 
+    try:
         response = urllib2.urlopen(url).read()
     except:
         pass
@@ -32,7 +29,6 @@ def run(home_dir, gitrepo, hub="http://provehito.com:8081"):
 
     lastCommit = ""
     while(True):
-        
         repo.remote(name='origin').pull(refspec="refs/heads/master:refs/remotes/origin/master")
         currentCommit = repo.iter_commits().next()
         if(currentCommit != lastCommit):
