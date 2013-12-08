@@ -1,4 +1,6 @@
 from ..fileio.walkhash import walk_hash, hash_diff
+from ..fileio.config import parse_config
+import os
 
 def test_basic_walkhash():
     result = walk_hash('fileio_tests/walkhash1')
@@ -26,3 +28,33 @@ def test_basic_hash_diff():
     new_paths = ['other.txt']
 
     assert (paths_changed, new_paths) == hash_diff(old, new_hash)
+
+def test_basic_config(tmpdir):
+    test_config = """
+[ignored]
+not_here:true
+[squadron]
+test=5
+override_this=/var/lib/file
+go_for_it=yes
+"""
+
+    tmpdir = str(tmpdir)
+    config_file = os.path.join(tmpdir,'config')
+    with open(config_file, 'w') as cfile:
+        cfile.write(test_config)
+
+    defaults = {'override_this':'/tmp','not_present':'false555'}
+    result = parse_config(defaults, config_file)
+    assert len(result) == 4
+    assert 'test' in result
+    assert result['test'] == '5'
+
+    assert 'override_this' in result
+    assert result['override_this'] != defaults['override_this']
+
+    assert 'go_for_it' in result
+    assert result['go_for_it'] == 'yes'
+
+    assert 'not_present' in result
+    assert result['not_present'] == 'false555'

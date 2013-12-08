@@ -3,12 +3,13 @@ import commit
 import service
 import runinfo
 from fileio.walkhash import walk_hash, hash_diff
+from fileio.config import parse_config, config_defaults
 import shutil
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
-def go(squadron_state_dir, squadron_dir, node_name, dry_run):
+def get_last_run_info(squadron_state_dir):
     last_run = runinfo.get_last_run_info(squadron_state_dir)
 
     if 'dir' in last_run:
@@ -17,6 +18,17 @@ def go(squadron_state_dir, squadron_dir, node_name, dry_run):
     else:
         last_run_dir = None
         last_run_sum = {}
+    return (last_run_dir, last_run_sum)
+
+def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, dry_run = True):
+    config = parse_config(config_defaults(), config_file)
+
+    if squadron_state_dir is None:
+        squadron_state_dir = config['statedir']
+    if node_name is None:
+        node_name = config['nodename']
+
+    (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
 
     (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)
 

@@ -1,0 +1,9 @@
+[daemon]
+polltime = 30m
+
+[squadron]
+keydir = /etc/squadron/keys
+status = status.gosquadron.com
+nodename = override.example.com
+statedir = /var/squadron
+

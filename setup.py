@@ -5,6 +5,7 @@ setup(
     packages=find_packages(),
     license='Proprietary',
     scripts=['scripts/squadron'],
+    data_files=[('/etc/squadron',['files/config'])],
     install_requires=['jsonschema','gitpython','quik']
 )
 
