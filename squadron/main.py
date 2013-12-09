@@ -5,6 +5,7 @@ import runinfo
 from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, config_defaults
 import shutil
+import status
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -20,7 +21,7 @@ def get_last_run_info(squadron_state_dir):
         last_run_sum = {}
     return (last_run_dir, last_run_sum)
 
-def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, dry_run = True):
+def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
     config = parse_config(config_defaults(), config_file)
 
     if squadron_state_dir is None:
@@ -28,6 +29,26 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     if node_name is None:
         node_name = config['nodename']
 
+    send_status = False
+    if bool(config['send_status']):
+        send_status = True
+
+        if status_server is None:
+            status_server = config['status_host']
+
+        status_apikey = config['status_apikey']
+        status_secret = config['status_secret']
+
+    try:
+        _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run)
+    except Exception as e:
+        if send_status:
+            status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
+    else:
+        if send_status:
+            status.report_status(status_server, status_apikey, status_secret, True, status='OK', hostname=node_name, info={'info':True})
+
+def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
 
     (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)

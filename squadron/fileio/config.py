@@ -1,4 +1,4 @@
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoSectionError
 import socket
 import os
 
@@ -6,9 +6,9 @@ def config_defaults():
     return {
         'polltime':'30m',
         'keydir':'/etc/squadron/keydir',
-        'status':'status.gosquadron.com',
         'nodename':socket.getfqdn(),
-        'statedir':'/var/squadron'
+        'statedir':'/var/squadron',
+        'send_status': False
     }
 
 def parse_config(defaults, config_file = None):
@@ -33,6 +33,13 @@ def parse_config(defaults, config_file = None):
             parser.readfp(cfile, config_file)
 
     if parser.sections():
-        return dict(parser.items('squadron'))
+        result = dict()
+        for section in ['squadron', 'status']:
+            try:
+                result.update(parser.items(section))
+            except NoSectionError:
+                pass
+
+        return result
     else:
         return {}

@@ -3,7 +3,12 @@ polltime = 30m
 
 [squadron]
 keydir = /etc/squadron/keys
-status = status.gosquadron.com
 nodename = override.example.com
 statedir = /var/squadron
+send_status = true
+
+[status]
+status_host = status.gosquadron.com
+status_apikey = ABCDEF12345
+status_secret = 8d4ce3db954ab1bed870ce682e6765ec24a1227352b3d2688170ecaefda1165c 
 

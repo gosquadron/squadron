@@ -6,7 +6,7 @@ setup(
     license='Proprietary',
     scripts=['scripts/squadron'],
     data_files=[('/etc/squadron',['files/config'])],
-    install_requires=['jsonschema','gitpython','quik']
+    install_requires=['jsonschema','gitpython','quik','requests']
 )
 
 #hopefully its been installed now
