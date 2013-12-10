@@ -43,4 +43,4 @@ if __name__ == "__main__":
 
     print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
 
-    main.go(args.directory, args.sysdir, args.config, args.node_name, args.command == 'check')
+    main.go(args.directory, args.sysdir, args.config, args.node_name, args.status, args.command == 'check')

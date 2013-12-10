@@ -23,6 +23,7 @@ def get_last_run_info(squadron_state_dir):
 
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
     config = parse_config(config_defaults(), config_file)
+    print "Got config {}".format(config)
 
     if squadron_state_dir is None:
         squadron_state_dir = config['statedir']
@@ -38,6 +39,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
 
         status_apikey = config['status_apikey']
         status_secret = config['status_secret']
+        print "Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret)
 
     try:
         _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run)

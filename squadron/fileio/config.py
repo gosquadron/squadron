@@ -8,7 +8,7 @@ def config_defaults():
         'keydir':'/etc/squadron/keydir',
         'nodename':socket.getfqdn(),
         'statedir':'/var/squadron',
-        'send_status': False
+        'send_status': 'false'
     }
 
 def parse_config(defaults, config_file = None):
