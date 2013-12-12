@@ -11,7 +11,7 @@ def config_defaults():
         'send_status': 'false'
     }
 
-def parse_config(defaults, config_file = None):
+def parse_config(config_file = None, defaults = config_defaults()):
     """
     Parses a given config file using SafeConfigParser. If the specified
     config_file is None, it searches in the usual places. Returns a

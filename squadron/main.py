@@ -22,7 +22,19 @@ def get_last_run_info(squadron_state_dir):
     return (last_run_dir, last_run_sum)
 
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
-    config = parse_config(config_defaults(), config_file)
+    """
+    Gets the config and applies it if it's not a dry run.
+
+    Keyword arguments:
+        squadron_dir -- where the Squadron description dir is
+        squadron_state_dir -- where Squadron should store its state between runs
+        config_file -- overall config file location
+        node_name -- what this node is called
+        status_server -- the hostname (and optionally port) of the HTTPS server to
+            send status to
+        dry_run -- whether or not to apply changes
+    """
+    config = parse_config(config_file)
     print "Got config {}".format(config)
 
     if squadron_state_dir is None:

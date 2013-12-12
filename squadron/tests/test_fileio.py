@@ -45,7 +45,7 @@ go_for_it=yes
         cfile.write(test_config)
 
     defaults = {'override_this':'/tmp','not_present':'false555'}
-    result = parse_config(defaults, config_file)
+    result = parse_config(config_file, defaults)
     assert len(result) == 4
     assert 'test' in result
     assert result['test'] == '5'
