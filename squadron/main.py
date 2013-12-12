@@ -11,6 +11,12 @@ def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
 def get_last_run_info(squadron_state_dir):
+    """
+    Gets the information from the last run of Squadron.
+
+    Keyword arguments:
+        squadron_state_dir -- where Squadron should store its state between runs
+    """
     last_run = runinfo.get_last_run_info(squadron_state_dir)
 
     if 'dir' in last_run:
@@ -56,13 +62,23 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     try:
         _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run)
     except Exception as e:
-        if send_status:
+        if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
     else:
-        if send_status:
+        if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='OK', hostname=node_name, info={'info':True})
 
 def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
+    """
+    Runs apply to set up the temp directory, and then runs commit if
+    dry_run is false.
+
+    Keyword arguments:
+        squadron_dir -- where the Squadron description dir is
+        squadron_state_dir -- where Squadron should store its state between runs
+        node_name -- what this node is called
+        dry_run -- whether or not to apply changes
+    """
     (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
 
     (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)
