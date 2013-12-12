@@ -14,7 +14,7 @@ def test_main_basic(tmpdir):
 
     squadron_dir = 'main_tests/main1'
 
-    main.go(squadron_dir, squadron_state_dir, None, 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -25,7 +25,7 @@ def test_main_basic(tmpdir):
 
     old_dir = info['dir']
 
-    main.go(squadron_dir, squadron_state_dir, None, 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -66,7 +66,7 @@ def test_main_git(tmpdir):
 
     squadron_dir = 'main_tests/main2'
 
-    main.go(squadron_dir, squadron_state_dir, None, 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())

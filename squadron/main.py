@@ -49,7 +49,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         node_name = config['nodename']
 
     send_status = False
-    if bool(config['send_status']):
+    if config['send_status'].lower() == 'true':
         send_status = True
 
         if status_server is None:
