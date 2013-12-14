@@ -37,7 +37,8 @@ def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
 
     print "Squadron has been initialized"
     if example is False:
-        print "If this is your first time with Squadron, you should init a service by passing --service [name] to the previous command"
+        print "Now, you can initialized your service:"
+        print "\tsquadron init --service service_name"
     else:
         init_service(squadron_dir, 'example')
         print "We have init an example service for you, please check out services/example"
@@ -45,21 +46,33 @@ def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
     return True
 
 
-def init_service(squadron_dir, service_name, service_ver='0.0.1'):
+def init_service(squadron_dir, service_name, service_ver):
     """ Initializes a service with the given name and version """
-    makedirsp(os.path.join(squadron_dir, 'services', service_name, service_ver,'root'))
-    if(service_name == None):
-        print "Please specify service name"
-        exit(1)
-    if(squadron_dir == None):
-        print "Please specify squadron dir"
-        exit(1)
-    if(service_ver == None):
-        version = "0.0.1"
-    service_dir = os.path.join(squadron_dir, "services", service_name, service_ver)
-    makedirsp(os.path.join(service_dir, 'root'))
-    open(os.path.join(service_dir, 'actions.json'), 'w+').close()
-    open(os.path.join(service_dir, 'defaults.json'), 'w+').close()
-    open(os.path.join(service_dir, 'react.json'), 'w+').close()
-    open(os.path.join(service_dir, 'schema.json'), 'w+').close()
-    open(os.path.join(service_dir, 'state.json'), 'w+').close()
+    try:
+        if squadron_dir == os.getcwd():
+            # We might not be at the root
+            old_cwd = os.getcwd()
+            root_dir = Git(squadron_dir).rev_parse('--show-toplevel')
+
+            os.chdir(root_dir)
+            squadron_dir = root_dir
+
+        service_dir = os.path.join(squadron_dir, 'services', service_name,
+                        service_ver)
+
+        makedirsp(os.path.join(service_dir, 'root'))
+
+        # Create the base files
+        open(os.path.join(service_dir, 'actions.json'), 'w+').close()
+        open(os.path.join(service_dir, 'defaults.json'), 'w+').close()
+        open(os.path.join(service_dir, 'react.json'), 'w+').close()
+        open(os.path.join(service_dir, 'schema.json'), 'w+').close()
+        open(os.path.join(service_dir, 'state.json'), 'w+').close()
+
+        print "Initialized service {} version {}".format(service_name,
+                service_ver)
+
+        return True
+    finally:
+        if old_cwd:
+            os.chdir(old_cwd)

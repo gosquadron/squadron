@@ -17,27 +17,23 @@ if __name__ == "__main__":
     parser.add_argument('-g', '--gitrepo', help='Git repo to use for INIT command')
     parser.add_argument('-t', '--status', help='Specify a status hub to register with')
     parser.add_argument('-f', '--force', help='Force a particular command to happen', action='store_true')
-    parser.add_argument('command', choices=['init','check','apply', 'daemon', 'init-service'], help='Which action to execute')
+    parser.add_argument('command', choices=['init','check','apply', 'daemon'], help='Which action to execute')
     parser.add_argument('-e', '--service', help='name of service to initialize')
-    parser.add_argument('-v', '--version', help='version of the service to initialize')
+    parser.add_argument('-v', '--version', help='version of the service to initialize', default='0.0.1')
     parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
     parser.add_argument('-d', '--sysdir', help='Directory to store Squadron state in')
     parser.add_argument('-c', '--config', help='Override which configuration file to read')
 
     args = parser.parse_args()
 
-    if(args.command == 'init-service'):
-        if(args.service is None):
-            print "Please specify service name"
-            exit(1)
-        initialize.init_service(args.directory, args.service, args.version)
+    if args.command == 'init':
+        if args.service:
+            initialize.init_service(args.directory, args.service, args.version)
+        else:
+            initialize.init(args.directory, args.skeleton, args.gitrepo, args.force, args.example)
         exit(0)
 
-    if(args.command == 'init'):
-        initialize.init(args.directory, args.skeleton, args.gitrepo, args.force, args.example)
-        exit(0)
-
-    if(args.command == 'daemon'):
+    if args.command == 'daemon':
         daemon.run(args.directory, args.gitrepo, args.hub)
         exit(0)
 
