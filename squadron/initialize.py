@@ -8,9 +8,12 @@ from fileio.dirio import makedirsp
 import shutil
 
 def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
-    if(os.path.exists(squadron_dir) and not force):
-        print "Directory already exists, please provide a new directory"
-        return False
+    if os.path.exists(squadron_dir):
+        # Check if it's empty-ish
+        if len(os.listdir(squadron_dir)) > 0 and not force:
+            print "Directory already exists and isn't empty."
+            print "Please provide a new directory or use -f."
+            return False
 
     makedirsp(squadron_dir)
     if skeleton is True and gitrepo is not None:

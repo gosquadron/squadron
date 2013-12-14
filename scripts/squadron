@@ -34,11 +34,11 @@ if __name__ == "__main__":
         exit(0)
 
     if(args.command == 'init'):
-        initialize.init(args.directory, args.skeleton, args.gitrepro, args.force, args.example)
+        initialize.init(args.directory, args.skeleton, args.gitrepo, args.force, args.example)
         exit(0)
 
     if(args.command == 'daemon'):
-        daemon.run(args.directory, args.gitrepro, args.hub)
+        daemon.run(args.directory, args.gitrepo, args.hub)
         exit(0)
 
     print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
