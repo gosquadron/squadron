@@ -4,39 +4,72 @@ from argparse import ArgumentParser
 import json
 import os
 import socket
+import sys
+
+def apply(args, parent, dry_run):
+    parser = ArgumentParser(prog='{} {}'.format(parent.prog, 'check' if dry_run else 'apply'),
+                description=parent.description,
+                epilog=parent.epilog,
+                parents=[parent])
+    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
+    parser.add_argument('-n', '--node-name', help='Override this node\'s name')
+    parser.add_argument('-t', '--status', help='Specify a status hub to register with')
+    parser.add_argument('-c', '--config', help='Override which configuration file to read')
+    parser.add_argument('-d', '--sysdir', help='Directory to store Squadron state in')
+
+    output = parser.parse_args(args)
+
+    return main.go(output.directory, output.sysdir, output.config,
+            output.node_name, output.status, dry_run)
+
+
+def init(args, parent):
+    parser = ArgumentParser(prog='{} init'.format(parent.prog),
+                description=parent.description,
+                epilog=parent.epilog,
+                parents=[parent])
+    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
+    parser.add_argument('-e', '--service', help='name of service to initialize')
+    parser.add_argument('-v', '--version', help='version of the service to initialize', default='0.0.1')
+    parser.add_argument('-f', '--force', help='Force initialize a non-empty directory', action='store_true')
+    parser.add_argument('-s', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
+    parser.add_argument('-g', '--gitrepo', help='Git repo to use')
+    parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
+
+    output = parser.parse_args(args)
+
+    if output.service:
+        return initialize.init_service(output.directory, output.service, output.version)
+    else:
+        return initialize.init(output.directory, output.skeleton, output.gitrepo, output.force, output.example)
 
 if __name__ == "__main__":
     parser = ArgumentParser(
                 description='Easy configuration management tool',
+                usage='%(prog)s [command] [options]',
+                add_help=False,
                 epilog="http://gosquadron.com"
             )
 
-    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
-    parser.add_argument('-n', '--node-name', help='Override this node\'s name')
-    parser.add_argument('-s', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
-    parser.add_argument('-g', '--gitrepo', help='Git repo to use for INIT command')
-    parser.add_argument('-t', '--status', help='Specify a status hub to register with')
-    parser.add_argument('-f', '--force', help='Force a particular command to happen', action='store_true')
-    parser.add_argument('command', choices=['init','check','apply', 'daemon'], help='Which action to execute')
-    parser.add_argument('-e', '--service', help='name of service to initialize')
-    parser.add_argument('-v', '--version', help='version of the service to initialize', default='0.0.1')
-    parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
-    parser.add_argument('-d', '--sysdir', help='Directory to store Squadron state in')
-    parser.add_argument('-c', '--config', help='Override which configuration file to read')
+    command_parser = ArgumentParser(
+            description = parser.description,
+            epilog = parser.epilog,
+            parents=[parser])
+    command_parser.add_argument('command', choices=['init','check','apply', 'help'], help='Which action to execute')
 
-    args = parser.parse_args()
+    output = command_parser.parse_args(sys.argv[1:2])
 
-    if args.command == 'init':
-        if args.service:
-            initialize.init_service(args.directory, args.service, args.version)
-        else:
-            initialize.init(args.directory, args.skeleton, args.gitrepo, args.force, args.example)
-        exit(0)
+    other_args = sys.argv[2:]
 
-    if args.command == 'daemon':
-        daemon.run(args.directory, args.gitrepo, args.hub)
-        exit(0)
+    if output.command == 'init':
+        if not init(other_args, parser):
+            exit(1)
+    elif output.command == 'apply' or output.command =='check':
+        if not apply(other_args, parser, output.command == 'check'):
+            exit(1)
+    elif output.command == 'help':
+        parser.print_help()
+    else:
+        print "Unsupported command {}".format(output.command)
+        exit(1)
 
-    print "{}: dir {} node_name {}".format(args.command, args.directory, args.node_name)
-
-    main.go(args.directory, args.sysdir, args.config, args.node_name, args.status, args.command == 'check')
