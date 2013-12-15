@@ -12,7 +12,7 @@ def test_basic(tmpdir):
 
 def test_service(tmpdir):
     tmpdir = str(tmpdir)
-    initialize.init_service(tmpdir, 'api')
+    initialize.init_service(tmpdir, 'api', '0.0.1')
 
     items = os.listdir(os.path.join(tmpdir, 'services', 'api'))
 

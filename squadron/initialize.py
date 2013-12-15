@@ -48,10 +48,10 @@ def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
 
 def init_service(squadron_dir, service_name, service_ver):
     """ Initializes a service with the given name and version """
+    old_cwd = os.getcwd()
     try:
         if squadron_dir == os.getcwd():
             # We might not be at the root
-            old_cwd = os.getcwd()
             root_dir = Git(squadron_dir).rev_parse('--show-toplevel')
 
             os.chdir(root_dir)
@@ -74,5 +74,4 @@ def init_service(squadron_dir, service_name, service_ver):
 
         return True
     finally:
-        if old_cwd:
-            os.chdir(old_cwd)
+        os.chdir(old_cwd)
