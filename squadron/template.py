@@ -8,73 +8,8 @@ import urllib
 import autotest
 from collections import namedtuple
 from fileio.dirio import mkdirp
-import git
 import shutil
-
-
-def ext_template(loader, inputhash, relpath, abs_source, dest):
-    """ Renders a ~tpl file"""
-    template = loader.load_template(relpath)
-    output = template.render(inputhash, loader=loader)
-
-    finalfile = get_filename(dest)
-    with open(finalfile, 'w') as outfile:
-        outfile.write(output)
-        return finalfile
-
-def ext_download(loader, inputhash, relpath, abs_source, dest):
-    """ Downloads a ~download file"""
-    template = loader.load_template(abs_source)
-    output = template.render(inputhash, loader=loader)
-
-    # split on whitespace
-    (url, checksum) = output.split(None, 3)
-
-    finalfile = get_filename(dest)
-    urllib.urlretrieve(url, finalfile)
-
-    return finalfile
-
-def ext_git(loader, inputhash, relpath, abs_source, dest):
-    """ Clones a git repository """
-    with open(abs_source) as gitfile:
-        url = gitfile.read().strip()
-
-    finalfile = get_filename(dest)
-    repo = git.Repo.clone_from(url, finalfile)
-    # get rid of the .git dir
-    shutil.rmtree(os.path.join(finalfile, '.git'))
-    return finalfile
-
-def ext_dir(loader, inputhash, relpath, abs_source, dest):
-    finalfile = get_filename(dest)
-    os.mkdir(finalfile)
-    return finalfile
-
-extension_handles = {
-    'tpl' : ext_template,
-    'download' : ext_download,
-    'git' : ext_git,
-    'dir' : ext_dir,
-}
-
-def get_filename(filename):
-    """
-    Gets the filename from a filename~ext combination. Throws a ValueError
-    if there seems to be no filename.
-
-    Keyword arguments:
-        filename -- the file to get the base filename from
-    """
-    try:
-        result = filename[:filename.index('~')]
-    except ValueError:
-        result = filename
-
-    if len(result) == 0:
-        raise ValueError('Filename of "{}" is nothing'.format(filename))
-
-    return result
+from exthandlers import extension_handles
 
 def get_sq_ext(filename):
     """
@@ -226,7 +161,11 @@ class DirectoryRender:
                 ext = get_sq_ext(filename)
                 if ext in extension_handles:
                     # call the specific handler for this file extension
-                    finalfile = extension_handles[ext](self.loader, inputhash, relpath, abs_source, dest)
+                    finalfile = extension_handles[ext](**{'loader':self.loader,
+                        'inputhash':inputhash,
+                        'relpath':relpath,
+                        'abs_source': abs_source,
+                        'dest':dest})
                 else:
                     # otherwise, just copy the file
                     copyfile(abs_source, dest)

@@ -1,6 +1,7 @@
 from __future__ import print_function
 from .. import template
 from ..template import FileConfig, get_config, apply_config
+from ..exthandlers.extutils import get_filename
 from tempfile import mkdtemp
 from shutil import rmtree
 import pytest
@@ -52,12 +53,12 @@ def test_extensions():
     assert template.get_sq_ext('filename~tar.bz2') == 'tar.bz2'
     assert template.get_sq_ext('filename') == ''
 
-    assert template.get_filename('filename.txt') == 'filename.txt'
-    assert template.get_filename('filename.txt~gz') == 'filename.txt'
-    assert template.get_filename('filename~tar') == 'filename'
-    assert template.get_filename('filename~~~tar.gz') == 'filename'
-    assert template.get_filename('filename~tar.bz2') == 'filename'
-    assert template.get_filename('filename') == 'filename'
+    assert get_filename('filename.txt') == 'filename.txt'
+    assert get_filename('filename.txt~gz') == 'filename.txt'
+    assert get_filename('filename~tar') == 'filename'
+    assert get_filename('filename~~~tar.gz') == 'filename'
+    assert get_filename('filename~tar.bz2') == 'filename'
+    assert get_filename('filename') == 'filename'
 
     assert template.get_file_ext('filename.txt') == 'txt'
     assert template.get_file_ext('filename.txt.gz') == 'gz'
@@ -68,7 +69,7 @@ def test_extensions():
 
 
     with pytest.raises(ValueError) as ex:
-        template.get_filename('~tpl')
+        get_filename('~tpl')
     assert ex is not None
 
 def test_autotest(tmpdir):
