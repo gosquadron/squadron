@@ -7,5 +7,6 @@ extension_handles = {
     'dir':ext_dir,
     'git':ext_git,
     'download':ext_download,
+    'virtualenv',ext_virtualenv,
     'tpl':ext_template
 }
