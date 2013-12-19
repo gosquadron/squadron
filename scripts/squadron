@@ -29,10 +29,12 @@ def init(args, parent):
                 epilog=parent.epilog,
                 parents=[parent])
     parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
-    parser.add_argument('-e', '--service', help='name of service to initialize')
+    parser.add_argument('-e','--env', help='name of environment to initialize')
+    parser.add_argument('-c','--copyfrom', help='name of environment to copy (use with -e)')
+    parser.add_argument('-s', '--service', help='name of service to initialize')
     parser.add_argument('-v', '--version', help='version of the service to initialize', default='0.0.1')
     parser.add_argument('-f', '--force', help='Force initialize a non-empty directory', action='store_true')
-    parser.add_argument('-s', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
+    parser.add_argument('-k', '--skeleton', help='Init with a skeleton structure (no internet access)', action='store_true') #False by default
     parser.add_argument('-g', '--gitrepo', help='Git repo to use')
     parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
 
@@ -40,6 +42,8 @@ def init(args, parent):
 
     if output.service:
         return initialize.init_service(output.directory, output.service, output.version)
+    elif output.env:
+        return initialize.init_environment(output.directory, output.env, output.copyfrom)
     else:
         return initialize.init(output.directory, output.skeleton, output.gitrepo, output.force, output.example)
 
