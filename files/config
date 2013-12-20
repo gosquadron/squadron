@@ -1,5 +1,5 @@
 [daemon]
-polltime = 30m
+polltime = 30
 
 [squadron]
 keydir = /etc/squadron/keys

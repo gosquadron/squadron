@@ -34,6 +34,13 @@ def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on
             raise e
 
 def check_node_info(node_info):
+    """
+    Parses node_info to find what environment this node is in and what
+    services it should run.
+
+    Keyword arguments:
+        node_info -- dictionary with 'env' and 'services' keys.
+    """
     if node_info is None:
         print "Couldn't find any node information for node {}".format(node_name)
         return False

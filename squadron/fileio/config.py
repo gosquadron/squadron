@@ -4,7 +4,7 @@ import os
 
 def config_defaults():
     return {
-        'polltime':'30m',
+        'polltime':'30',
         'keydir':'/etc/squadron/keydir',
         'nodename':socket.getfqdn(),
         'statedir':'/var/squadron',
@@ -34,7 +34,7 @@ def parse_config(config_file = None, defaults = config_defaults()):
 
     if parser.sections():
         result = dict()
-        for section in ['squadron', 'status']:
+        for section in ['squadron', 'status', 'daemon']:
             try:
                 result.update(parser.items(section))
             except NoSectionError:

@@ -1,42 +1,47 @@
-import urllib2
-import socket
 from git import *
 import os
-from squadron import main
 import time
+import main
+from fileio.config import parse_config
+import logging
 
-def run(home_dir, gitrepo, hub):
+def _setup_logging(loglevel):
+    level = getattr(logging, loglevel.upper(), None)
+    if not isinstance(level, int):
+        raise ValueError('Invalid log level {}'.format(loglevel))
+    logging.basicConfig(level=level)
 
-    if(gitrepo == None):
-        print "please pass a git repo to poll"
-        exit(1)
+def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
+    """
+    Runs squadron every polltime minutes.
 
-    if not(os.path.exists(os.path.join(home_dir, ".git"))):
-        repo = Repo.clone_from(gitrepo, home_dir)
+    Keyword arguments:
+        squadron_dir -- squadron directory
+        config_file -- config file or None for defaults
+        polltime -- minutes to sleep in between runs
+        repo -- source code for the squadron_dir for updating
+        loglevel -- how much to log
+    """
+
+    _setup_logging(loglevel)
+
+    parsed_config = parse_config(config_file)
+
+    if not polltime:
+        polltime = int(parsed_config['polltime'])
+
+    if not os.path.exists(squadron_dir):
+        repo = Repo.clone_from(repo, squadron_dir)
     else:
-        repo = Repo(home_dir)
+        repo = Repo(squadron_dir)
 
-    url = (hub + "/register/" + str(socket.gethostname()))
-    response = ':('
-    try:
-        response = urllib2.urlopen(url).read()
-    except:
-        pass
-    if(response == 'ok'):
-        print "registered :)"
-    else:
-        print "could not register? :("
-
-    lastCommit = ""
     while(True):
-        repo.remote(name='origin').pull(refspec="refs/heads/master:refs/remotes/origin/master")
-        currentCommit = repo.iter_commits().next()
-        if(currentCommit != lastCommit):
-            lastCommit = currentCommit
-            print "updating node"
-            try:
-                main.apply(home_dir, socket.getfqdn())
-            except:
-                pass
-        #Do heartbeat
-        time.sleep(30)
+        git = repo.git
+
+        logging.debug('Git checkout: ' + git.checkout('master'))
+        logging.debug('Git pull: ' + git.pull('--rebase'))
+
+        if not main.go(squadron_dir, config_file=config_file):
+            logging.error('Squadron had an error')
+
+        time.sleep(polltime)
