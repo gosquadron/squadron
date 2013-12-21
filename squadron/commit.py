@@ -97,7 +97,16 @@ def apply(squadron_dir, node_name, dry_run=False):
         if schema:
             jsonschema.validate(cfg, schema)
 
+        # Setting the state comes first, since the rest of this might
+        # depend on the state of the system (like virtualenv)
+        statejson = get_service_json(squadron_dir, service, version, 'state', True)
+        for library, items in statejson.items():
+            print "{}Installing {} via {}".format(
+                    "DRYRUN: " if dry_run else "", items, library)
+            state.apply(library, items, dry_run)
+
         if not dry_run:
+
             service_dir = os.path.join(squadron_dir, 'services',
                                     service, version, 'root')
             render = DirectoryRender(service_dir)
@@ -107,11 +116,6 @@ def apply(squadron_dir, node_name, dry_run=False):
             atomic = render.render(tmp_serv_dir, cfg)
 
             result[service] = {'base_dir': base_dir, 'dir': tmp_serv_dir, 'atomic': atomic, 'version':version}
-
-        statejson = get_service_json(squadron_dir, service, version, 'state', True)
-        for library, items in statejson.items():
-            state.apply(library, items, dry_run)
-
 
     return (result, tmpdir)
 
