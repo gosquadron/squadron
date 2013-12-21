@@ -5,11 +5,15 @@ from ..fileio.dirio import makedirsp
 from helper import are_dir_trees_equal
 import shutil
 
+def create_blank_infojson(statedir):
+    open(os.path.join(statedir,'info.json'),'w+').close()
+
 def test_main_basic(tmpdir):
     tmpdir = str(tmpdir)
 
     squadron_state_dir = os.path.join(tmpdir, 'state')
     makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
     makedirsp('/tmp/applytest1/')
 
     squadron_dir = 'main_tests/main1'
@@ -44,6 +48,7 @@ def test_main_with_config(tmpdir):
 
     squadron_state_dir = os.path.join(tmpdir, 'state')
     makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
     makedirsp('/tmp/applytest1/')
 
     squadron_dir = 'main_tests/main1'
@@ -63,6 +68,7 @@ def test_main_git(tmpdir):
 
     squadron_state_dir = os.path.join(tmpdir, 'state')
     makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
 
     squadron_dir = 'main_tests/main2'
 
