@@ -6,6 +6,7 @@ from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, config_defaults
 import shutil
 import status
+import traceback
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -64,6 +65,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     except Exception as e:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
+        traceback.print_exc()
         raise e
     else:
         if send_status and not dry_run:
@@ -83,6 +85,10 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
 
     (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)
+
+    if not new_dir:
+        print "Error getting changes"
+        return False
 
     this_run_sum = walk_hash(new_dir)
 

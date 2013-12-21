@@ -70,7 +70,7 @@ def apply(squadron_dir, node_name, dry_run=False):
 
     if not check_node_info(node_info):
         # Return early if there's an error
-        return False
+        return (False, None)
 
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
