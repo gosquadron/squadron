@@ -68,6 +68,10 @@ def _go_to_root(fn):
             os.chdir(old_cwd)
     return wrapped
 
+def create_empty_json(path):
+    with open(path, 'w+') as jsonfile:
+        jsonfile.write(json.dumps({}))
+
 @_go_to_root
 def init_service(squadron_dir, service_name, service_ver):
     """ Initializes a service with the given name and version """
@@ -77,11 +81,11 @@ def init_service(squadron_dir, service_name, service_ver):
     makedirsp(os.path.join(service_dir, 'root'))
 
     # Create the base files
-    open(os.path.join(service_dir, 'actions.json'), 'w+').close()
-    open(os.path.join(service_dir, 'defaults.json'), 'w+').close()
-    open(os.path.join(service_dir, 'react.json'), 'w+').close()
-    open(os.path.join(service_dir, 'schema.json'), 'w+').close()
-    open(os.path.join(service_dir, 'state.json'), 'w+').close()
+    create_empty_json(os.path.join(service_dir, 'actions.json'))
+    create_empty_json(os.path.join(service_dir, 'defaults.json'))
+    create_empty_json(os.path.join(service_dir, 'react.json'))
+    create_empty_json(os.path.join(service_dir, 'schema.json'))
+    create_empty_json(os.path.join(service_dir, 'state.json'))
 
     print "Initialized service {} version {}".format(service_name,
             service_ver)
