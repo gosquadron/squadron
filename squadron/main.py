@@ -64,6 +64,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     except Exception as e:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
+        raise e
     else:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='OK', hostname=node_name, info={'info':True})
