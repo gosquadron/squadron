@@ -68,9 +68,12 @@ def _go_to_root(fn):
             os.chdir(old_cwd)
     return wrapped
 
-def create_empty_json(path):
+def create_empty_json(path, array=False):
     with open(path, 'w+') as jsonfile:
-        jsonfile.write(json.dumps({}))
+        if array:
+            jsonfile.write(json.dumps([]))
+        else:
+            jsonfile.write(json.dumps({}))
 
 @_go_to_root
 def init_service(squadron_dir, service_name, service_ver):
@@ -83,7 +86,7 @@ def init_service(squadron_dir, service_name, service_ver):
     # Create the base files
     create_empty_json(os.path.join(service_dir, 'actions.json'))
     create_empty_json(os.path.join(service_dir, 'defaults.json'))
-    create_empty_json(os.path.join(service_dir, 'react.json'))
+    create_empty_json(os.path.join(service_dir, 'react.json'), True)
     create_empty_json(os.path.join(service_dir, 'schema.json'))
     create_empty_json(os.path.join(service_dir, 'state.json'))
 

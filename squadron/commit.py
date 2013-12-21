@@ -106,7 +106,6 @@ def apply(squadron_dir, node_name, dry_run=False):
             state.apply(library, items, dry_run)
 
         if not dry_run:
-
             service_dir = os.path.join(squadron_dir, 'services',
                                     service, version, 'root')
             render = DirectoryRender(service_dir)
