@@ -7,33 +7,33 @@ from git import *
 from fileio.dirio import makedirsp
 import shutil
 
-def init(squadron_dir, skeleton, gitrepo, force=False, example=False):
+def init(squadron_dir, gitrepo, force=False, example=False):
     if os.path.exists(squadron_dir):
         # Check if it's empty-ish
         if len(os.listdir(squadron_dir)) > 0 and not force:
-            print "Directory already exists and isn't empty."
-            print "Please provide a new directory or use -f."
-            return False
+            if gitrepo is not None:
+                # Grab the gitrepo name out and use that
+                repo_name = gitrepo[gitrepo.rstrip('/').rfind('/'):].lstrip('/')
+                if repo_name.endswith('.git'):
+                    repo_name = repo_name[:-4]
 
-    makedirsp(squadron_dir)
-    if skeleton is True and gitrepo is not None:
-        print "Can't do skeleton and gitrepo at the same time"
-        return False
+                squadron_dir = os.path.join(squadron_dir, repo_name)
+            else:
+                print "Directory already exists and isn't empty."
+                print "Please provide a new directory or use -f."
+                return False
 
-    if skeleton is False and gitrepo is None:
-        skeleton = True #Probably a silly mistake
-
-    if skeleton is True or gitrepo is None:
-        print "Creating skeleton..."
+    if gitrepo is None:
+        print "Creating Squadron config in {}".format(squadron_dir)
+        makedirsp(squadron_dir)
         makedirsp(os.path.join(squadron_dir, 'libraries'))
         makedirsp(os.path.join(squadron_dir, 'config'))
         makedirsp(os.path.join(squadron_dir, 'services'))
         makedirsp(os.path.join(squadron_dir, 'nodes'))
-
-    if gitrepo is not None:
-        repo = Repo.clone_from(gitrepo, squadron_dir)
-    else:
         repo = Repo.init(squadron_dir) # initialize repo
+    else:
+        print "Cloning Squadron config from {}".format(gitrepo)
+        repo = Repo.clone_from(gitrepo, squadron_dir)
 
     print "Squadron has been initialized"
     if example is False:

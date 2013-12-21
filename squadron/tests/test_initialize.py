@@ -5,7 +5,7 @@ import json
 
 def test_basic(tmpdir):
     tmpdir = str(tmpdir)
-    assert initialize.init(tmpdir, True, None, force=True)
+    assert initialize.init(tmpdir, None, force=True)
 
     items = os.listdir(tmpdir)
     assert len(items) > 0
@@ -14,7 +14,7 @@ def test_basic(tmpdir):
 
 def test_service(tmpdir):
     tmpdir = str(tmpdir)
-    assert initialize.init(tmpdir, True, None, force=True)
+    assert initialize.init(tmpdir, None, force=True)
     assert initialize.init_service(tmpdir, 'api', '0.0.1')
 
     items = os.listdir(os.path.join(tmpdir, 'services', 'api'))
@@ -23,7 +23,7 @@ def test_service(tmpdir):
 
 def test_environment(tmpdir):
     tmpdir = str(tmpdir)
-    assert initialize.init(tmpdir, True, None, force=True)
+    assert initialize.init(tmpdir, None, force=True)
     assert initialize.init_service(tmpdir, 'api', '0.0.1')
 
     assert initialize.init_environment(tmpdir, 'dev', None)
