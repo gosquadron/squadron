@@ -6,6 +6,7 @@ import subprocess
 from git import *
 from fileio.dirio import makedirsp
 import shutil
+from pkg_resources import parse_version
 
 def init(squadron_dir, gitrepo, force=False, example=False):
     if os.path.exists(squadron_dir):
@@ -68,12 +69,9 @@ def _go_to_root(fn):
             os.chdir(old_cwd)
     return wrapped
 
-def create_empty_json(path, array=False):
+def create_json(path, to_write={}):
     with open(path, 'w+') as jsonfile:
-        if array:
-            jsonfile.write(json.dumps([]))
-        else:
-            jsonfile.write(json.dumps({}))
+        jsonfile.write(json.dumps(to_write))
 
 @_go_to_root
 def init_service(squadron_dir, service_name, service_ver):
@@ -84,16 +82,38 @@ def init_service(squadron_dir, service_name, service_ver):
     makedirsp(os.path.join(service_dir, 'root'))
 
     # Create the base files
-    create_empty_json(os.path.join(service_dir, 'actions.json'))
-    create_empty_json(os.path.join(service_dir, 'defaults.json'))
-    create_empty_json(os.path.join(service_dir, 'react.json'), True)
-    create_empty_json(os.path.join(service_dir, 'schema.json'))
-    create_empty_json(os.path.join(service_dir, 'state.json'))
+    create_json(os.path.join(service_dir, 'actions.json'))
+    create_json(os.path.join(service_dir, 'defaults.json'))
+    # react.json's top level is an array
+    create_json(os.path.join(service_dir, 'react.json'), [])
+    create_json(os.path.join(service_dir, 'schema.json'))
+    create_json(os.path.join(service_dir, 'state.json'))
 
     print "Initialized service {} version {}".format(service_name,
             service_ver)
 
     return True
+
+def _get_latest_service_versions(service_dir):
+    """
+    Takes the service directory, and returns a map of service to
+    latest version.
+
+    Keyword arguments:
+        service_dir
+    """
+    services = [ d for d in os.listdir(service_dir)
+                if os.path.isdir(os.path.join(service_dir, d)) ]
+    result = {}
+    for s in services:
+        max_version = None
+        for d in os.listdir(os.path.join(service_dir, s)):
+            if max_version is None or parse_version(d) > parse_version(max_version):
+                max_version = d
+        
+        if max_version:
+            result[s] = max_version
+    return result
 
 @_go_to_root
 def init_environment(squadron_dir, environment_name, copy_from):
@@ -109,11 +129,12 @@ def init_environment(squadron_dir, environment_name, copy_from):
         makedirsp(new_env)
         service_dir = os.path.join(squadron_dir, 'services')
         # Grab all the directories
-        to_make = [ d for d in os.listdir(service_dir)
-                    if os.path.isdir(os.path.join(service_dir, d)) ]
+        to_make = _get_latest_service_versions(service_dir)
 
-        for d in to_make:
-            open(os.path.join(new_env, d + '.json'), 'w+').close()
+        for service_name, service_version in to_make.items():
+            create_json(os.path.join(new_env, service_name + '.json'),
+                    {'version': service_version, 'config':{},
+                     'basedir': 'TODO'})
 
     print "Initialized environment {}{}".format(environment_name,
             " copied from " + copy_from if copy_from else "")
