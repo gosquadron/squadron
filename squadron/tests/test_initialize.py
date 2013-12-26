@@ -40,6 +40,15 @@ def test_environment(tmpdir):
     assert len(subitems) == 1
     assert 'api.json' in subitems
 
+    # Check that config was put in
+    with open(os.path.join(dev_dir, subitems[0])) as jsonfile:
+        config = json.loads(jsonfile.read())
+
+    assert 'version' in config
+    assert config['version'] == '0.0.1'
+    assert config['config'] == {}
+    assert 'basedir' in config
+
     # Try copy from
     with open(os.path.join(dev_dir, 'fake.json'), 'w') as fd:
         fd.write(json.dumps({'testing':True}))
