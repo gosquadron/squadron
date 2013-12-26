@@ -1,12 +1,14 @@
-from .. import main
+from squadron import main
 import os
 import json
-from ..fileio.dirio import makedirsp
-from helper import are_dir_trees_equal
+from squadron.fileio.dirio import makedirsp
+from helper import are_dir_trees_equal, get_test_path
 import shutil
 
 def create_blank_infojson(statedir):
     open(os.path.join(statedir,'info.json'),'w+').close()
+
+test_path = os.path.join(get_test_path(), 'main_tests')
 
 def test_main_basic(tmpdir):
     tmpdir = str(tmpdir)
@@ -16,20 +18,20 @@ def test_main_basic(tmpdir):
     create_blank_infojson(squadron_state_dir)
     makedirsp('/tmp/applytest1/')
 
-    squadron_dir = 'main_tests/main1'
+    squadron_dir = os.path.join(test_path, 'main1')
 
-    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
-    assert are_dir_trees_equal('main_tests/main1result', info['dir']) == True
+    assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
 
     old_dir = info['dir']
 
-    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -40,7 +42,7 @@ def test_main_basic(tmpdir):
     new_dir = info['dir']
 
     assert old_dir != new_dir
-    assert are_dir_trees_equal('main_tests/main1result', info['dir']) == True
+    assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
     shutil.rmtree('/tmp/applytest1/')
 
 def test_main_with_config(tmpdir):
@@ -51,17 +53,17 @@ def test_main_with_config(tmpdir):
     create_blank_infojson(squadron_state_dir)
     makedirsp('/tmp/applytest1/')
 
-    squadron_dir = 'main_tests/main1'
+    squadron_dir = os.path.join(test_path, 'main1')
 
     # Gets the node name from the config file
-    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', None, None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), None, None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
-    assert are_dir_trees_equal('main_tests/main1result', info['dir']) == True
+    assert are_dir_trees_equal(os.path.join(test_path,'main1result'), info['dir']) == True
 
 def test_main_git(tmpdir):
     tmpdir = str(tmpdir)
@@ -70,14 +72,14 @@ def test_main_git(tmpdir):
     makedirsp(squadron_state_dir)
     create_blank_infojson(squadron_state_dir)
 
-    squadron_dir = 'main_tests/main2'
+    squadron_dir = os.path.join(test_path, 'main2')
 
-    main.go(squadron_dir, squadron_state_dir, 'main_tests/main1.config', 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), 'dev', None, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
-    assert are_dir_trees_equal('main_tests/main2result', info['dir']) == True
+    assert are_dir_trees_equal(os.path.join(test_path,'main2result'), info['dir']) == True
     shutil.rmtree('/tmp/main2test/')

@@ -1,5 +1,5 @@
-from ..runinfo import get_last_run_info, write_run_info
-from ..fileio.lock import FileLockException
+from squadron.runinfo import get_last_run_info, write_run_info
+from squadron.fileio.lock import FileLockException
 import random
 import os
 import pytest

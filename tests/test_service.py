@@ -1,11 +1,14 @@
-from ..service import get_service_actions, get_reactions, react, _checkfiles
+from squadron.service import get_service_actions, get_reactions, react, _checkfiles
 import glob
 import os
-from ..fileio.dirio import makedirsp
+from squadron.fileio.dirio import makedirsp
 import shutil
+from helper import get_test_path
+
+test_path = os.path.join(get_test_path(), 'service_tests')
 
 def test_get_service_actions():
-    actions = get_service_actions('service_tests', 'service1', '1.0.1')
+    actions = get_service_actions(test_path, 'service1', '1.0.1')
     print "actions {}".format(actions)
 
     assert len(actions) == 3
@@ -26,7 +29,7 @@ def test_get_service_actions():
     assert 'service1.start' in actions['service1.restart']['not_after']
 
 def test_get_reactions():
-    reactions = get_reactions('service_tests', 'service1', '1.0.1')
+    reactions = get_reactions(test_path, 'service1', '1.0.1')
 
     assert len(reactions) == 3
 
@@ -66,7 +69,7 @@ def test_react_basic():
 
     make_react_tmp()
     try:
-        args = {'service_dir':'service_tests',
+        args = {'service_dir':test_path,
                 'service_name':'service1',
                 'service_ver':'1.0.1'}
 
@@ -90,7 +93,7 @@ def test_react_precendence():
 
     make_react_tmp()
     try:
-        args = {'service_dir':'service_tests',
+        args = {'service_dir':test_path,
                 'service_name':'service1',
                 'service_ver':'2.0'}
 

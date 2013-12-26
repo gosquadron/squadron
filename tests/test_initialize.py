@@ -1,5 +1,5 @@
 from helper import are_dir_trees_equal
-from .. import initialize
+from squadron import initialize
 import os
 import json
 

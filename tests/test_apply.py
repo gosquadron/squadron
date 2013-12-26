@@ -1,21 +1,24 @@
-from .. import commit
+from squadron import commit
 import pytest
 import jsonschema
-from helper import are_dir_trees_equal
+from helper import are_dir_trees_equal, get_test_path
 import os
 import shutil
 
-from ..fileio.dirio import makedirsp
+from squadron.fileio.dirio import makedirsp
 
 def checkfile(filename, compare):
     with open(filename) as ofile:
         assert compare == ofile.read()
 
+test_path = os.path.join(get_test_path(), 'applytests')
 def test_apply_only():
-    (results, tmpdir) = commit.apply('applytests/applytest1', 'node')
+    (results, tmpdir) = commit.apply(
+            os.path.join(test_path,'applytest1'), 'node')
 
     assert len(results) == 1
-    assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest1result')
+    assert are_dir_trees_equal(results['api']['dir'],
+            os.path.join(test_path,'applytest1result'))
 
     checkfile('/tmp/test1.out', '55')
     checkfile('/tmp/test2.out', '0')
@@ -29,15 +32,17 @@ def test_apply_commit(tmpdir):
     shutil.rmtree('/tmp/applytest2', ignore_errors=True)
 
     tmpdir = str(tmpdir)
-    (results, top_level_tmp) = commit.apply('applytests/applytest2', 'node')
+    (results, top_level_tmp) = commit.apply(os.path.join(test_path,'applytest2'), 'node')
 
     assert len(results) == 1
-    assert are_dir_trees_equal(results['api']['dir'], 'applytests/applytest2result')
+    assert are_dir_trees_equal(results['api']['dir'],
+            os.path.join(test_path, 'applytest2result'))
 
     makedirsp(results['api']['base_dir'])
     commit.commit(results)
 
-    assert are_dir_trees_equal(results['api']['base_dir'], 'applytests/applytest2result')
+    assert are_dir_trees_equal(results['api']['base_dir'],
+            os.path.join(test_path,'applytest2result'))
 
     checkfile('/tmp/test1.out', '55')
     checkfile('/tmp/test2.out', '0')
@@ -48,7 +53,7 @@ def test_apply_commit(tmpdir):
 
 def test_schema_validation_error():
     with pytest.raises(jsonschema.ValidationError) as ex:
-        commit.apply('applytests/applytest1-exception', 'node')
+        commit.apply(os.path.join(test_path, 'applytest1-exception'), 'node')
 
     assert ex.value.cause is None # make sure it was a validation error
     assert ex.value.validator_value == 'integer'

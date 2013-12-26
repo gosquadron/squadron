@@ -1,6 +1,9 @@
 import filecmp
 import os
 
+def get_test_path():
+    return os.path.dirname(os.path.realpath(__file__))
+
 def are_dir_trees_equal(dir1, dir2):
     """
     Compare two directories recursively. Files in each directory are

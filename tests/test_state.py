@@ -1,13 +1,16 @@
-from .. import state
+from squadron import state
 from tempfile import mktemp
 import pytest
 import random
 import os
 import jsonschema
+from helper import get_test_path
+
+test_path = os.path.join(get_test_path(), 'statetests')
 
 def test_basic(tmpdir):
     tmpfile = os.path.join(str(tmpdir),'basic')
-    handler = state.StateHandler('statetests')
+    handler = state.StateHandler(test_path)
 
     num = random.randint(0, 100)
     item = {'tmpfile': tmpfile, 'num' : num}
@@ -25,7 +28,7 @@ def test_basic(tmpdir):
 
 def test_schema_validation_error(tmpdir):
     tmpfile = os.path.join(str(tmpdir),'basic')
-    handler = state.StateHandler('statetests')
+    handler = state.StateHandler(test_path)
 
     item = {'tmpfile': tmpfile, 'num' : 'five'}
     with pytest.raises(jsonschema.ValidationError) as ex:
