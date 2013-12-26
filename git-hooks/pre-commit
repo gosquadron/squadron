@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Runs python setup.py test before every commit
+#
+
+echo "Running hook"
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+    exec 1>&2
+    echo "Running python setup.py test..."
+    pushd $(git rev-parse --show-toplevel)
+    python setup.py test
+    ERRORCODE=$?
+    popd
+    exit $ERRORCODE
+fi
+
+echo "Done running hook"
