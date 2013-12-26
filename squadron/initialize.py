@@ -7,6 +7,7 @@ from git import *
 from fileio.dirio import makedirsp
 import shutil
 from pkg_resources import parse_version
+from log import log
 
 def init(squadron_dir, gitrepo, force=False, example=False):
     if os.path.exists(squadron_dir):
@@ -20,12 +21,12 @@ def init(squadron_dir, gitrepo, force=False, example=False):
 
                 squadron_dir = os.path.join(squadron_dir, repo_name)
             else:
-                print "Directory already exists and isn't empty."
-                print "Please provide a new directory or use -f."
+                log.error("Directory already exists and isn't empty.")
+                log.error("Please provide a new directory or use -f.")
                 return False
 
     if gitrepo is None:
-        print "Creating Squadron config in {}".format(squadron_dir)
+        log.info("Creating Squadron config in {}".format(squadron_dir))
         makedirsp(squadron_dir)
         makedirsp(os.path.join(squadron_dir, 'libraries'))
         makedirsp(os.path.join(squadron_dir, 'config'))
@@ -33,16 +34,16 @@ def init(squadron_dir, gitrepo, force=False, example=False):
         makedirsp(os.path.join(squadron_dir, 'nodes'))
         repo = Repo.init(squadron_dir) # initialize repo
     else:
-        print "Cloning Squadron config from {}".format(gitrepo)
+        log.info("Cloning Squadron config from {}".format(gitrepo))
         repo = Repo.clone_from(gitrepo, squadron_dir)
 
-    print "Squadron has been initialized"
+    log.info("Squadron has been initialized")
     if example is False:
-        print "Now, you can initialized your service:"
-        print "\tsquadron init --service service_name"
+        log.info("Now, you can initialized your service:")
+        log.info("\tsquadron init --service service_name")
     else:
         init_service(squadron_dir, 'example')
-        print "We have init an example service for you, please check out services/example"
+        log.info("We have init an example service for you, please check out services/example")
 
     return True
 
@@ -89,8 +90,8 @@ def init_service(squadron_dir, service_name, service_ver):
     create_json(os.path.join(service_dir, 'schema.json'))
     create_json(os.path.join(service_dir, 'state.json'))
 
-    print "Initialized service {} version {}".format(service_name,
-            service_ver)
+    log.info("Initialized service {} version {}".format(service_name,
+            service_ver))
 
     return True
 
@@ -134,8 +135,8 @@ def init_environment(squadron_dir, environment_name, copy_from):
         for service_name, service_version in to_make.items():
             create_json(os.path.join(new_env, service_name + '.json'),
                     {'version': service_version, 'config':{},
-                     'basedir': 'TODO'})
+                     'base_dir': 'TODO'})
 
-    print "Initialized environment {}{}".format(environment_name,
-            " copied from " + copy_from if copy_from else "")
+    log.info("Initialized environment {}{}".format(environment_name,
+            " copied from " + copy_from if copy_from else ""))
     return True

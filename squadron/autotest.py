@@ -1,7 +1,6 @@
 import os
 import json
 
-
 def verify_json(filename):
     """ Checks that a JSON file is valid JSON """
     try:

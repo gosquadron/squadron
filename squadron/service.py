@@ -4,6 +4,7 @@ import subprocess
 import fnmatch
 import os
 from fileio import dirio
+from log import log
 
 _action_schema = {
     'type': 'object',
@@ -174,13 +175,10 @@ def _checkfiles(filepatterns, paths_changed):
         paths_changed -- list of paths changed, each item is relative to the
             base deployment directory
     """
-    print "_checkfiles({}, {})".format(filepatterns, paths_changed)
     for pattern in filepatterns:
         if fnmatch.filter(paths_changed, pattern):
-            print "Match on pattern {}".format(pattern)
             return True
 
-    print "no match"
     return False
 
 def _runcommand(command, retcode):
@@ -216,12 +214,12 @@ def react(actions, reactions, paths_changed, new_files, base_dir):
             run_action = True
 
         if not run_action:
-            print "Not running reaction {}".format(reaction)
+            log.debug("Not running reaction {}".format(reaction))
             continue
 
         # Run action
         for action in reaction['execute']:
-            print "Running action {} in reaction {}".format(action, reaction)
+            log.info("Running action {} in reaction {}".format(action, reaction))
             if action in actions:
                 if action not in done_actions:
                     # Actions must be unique
@@ -241,7 +239,7 @@ def react(actions, reactions, paths_changed, new_files, base_dir):
                                 try:
                                     subprocess.check_call(command.split())
                                 except subprocess.CalledProcessError as e:
-                                    print "Command {} errored with code {}".format(command, e.returncode)
+                                    log.error("Command {} errored with code {}".format(command, e.returncode))
                                     raise e
                         done_actions.add(action)
             else:

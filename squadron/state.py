@@ -4,6 +4,7 @@ import imp
 import importlib
 import sys
 from distutils.sysconfig import get_python_lib
+from log import log
 
 class StateHandler:
     def __init__(self, library_dir):
@@ -26,7 +27,7 @@ class StateHandler:
                 mod = imp.find_module(library_name, [self.library_dir, self.community_dir])
                 imp.load_module(library_name, *mod)
             except ImportError:
-                print "Couldn't find module in dir {}".format(self.library_dir)
+                log.exception("Couldn't find module in dir {}".format(self.library_dir))
                 raise
             finally:
                 if imp.lock_held():
@@ -44,6 +45,6 @@ class StateHandler:
             library.apply(failed)
             failed = library.verify(inputhash)
             if len(failed) > 0:
-                print "Failed for good on {}".format(failed)
+                log.error("Failed for good on {}".format(failed))
 
         return failed

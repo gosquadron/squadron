@@ -7,6 +7,7 @@ from fileio.config import parse_config, config_defaults
 import shutil
 import status
 import traceback
+from log import log
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -42,7 +43,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         dry_run -- whether or not to apply changes
     """
     config = parse_config(config_file)
-    print "Got config {}".format(config)
+    log.info("Got config {}".format(config))
 
     if squadron_state_dir is None:
         squadron_state_dir = config['statedir']
@@ -58,14 +59,14 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
 
         status_apikey = config['status_apikey']
         status_secret = config['status_secret']
-        print "Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret)
+        log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
 
     try:
         _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run)
     except Exception as e:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
-        traceback.print_exc()
+        log.exception('Caught exception')
         raise e
     else:
         if send_status and not dry_run:
@@ -87,7 +88,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)
 
     if not new_dir:
-        print "Error getting changes"
+        log.error("Error getting changes")
         return False
 
     this_run_sum = walk_hash(new_dir)
@@ -100,7 +101,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         new_paths = strip_prefix(new_paths, new_dir)
 
         if not dry_run:
-            print "Applying changes"
+            log.info("Applying changes")
             files_commited = commit.commit(result)
 
             actions = {}
@@ -114,12 +115,13 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
 
             service.react(actions, reactions, paths_changed, new_paths, new_dir)
         else:
-            print "Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths)
+            log.info("Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths))
     else:
-        print "Nothing changed."
+        log.info("Nothing changed.")
 
-    print "Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir)
+    log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
     runinfo.write_run_info(squadron_state_dir, {'dir': new_dir})
 
     if last_run_dir is not None:
+        log.debug("Removing last run dir {}".format(last_run_dir))
         shutil.rmtree(last_run_dir)

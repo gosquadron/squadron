@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from squadron import main,initialize,daemon
+from squadron import main,initialize,daemon,log
 from argparse import ArgumentParser
 import json
 import os
 import socket
 import sys
+import logging
 
 def apply(args, parent, dry_run):
     parser = ArgumentParser(prog='{} {}'.format(parent.prog, 'check' if dry_run else 'apply'),
@@ -16,8 +17,11 @@ def apply(args, parent, dry_run):
     parser.add_argument('-t', '--status', help='Specify a status hub to register with')
     parser.add_argument('-c', '--config', help='Override which configuration file to read')
     parser.add_argument('-d', '--sysdir', help='Directory to store Squadron state in')
+    parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
 
     output = parser.parse_args(args)
+
+    log.setup_log(output.loglevel, console=True)
 
     return main.go(output.directory, output.sysdir, output.config,
             output.node_name, output.status, dry_run)
@@ -50,6 +54,7 @@ def init(args, parent):
     parser.add_argument('-f', '--force', help='Force initialize a non-empty directory', action='store_true')
     parser.add_argument('-g', '--gitrepo', help='Git repo to use')
     parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
+    parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
 
     output = parser.parse_args(args)
 

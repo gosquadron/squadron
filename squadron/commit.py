@@ -11,6 +11,7 @@ from nodes import get_node_info
 from collections import defaultdict
 from fileio.dirio import makedirsp
 import errno
+from log import log
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False):
@@ -42,15 +43,15 @@ def check_node_info(node_info):
         node_info -- dictionary with 'env' and 'services' keys.
     """
     if node_info is None:
-        print "Couldn't find any node information for node {}".format(node_name)
+        log.error("Couldn't find any node information for node {}".format(node_name))
         return False
 
     if 'env' not in node_info:
-        print "No environment specified in node_info: {}".format(node_info)
+        log.error("No environment specified in node_info: {}".format(node_info))
         return False
 
     if 'services' not in node_info or len(node_info['services']) < 1:
-        print "No services configured in node_info: {}".format(node_info)
+        log.error("No services configured in node_info: {}".format(node_info))
         return False
 
     return True
@@ -101,8 +102,8 @@ def apply(squadron_dir, node_name, dry_run=False):
         # depend on the state of the system (like virtualenv)
         statejson = get_service_json(squadron_dir, service, version, 'state', True)
         for library, items in statejson.items():
-            print "{}Installing {} via {}".format(
-                    "DRYRUN: " if dry_run else "", items, library)
+            log.info("{}Installing {} via {}".format(
+                    "DRYRUN: " if dry_run else "", items, library))
             state.apply(library, items, dry_run)
 
         if not dry_run:

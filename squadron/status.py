@@ -3,6 +3,7 @@ import hmac
 import hashlib
 import uuid
 import json
+from log import log
 
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
@@ -47,7 +48,7 @@ def report_status(server, apikey, secret, verify, **kwargs):
 
     hash_result = hmac.new(raw_secret, nonce, hashlib.sha256).hexdigest()
 
-    print "Got body: {}".format(kwargs)
+    log.debug("Got body: {}".format(kwargs))
     resp = s.post('https://{}/update/{}/{}'.format(server, apikey, hash_result),
                 data=json.dumps(kwargs), headers={'Content-Type':'application/json','X-Nonce':nonce}, verify=False)
 

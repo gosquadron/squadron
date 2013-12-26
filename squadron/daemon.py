@@ -3,13 +3,7 @@ import os
 import time
 import main
 from fileio.config import parse_config
-import logging
-
-def _setup_logging(loglevel):
-    level = getattr(logging, loglevel.upper(), None)
-    if not isinstance(level, int):
-        raise ValueError('Invalid log level {}'.format(loglevel))
-    logging.basicConfig(level=level)
+from log import setup_log, log
 
 def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
     """
@@ -23,7 +17,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
         loglevel -- how much to log
     """
 
-    _setup_logging(loglevel)
+    setup_log(loglevel)
 
     parsed_config = parse_config(config_file)
 
@@ -38,10 +32,10 @@ def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
     while(True):
         git = repo.git
 
-        logging.debug('Git checkout: ' + git.checkout('master'))
-        logging.debug('Git pull: ' + git.pull('--rebase'))
+        log.debug('Git checkout: ' + git.checkout('master'))
+        log.debug('Git pull: ' + git.pull('--rebase'))
 
         if not main.go(squadron_dir, config_file=config_file):
-            logging.error('Squadron had an error')
+            log.error('Squadron had an error')
 
         time.sleep(polltime)

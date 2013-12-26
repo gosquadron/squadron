@@ -47,7 +47,7 @@ def test_environment(tmpdir):
     assert 'version' in config
     assert config['version'] == '0.0.1'
     assert config['config'] == {}
-    assert 'basedir' in config
+    assert 'base_dir' in config
 
     # Try copy from
     with open(os.path.join(dev_dir, 'fake.json'), 'w') as fd:
