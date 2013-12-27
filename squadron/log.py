@@ -17,6 +17,8 @@ def setup_log(loglevel, console=False):
     if not isinstance(level, int):
         raise ValueError('Invalid log level {}'.format(loglevel))
 
+    log.setLevel(level)
+
     ch = logging.StreamHandler()
     ch.setLevel(level)
 
