@@ -12,6 +12,7 @@ from collections import defaultdict
 from fileio.dirio import makedirsp
 import errno
 from log import log
+from fileio.symlink import force_create_symlink
 
 # This will be easy to memoize if need be
 def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False):
@@ -159,7 +160,7 @@ def commit(dir_info):
                 shutil.rmtree(destdir, ignore_errors=True)
                 stripped = destdir.rstrip(os.sep)
                 makedirsp(os.path.dirname(stripped))
-                os.symlink(srcdir, stripped)
+                force_create_symlink(srcdir, stripped)
             else:
                 # Copy
                 copy_tree(srcdir, destdir)
