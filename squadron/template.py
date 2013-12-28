@@ -10,6 +10,7 @@ from collections import namedtuple
 from fileio.dirio import mkdirp
 import shutil
 from exthandlers import extension_handles
+from log import log
 
 def get_sq_ext(filename):
     """
@@ -67,7 +68,7 @@ def parse_config(filename):
 
                 if key in require_dir:
                     # if this key requires us to be a directory, check
-                    if not filepath.endswith('/'):
+                    if not filepath.endswith(os.path.sep):
                         raise ValueError('Key {} requires entry {} to end with' +
                                 ' a slash (must be directory) in file {}'.format(key, filepath, filename))
 
@@ -80,14 +81,14 @@ def parse_config(filename):
     return result
 
 def get_config(filename, config):
-    path_items = filename.split('/')
+    path_items = filename.split(os.path.sep)
     accum = ""
     file_setting = FileConfig(filename, False, None, None, None)
     for item in path_items[:-1]:
         # loop over all the directories, but not the filename
         path = os.path.join(accum, item)
-        if path + '/' in config:
-            file_setting = config[path + '/']
+        if path + os.path.sep in config:
+            file_setting = config[path + os.path.sep]
 
     if filename in config:
         file_setting = config[filename]
@@ -150,13 +151,14 @@ class DirectoryRender:
             if os.path.isdir(abs_source):
                 mkdirp(dest)
                 # Needs a slash because this is a directory
-                stripped = dest[len(destdir)+1:] + '/'
+                stripped = dest[len(destdir)+1:] + os.path.sep
+
+                key = relpath + os.path.sep
+                if key in config:
+                    result[key] = config[key].atomic
 
                 apply_config(dest, get_config(stripped, config))
                 result.update(self.render(destdir, inputhash, relpath, config))
-
-                if relpath+'/' in config:
-                    result[relpath+'/'] = config[relpath+'/'].atomic
             else:
                 ext = get_sq_ext(filename)
                 if ext in extension_handles:
@@ -173,6 +175,11 @@ class DirectoryRender:
 
                 finalext = get_file_ext(finalfile)
                 stripped = finalfile[len(destdir)+1:]
+                if os.path.isdir(finalfile):
+                    stripped = stripped + os.path.sep
+                    if stripped in config:
+                        result[stripped] = config[stripped].atomic
+
                 apply_config(finalfile, get_config(stripped, config))
 
                 # if there's an automatic way to test this type of file,

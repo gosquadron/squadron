@@ -1,0 +1,2 @@
+testdir/        atomic:true
+dir1/testdir/   atomic:true

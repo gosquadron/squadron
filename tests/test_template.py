@@ -167,11 +167,20 @@ def test_git_repo(tmpdir):
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path,'test-git-result'))
 
-def test_create_dir(tmpdir):
+def test_ext_created_dir(tmpdir):
     dirname = str(tmpdir)
-    test = template.DirectoryRender(os.path.join(test_path,'test-create-dir'))
-    test.render(dirname, {})
+    test = template.DirectoryRender(os.path.join(test_path,'test-ext-created-dir'))
+    atomic = test.render(dirname, {})
+
+    assert 'testdir/' in atomic
+    assert atomic['testdir/'] == True
+    assert 'dir1/testdir/' in atomic
+    assert atomic['dir1/testdir/'] == True
 
     result = os.path.join(dirname, 'testdir')
+    assert os.path.isdir(result) == True
+    assert len(os.listdir(result)) == 0 # Should be empty
+
+    result = os.path.join(dirname, 'dir1', 'testdir')
     assert os.path.isdir(result) == True
     assert len(os.listdir(result)) == 0 # Should be empty
