@@ -15,7 +15,12 @@ def ext_virtualenv(abs_source, dest, **kwargs):
 
     # Create virtualenv
     virtual_env = get_filename(dest)
-    subprocess.check_call(['virtualenv', virtual_env])
+
+    old_umask = os.umask(0) # Allow virtualenv to do whatever it wants
+    try:
+        subprocess.check_call(['virtualenv', virtual_env])
+    finally:
+        os.umask(old_umask)
 
     if requirements:
         # Write out requirements file
