@@ -2,11 +2,6 @@ import tempfile
 import os
 import subprocess
 from extutils import get_filename
-from stat import *
-
-def _make_exec(path):
-    st = os.stat(path)
-    os.chmod(path, st.st_mode | S_IXUSR | S_IXGRP | S_IXOTH)
 
 def ext_virtualenv(abs_source, dest, **kwargs):
     requirements=[]
@@ -21,12 +16,6 @@ def ext_virtualenv(abs_source, dest, **kwargs):
     # Create virtualenv
     virtual_env = get_filename(dest)
     subprocess.check_call(['virtualenv', virtual_env])
-
-    # Mark everything but activate* in bin/ executable
-    bin_dir = os.path.join(virtual_env, 'bin')
-    for f in os.listdir(bin_dir):
-        if not f.startswith('activate'):
-            _make_exec(os.path.join(bin_dir, f))
 
     if requirements:
         # Write out requirements file
