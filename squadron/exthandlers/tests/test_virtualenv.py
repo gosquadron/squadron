@@ -1,5 +1,6 @@
 import os
 from ..virtualenv import ext_virtualenv
+from stat import *
 
 def test_basic(tmpdir):
     tmpdir = str(tmpdir)
@@ -14,7 +15,15 @@ def test_basic(tmpdir):
 
     assert os.path.exists(finalfile)
     assert os.path.exists(os.path.join(finalfile, 'bin', 'activate'))
-    assert os.path.exists(os.path.join(finalfile, 'bin', 'activate'))
+
+    python = os.path.join(finalfile, 'bin', 'python')
+    assert os.path.exists(python)
+    st = os.stat(python)
+
+    # Make sure Python is executable
+    assert st.st_mode & S_IXUSR > 0
+    assert st.st_mode & S_IXGRP > 0
+    assert st.st_mode & S_IXOTH > 0
 
     lib_dir = os.path.join(finalfile, 'lib', 'python2.7',
                 'site-packages')
