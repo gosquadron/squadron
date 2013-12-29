@@ -157,7 +157,8 @@ def commit(dir_info):
             destdir = os.path.join(base_dir, dirname)
             # Delete existing dir
             if atomic:
-                shutil.rmtree(destdir, ignore_errors=True)
+                if not os.path.islink(destdir):
+                    shutil.rmtree(destdir, ignore_errors=True)
                 stripped = destdir.rstrip(os.sep)
                 makedirsp(os.path.dirname(stripped))
                 force_create_symlink(srcdir, stripped)
@@ -167,16 +168,20 @@ def commit(dir_info):
 
             result[service].extend(walk_file_list(serv_dir, srcdir, dirname))
 
-            done_files.add(dirname)
+            done_files.add(dirname.rstrip(os.sep))
 
         # Do the remaining files
         for name in files.difference(done_files):
             src = os.path.join(serv_dir, name)
             dst = os.path.join(base_dir, name)
             if os.path.isdir(src):
+                # TODO: Look into how this handles file modes, it's not copying
+                # them properly
                 copy_tree(src, dst)
                 result[service].extend(walk_file_list(serv_dir, src, name, done_files))
             else:
+                # TODO: Look into how this handles file modes, it's not copying
+                # them properly
                 shutil.copyfile(src, dst)
                 result[service].append(name)
     return result
