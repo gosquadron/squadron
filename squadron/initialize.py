@@ -74,7 +74,7 @@ def _go_to_root(fn):
 
 def create_json(path, to_write={}):
     with open(path, 'w+') as jsonfile:
-        jsonfile.write(json.dumps(to_write))
+        jsonfile.write(json.dumps(to_write, sort_keys=True, indent=4))
 
 @_go_to_root
 def init_service(squadron_dir, service_name, service_ver):
