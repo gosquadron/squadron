@@ -40,6 +40,8 @@ def init(squadron_dir, gitrepo, force=False, example=False):
     log.info("Squadron has been initialized")
     if example is False:
         log.info("Now, you can initialized your service:")
+        if squadron_dir != os.getcwd():
+            log.info("\tcd %s", squadron_dir)
         log.info("\tsquadron init --service service_name")
     else:
         init_service(squadron_dir, 'example')
