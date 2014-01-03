@@ -9,6 +9,14 @@ import shutil
 from pkg_resources import parse_version
 from log import log
 
+def _test_for_git():
+    try:
+        return Git('.').version()
+    except OSError:
+        return False
+    except:
+        return True
+
 def init(squadron_dir, gitrepo, force=False, example=False):
     if os.path.exists(squadron_dir):
         # Check if it's empty-ish
@@ -25,17 +33,24 @@ def init(squadron_dir, gitrepo, force=False, example=False):
                 log.error("Please provide a new directory or use -f.")
                 return False
 
-    if gitrepo is None:
-        log.info("Creating Squadron config in {}".format(squadron_dir))
-        makedirsp(squadron_dir)
-        makedirsp(os.path.join(squadron_dir, 'libraries'))
-        makedirsp(os.path.join(squadron_dir, 'config'))
-        makedirsp(os.path.join(squadron_dir, 'services'))
-        makedirsp(os.path.join(squadron_dir, 'nodes'))
-        repo = Repo.init(squadron_dir) # initialize repo
-    else:
-        log.info("Cloning Squadron config from {}".format(gitrepo))
-        repo = Repo.clone_from(gitrepo, squadron_dir)
+    try:
+        if gitrepo is None:
+            log.info("Creating Squadron config in {}".format(squadron_dir))
+            makedirsp(squadron_dir)
+            makedirsp(os.path.join(squadron_dir, 'libraries'))
+            makedirsp(os.path.join(squadron_dir, 'config'))
+            makedirsp(os.path.join(squadron_dir, 'services'))
+            makedirsp(os.path.join(squadron_dir, 'nodes'))
+            repo = Repo.init(squadron_dir) # initialize repo
+        else:
+            log.info("Cloning Squadron config from {}".format(gitrepo))
+            repo = Repo.clone_from(gitrepo, squadron_dir)
+    except OSError:
+        if not _test_for_git():
+            log.error("Looks like git isn't installed! Install git to continue")
+            return False
+        else:
+            raise
 
     log.info("Squadron has been initialized")
     if example is False:
