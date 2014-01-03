@@ -58,6 +58,8 @@ def init(args, parent):
 
     output = parser.parse_args(args)
 
+    log.setup_log(output.loglevel, console=True)
+
     if output.service:
         return initialize.init_service(output.directory, output.service, output.version)
     elif output.env:
