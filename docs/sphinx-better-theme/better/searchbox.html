@@ -1,0 +1,11 @@
+{%- if pagename != "search" %}
+<form class="search" action="{{ pathto('search') }}" method="get">
+  <input type="text" name="q"
+   placeholder="{{ _('type to search') }}" />
+  {#- I have not been able to make this look good. #}
+  {#- <input type="submit" value="{{ _('Search') }}" /> #}
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+{%- endif %}

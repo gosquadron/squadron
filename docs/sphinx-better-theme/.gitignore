@@ -1,0 +1,4 @@
+basic/
+*.pyc
+MANIFEST
+dist/
