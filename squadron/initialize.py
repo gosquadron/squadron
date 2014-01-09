@@ -98,6 +98,7 @@ def init_service(squadron_dir, service_name, service_ver):
                     service_ver)
 
     makedirsp(os.path.join(service_dir, 'root'))
+    makedirsp(os.path.join(service_dir, 'tests'))
 
     # Create the base files
     create_json(os.path.join(service_dir, 'actions.json'))

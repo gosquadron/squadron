@@ -8,6 +8,8 @@ import shutil
 import status
 import traceback
 from log import log
+from exceptions import TestException
+import tests
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -108,12 +110,29 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
             reactions = []
             # Get all available actions and reactions
             for service_name in sorted(result):
-                actions.update(service.get_service_actions(
-                    squadron_dir, service_name, result[service_name]['version']))
-                reactions.extend(service.get_reactions(
-                    squadron_dir, service_name, result[service_name]['version']))
+                version = result[service_name]['version']
+                actions.update(service.get_service_actions(squadron_dir,
+                    service_name, version))
+                reactions.extend(service.get_reactions(squadron_dir,
+                    service_name, version))
 
+
+            # Then react to the changes
             service.react(actions, reactions, paths_changed, new_paths, new_dir)
+
+            # Now test
+            for service_name in sorted(result):
+                version = result[service_name]['version']
+                print("Getting tests for {}/{}".format(service_name, version))
+                print "get_tests({}, {}, {})".format(squadron_dir, service_name, version)
+                tests_to_run = tests.get_tests(squadron_dir, service_name, version)
+                failed_tests = tests.run_tests(tests_to_run)
+
+                if failed_tests:
+                    # TODO revert
+                    log.error("Aborting due to %s failed tests (total tests %s)", 
+                            len(failed_tests), len(tests_to_run))
+                    raise TestException()
         else:
             log.info("Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths))
     else:

@@ -23,7 +23,7 @@ def get_tests(squadron_dir, service_name, service_version):
                 result.append(fpath)
         return result
 
-    test_path = os.path.join(squadron_dir, service_name, service_version, 'tests')
+    test_path = os.path.join(squadron_dir, 'services', service_name, service_version, 'tests')
     return [os.path.join(test_path, x) for x in get_all_executable_files(test_path)]
 
 def run_tests(tests):
