@@ -136,15 +136,8 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     this_run_sum = walk_hash(new_dir)
 
     if this_run_sum != last_run_sum:
-        # Yes it is, better find out what changed
-        paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
-
-        # Remove the temp directory from the front
-        paths_changed = strip_prefix(paths_changed, new_dir)
-        new_paths = strip_prefix(new_paths, new_dir)
-
         if not dry_run:
-            _deploy(squadron_dir, new_dir, last_run_dir, result, paths_changed, new_paths,
+            _deploy(squadron_dir, new_dir, last_run_dir, result, 
                     this_run_sum, last_run_sum, last_commit)
             log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
             runinfo.write_run_info(squadron_state_dir,
@@ -154,8 +147,17 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     else:
         log.info("Nothing changed.")
 
-def _deploy(squadron_dir, new_dir, last_dir, commit_info, paths_changed,
-        new_paths, this_run_sum, last_run_sum, last_commit):
+def _get_paths_changed(last_run_sum, this_run_sum, strip_dir):
+    paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
+
+    # Remove the temp directory from the front
+    paths_changed = strip_prefix(paths_changed, strip_dir)
+    new_paths = strip_prefix(new_paths, strip_dir)
+
+    return (paths_changed, new_paths)
+
+def _deploy(squadron_dir, new_dir, last_dir, commit_info,
+        this_run_sum, last_run_sum, last_commit):
     log.info("Applying changes")
     log.debug("Changes: %s", commit_info)
     commit.commit(commit_info)
@@ -175,6 +177,9 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info, paths_changed,
     # Then react to the changes
     log.debug("Reacting to changes: %s actions and %s reactions to run",
             len(actions), len(reactions))
+
+    paths_changed, new_paths = _get_paths_changed(last_run_sum, this_run_sum, new_dir)
+
     service.react(actions, reactions, paths_changed, new_paths, new_dir)
 
     # Now test
@@ -189,9 +194,8 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info, paths_changed,
                 log.error("Rolling back because tests failed")
                 log.debug("Rolling back to: %s", last_commit)
                 # Flip around the paths changed and new_paths
-                paths_changed, new_paths = hash_diff(this_run_sum, last_run_sum)
-                _deploy(squadron_dir, last_dir, None, last_commit,
-                        paths_changed, new_paths, last_run_sum, {}, None)
+                _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
+                        {}, None)
 
             log.error("Aborting due to %s failed tests (total tests %s)",
                     len(failed_tests), len(tests_to_run))
