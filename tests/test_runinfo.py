@@ -3,6 +3,7 @@ from squadron.fileio.lock import FileLockException
 import random
 import os
 import pytest
+from .test_main import create_blank_infojson
 
 def test_basic(tmpdir):
     tmpdir = str(tmpdir)
@@ -11,6 +12,11 @@ def test_basic(tmpdir):
     write_run_info(tmpdir, info)
 
     assert get_last_run_info(tmpdir) == info
+
+def test_blank(tmpdir):
+    tmpdir = str(tmpdir)
+    create_blank_infojson(tmpdir)
+    assert get_last_run_info(tmpdir) == {}
 
 def test_lock_error(tmpdir):
     tmpdir = str(tmpdir)

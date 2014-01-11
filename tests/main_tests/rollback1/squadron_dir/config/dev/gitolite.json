@@ -1,0 +1,7 @@
+{
+    "version" : "0.0.1",
+    "config" : {
+        "test":", it's true."
+    },
+    "base_dir" : "/tmp/main2test"
+}

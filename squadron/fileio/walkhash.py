@@ -33,6 +33,7 @@ def hash_diff(old_hash, new_hash):
     """
     paths_changed = []
     new_paths = []
+
     for key, value in new_hash.items():
         if key in old_hash:
             if value != old_hash[key]:

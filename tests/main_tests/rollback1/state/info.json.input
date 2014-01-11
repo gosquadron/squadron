@@ -1,0 +1,17 @@
+{
+   "commit":{
+      "gitolite":{
+         "version":"0.0.1",
+         "atomic":{
+
+         },
+         "dir":"gitolite",
+         "base_dir":"/tmp/main2test"
+      }
+   },
+   "dir":"",
+   "checksum":{
+      "gitolite/gitolite/install":"0642da7e2d992e87ac0aa5c04189abed4ad9a092de3b7f8c32bf84255a769a15",
+      "gitolite/admin.pub":"29568a3991bd0992753547978901f1059fe7c964c90437f399b77bccb51168b7"
+   }
+}

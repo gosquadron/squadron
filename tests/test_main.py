@@ -4,6 +4,8 @@ import json
 from squadron.fileio.dirio import makedirsp
 from helper import are_dir_trees_equal, get_test_path
 import shutil
+import pytest
+import squadron
 
 def create_blank_infojson(statedir):
     open(os.path.join(statedir,'info.json'),'w+').close()
@@ -89,6 +91,7 @@ def test_main_git(tmpdir):
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
 
+    print "info: {}".format(json.dumps(info))
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
     remove_lock_file(info['dir'])
@@ -103,3 +106,39 @@ def test_dont_current():
             os.path.join(tempdir, 'test1-2'))
     assert main._is_current_last(prefix, tempdir,
             os.path.join(tempdir, 'test1-1'))
+
+def test_rollback(tmpdir):
+    tmpdir = str(tmpdir)
+    rollback_test = os.path.join(test_path, 'rollback1')
+
+    old_dir = os.path.join(rollback_test,'temp','sq-59','old_result')
+    # Make the real info.json
+    with open(os.path.join(rollback_test, 'state', 'info.json.input')) as inputjson:
+        with open(os.path.join(tmpdir, 'info.json'), 'w+') as outputjson:
+            info = json.loads(inputjson.read())
+            info['dir'] = old_dir
+            info['commit']['gitolite']['dir'] = os.path.join(info['dir'], info['commit']['gitolite']['dir'])
+
+            for k,v in info['checksum'].items():
+                del info['checksum'][k]
+                info['checksum'][os.path.join(info['dir'], k)] = v
+
+            outputjson.write(json.dumps(info))
+
+    # Now let's get back to testing
+    squadron_dir = os.path.join(rollback_test, 'squadron_dir')
+
+    with pytest.raises(squadron.exceptions.TestException) as ex:
+        makedirsp('/tmp/main2test/')
+        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, False)
+
+    assert ex is not None
+
+    with open(os.path.join(tmpdir, 'info.json')) as infojson:
+        assert info == json.loads(infojson.read())
+
+    assert 'dir' in info
+    assert os.path.isdir(info['dir']) == True
+    remove_lock_file(info['dir'])
+    assert are_dir_trees_equal(old_dir, info['dir'])
+    shutil.rmtree('/tmp/main2test/')

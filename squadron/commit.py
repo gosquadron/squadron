@@ -112,7 +112,6 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
                                     service, version, 'root')
             render = DirectoryRender(service_dir)
 
-            print "tempdir: {}, service: {}".format(tempdir, service)
             tmp_serv_dir = os.path.join(tempdir, service)
             makedirsp(tmp_serv_dir)
             atomic = render.render(tmp_serv_dir, cfg)
@@ -151,6 +150,7 @@ def commit(dir_info):
         # copy the directory
         serv_dir = dir_info[service]['dir']
         base_dir = dir_info[service]['base_dir']
+
         files = set(os.listdir(serv_dir))
         done_files = set()
         for dirname, atomic in dir_info[service]['atomic'].items():
@@ -178,6 +178,7 @@ def commit(dir_info):
             if os.path.isdir(src):
                 # TODO: Look into how this handles file modes, it's not copying
                 # them properly
+                makedirsp(dst)
                 copy_tree(src, dst)
                 result[service].extend(walk_file_list(serv_dir, src, name, done_files))
             else:

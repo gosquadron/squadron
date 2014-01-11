@@ -17,23 +17,6 @@ import sys
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
-def get_last_run_info(squadron_state_dir):
-    """
-    Gets the information from the last run of Squadron.
-
-    Keyword arguments:
-        squadron_state_dir -- where Squadron should store its state between runs
-    """
-    last_run = runinfo.get_last_run_info(squadron_state_dir)
-
-    if 'dir' in last_run:
-        last_run_dir = last_run['dir']
-        last_run_sum = walk_hash(last_run_dir)
-    else:
-        last_run_dir = None
-        last_run_sum = {}
-    return (last_run_dir, last_run_sum)
-
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
     """
     Gets the config and applies it if it's not a dry run.
@@ -72,8 +55,6 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
         log.exception('Caught exception')
-        import traceback
-        traceback.print_exc()
         raise e
     else:
         if send_status and not dry_run:
@@ -129,7 +110,15 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         node_name -- what this node is called
         dry_run -- whether or not to apply changes
     """
-    (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
+    run_info = runinfo.get_last_run_info(squadron_state_dir)
+    if run_info:
+        last_run_dir = run_info['dir']
+        last_run_sum = run_info['checksum']
+        last_commit = run_info['commit']
+    else:
+        last_run_dir = None
+        last_run_sum = {}
+        last_commit = None
 
     prefix = 'sq-'
     tempdir = os.path.join(squadron_state_dir, 'tmp')
@@ -155,38 +144,55 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         new_paths = strip_prefix(new_paths, new_dir)
 
         if not dry_run:
-            log.info("Applying changes")
-            files_commited = commit.commit(result)
-
-            actions = {}
-            reactions = []
-            # Get all available actions and reactions
-            for service_name in sorted(result):
-                version = result[service_name]['version']
-                actions.update(service.get_service_actions(squadron_dir,
-                    service_name, version))
-                reactions.extend(service.get_reactions(squadron_dir,
-                    service_name, version))
-
-
-            # Then react to the changes
-            service.react(actions, reactions, paths_changed, new_paths, new_dir)
-
-            # Now test
-            for service_name in sorted(result):
-                version = result[service_name]['version']
-                tests_to_run = tests.get_tests(squadron_dir, service_name, version)
-                failed_tests = tests.run_tests(tests_to_run)
-
-                if failed_tests:
-                    # TODO revert
-                    log.error("Aborting due to %s failed tests (total tests %s)", 
-                            len(failed_tests), len(tests_to_run))
-                    raise TestException()
-
+            _deploy(squadron_dir, new_dir, last_run_dir, result, paths_changed, new_paths,
+                    this_run_sum, last_run_sum, last_commit)
             log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
-            runinfo.write_run_info(squadron_state_dir, {'dir': new_dir})
+            runinfo.write_run_info(squadron_state_dir,
+                    {'dir': new_dir, 'commit':result, 'checksum': this_run_sum})
         else:
             log.info("Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths))
     else:
         log.info("Nothing changed.")
+
+def _deploy(squadron_dir, new_dir, last_dir, commit_info, paths_changed,
+        new_paths, this_run_sum, last_run_sum, last_commit):
+    log.info("Applying changes")
+    log.debug("Changes: %s", commit_info)
+    commit.commit(commit_info)
+
+    actions = {}
+    reactions = []
+
+    commit_keys = sorted(commit_info)
+    # Get all available actions and reactions
+    for service_name in commit_keys:
+        version = commit_info[service_name]['version']
+        actions.update(service.get_service_actions(squadron_dir,
+            service_name, version))
+        reactions.extend(service.get_reactions(squadron_dir,
+            service_name, version))
+
+    # Then react to the changes
+    log.debug("Reacting to changes: %s actions and %s reactions to run",
+            len(actions), len(reactions))
+    service.react(actions, reactions, paths_changed, new_paths, new_dir)
+
+    # Now test
+    for service_name in commit_keys:
+        version = commit_info[service_name]['version']
+        tests_to_run = tests.get_tests(squadron_dir, service_name, version)
+        failed_tests = tests.run_tests(tests_to_run)
+
+        if failed_tests:
+            # Roll back
+            if last_commit is not None:
+                log.error("Rolling back because tests failed")
+                log.debug("Rolling back to: %s", last_commit)
+                # Flip around the paths changed and new_paths
+                paths_changed, new_paths = hash_diff(this_run_sum, last_run_sum)
+                _deploy(squadron_dir, last_dir, None, last_commit,
+                        paths_changed, new_paths, last_run_sum, {}, None)
+
+            log.error("Aborting due to %s failed tests (total tests %s)",
+                    len(failed_tests), len(tests_to_run))
+            raise TestException()

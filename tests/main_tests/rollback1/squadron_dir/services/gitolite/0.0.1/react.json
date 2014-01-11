@@ -1,0 +1,14 @@
+[
+    {
+        "execute": ["install"],
+        "when" : {
+            "files_created":["gitolite/install"]
+        }
+    },
+    {
+        "execute": ["upgrade"],
+        "when" : {
+            "files_modified":["gitolite"]
+        }
+    }
+]
