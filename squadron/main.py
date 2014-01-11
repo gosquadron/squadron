@@ -183,14 +183,10 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
                     log.error("Aborting due to %s failed tests (total tests %s)", 
                             len(failed_tests), len(tests_to_run))
                     raise TestException()
+
+            log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
+            runinfo.write_run_info(squadron_state_dir, {'dir': new_dir})
         else:
             log.info("Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths))
     else:
         log.info("Nothing changed.")
-
-    log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
-    runinfo.write_run_info(squadron_state_dir, {'dir': new_dir})
-
-    if last_run_dir is not None:
-        log.debug("Removing last run dir {}".format(last_run_dir))
-        shutil.rmtree(last_run_dir)
