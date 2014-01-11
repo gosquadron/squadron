@@ -4,12 +4,15 @@ import service
 import runinfo
 from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, config_defaults
+from fileio.dirio import makedirsp
 import shutil
 import status
 import traceback
 from log import log
 from exceptions import TestException
 import tests
+import py
+import sys
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -69,10 +72,51 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
         log.exception('Caught exception')
+        import traceback
+        traceback.print_exc()
         raise e
     else:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='OK', hostname=node_name, info={'info':True})
+
+def _is_current_last(prefix, tempdir, last_run_dir):
+    """
+    This method checks if the current directory in use (last_run_dir) is
+    going to be removed (has the lowest number).
+
+    Keyword arguments:
+        prefix -- The prefix of the temp directories
+        tempdir -- the path to the temp directory
+        last_run_dir -- the path to the in use directory
+    """
+
+    def parse_num(path):
+        """
+        parse the number out of a path (if it matches the prefix)
+
+        Borrowed from py.path
+        """
+        if path.startswith(prefix):
+            try:
+                return int(path[len(prefix):])
+            except ValueError:
+                pass
+
+    if not last_run_dir:
+        return False
+
+    bn = os.path.basename(os.path.normpath(last_run_dir))
+    lastmin = None
+    matched = False
+
+    minnum = sys.maxint
+    for path in os.listdir(tempdir):
+        num = parse_num(path)
+        if num is not None:
+            if minnum > num:
+                minnum = num
+                matched = bn == path
+    return matched
 
 def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     """
@@ -87,15 +131,23 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     """
     (last_run_dir, last_run_sum) = get_last_run_info(squadron_state_dir)
 
-    (result, new_dir) = commit.apply(squadron_dir, node_name, dry_run)
+    prefix = 'sq-'
+    tempdir = os.path.join(squadron_state_dir, 'tmp')
+    makedirsp(tempdir)
 
-    if not new_dir:
-        log.error("Error getting changes")
-        return False
+    if _is_current_last(prefix, tempdir, last_run_dir):
+        new_dir = py.path.local.make_numbered_dir(prefix=prefix, keep=0)
+    else:
+        new_dir = py.path.local.make_numbered_dir(prefix=prefix)
+    new_dir = str(new_dir) # we want a str not a LocalPath
 
+    result = commit.apply(squadron_dir, node_name, new_dir, dry_run)
+
+    # Is this different from the last time we ran?
     this_run_sum = walk_hash(new_dir)
 
     if this_run_sum != last_run_sum:
+        # Yes it is, better find out what changed
         paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
 
         # Remove the temp directory from the front
@@ -123,8 +175,6 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
             # Now test
             for service_name in sorted(result):
                 version = result[service_name]['version']
-                print("Getting tests for {}/{}".format(service_name, version))
-                print "get_tests({}, {}, {})".format(squadron_dir, service_name, version)
                 tests_to_run = tests.get_tests(squadron_dir, service_name, version)
                 failed_tests = tests.run_tests(tests_to_run)
 

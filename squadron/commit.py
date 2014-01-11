@@ -57,7 +57,7 @@ def check_node_info(node_info):
 
     return True
 
-def apply(squadron_dir, node_name, dry_run=False):
+def apply(squadron_dir, node_name, tempdir, dry_run=False):
     """
     This method takes input from the given squadron_dir and configures
     a temporary directory according to that information
@@ -65,6 +65,7 @@ def apply(squadron_dir, node_name, dry_run=False):
     Keyword arguments:
         squadron_dir -- configuration directory for input
         node_name -- this node's name
+        tempdir -- the base temporary directory to use
         dry_run -- whether or not to actually create the temp directory
             or change any system-wide configuration via state.json
     """
@@ -76,7 +77,6 @@ def apply(squadron_dir, node_name, dry_run=False):
 
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
-    tmpdir = tempfile.mkdtemp('.sq')
     result = {}
 
     # handle the state of the system via the library
@@ -112,13 +112,14 @@ def apply(squadron_dir, node_name, dry_run=False):
                                     service, version, 'root')
             render = DirectoryRender(service_dir)
 
-            tmp_serv_dir = os.path.join(tmpdir, service)
+            print "tempdir: {}, service: {}".format(tempdir, service)
+            tmp_serv_dir = os.path.join(tempdir, service)
             makedirsp(tmp_serv_dir)
             atomic = render.render(tmp_serv_dir, cfg)
 
             result[service] = {'base_dir': base_dir, 'dir': tmp_serv_dir, 'atomic': atomic, 'version':version}
 
-    return (result, tmpdir)
+    return result
 
 
 

@@ -20,10 +20,14 @@ def are_dir_trees_equal(dir1, dir2):
     dirs_cmp = filecmp.dircmp(dir1, dir2)
     if len(dirs_cmp.left_only)>0 or len(dirs_cmp.right_only)>0 or \
         len(dirs_cmp.funny_files)>0:
+        print "dir1: {} and dir2: {} are unequal".format(dir1, dir2)
+        print "left_only: {}, right_only: {}, funny_files: {}".format(
+                dirs_cmp.left_only, dirs_cmp.right_only, dirs_cmp.funny_files)
         return False
     (_, mismatch, errors) =  filecmp.cmpfiles(
         dir1, dir2, dirs_cmp.common_files, shallow=False)
     if len(mismatch)>0 or len(errors)>0:
+        print "File mismatch: {}, errors: {}".format(mismatch, errors)
         return False
     for common_dir in dirs_cmp.common_dirs:
         new_dir1 = os.path.join(dir1, common_dir)

@@ -8,6 +8,12 @@ import shutil
 def create_blank_infojson(statedir):
     open(os.path.join(statedir,'info.json'),'w+').close()
 
+def remove_lock_file(d, lockfile='.lock'):
+    try:
+        os.remove(os.path.join(d, lockfile))
+    except OSError:
+        pass
+
 test_path = os.path.join(get_test_path(), 'main_tests')
 
 def test_main_basic(tmpdir):
@@ -27,6 +33,8 @@ def test_main_basic(tmpdir):
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
+
+    remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
 
     old_dir = info['dir']
@@ -42,6 +50,7 @@ def test_main_basic(tmpdir):
     new_dir = info['dir']
 
     assert old_dir != new_dir
+    remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
     shutil.rmtree('/tmp/applytest1/')
 
@@ -63,6 +72,7 @@ def test_main_with_config(tmpdir):
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
+    remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path,'main1result'), info['dir']) == True
 
 def test_main_git(tmpdir):
@@ -81,5 +91,15 @@ def test_main_git(tmpdir):
 
     assert 'dir' in info
     assert os.path.isdir(info['dir']) == True
+    remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path,'main2result'), info['dir']) == True
     shutil.rmtree('/tmp/main2test/')
+
+def test_dont_current():
+    prefix = 'test1-'
+    tempdir = os.path.join(test_path, 'current')
+
+    assert not main._is_current_last(prefix, tempdir,
+            os.path.join(tempdir, 'test1-2'))
+    assert main._is_current_last(prefix, tempdir,
+            os.path.join(tempdir, 'test1-1'))

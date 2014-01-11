@@ -15,8 +15,10 @@ def walk_hash(directory):
     for root, dirs, files in os.walk(directory):
         for filename in files:
             path_name = os.path.join(root, filename)
-            with open(path_name) as tohash:
-                ret[path_name] = sha256(tohash.read()).hexdigest()
+            if filename != '.lock':
+                # Skip .lock files, as they're unimportant
+                with open(path_name) as tohash:
+                    ret[path_name] = sha256(tohash.read()).hexdigest()
     return ret
 
 def hash_diff(old_hash, new_hash):

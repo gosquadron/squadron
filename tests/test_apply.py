@@ -12,9 +12,10 @@ def checkfile(filename, compare):
         assert compare == ofile.read()
 
 test_path = os.path.join(get_test_path(), 'applytests')
-def test_apply_only():
-    (results, tmpdir) = commit.apply(
-            os.path.join(test_path,'applytest1'), 'node')
+def test_apply_only(tmpdir):
+    tmpdir = str(tmpdir)
+    results = commit.apply(
+            os.path.join(test_path,'applytest1'), 'node', tmpdir)
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
@@ -24,7 +25,6 @@ def test_apply_only():
     checkfile('/tmp/test2.out', '0')
     os.remove('/tmp/test1.out')
     os.remove('/tmp/test2.out')
-    shutil.rmtree(tmpdir)
     # Don't need to delete base_dir as it hasn't been created yet
 
 def test_apply_commit(tmpdir):
@@ -32,7 +32,8 @@ def test_apply_commit(tmpdir):
     shutil.rmtree('/tmp/applytest2', ignore_errors=True)
 
     tmpdir = str(tmpdir)
-    (results, top_level_tmp) = commit.apply(os.path.join(test_path,'applytest2'), 'node')
+    results = commit.apply(os.path.join(test_path,'applytest2'),
+            'node', tmpdir)
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
@@ -48,12 +49,13 @@ def test_apply_commit(tmpdir):
     checkfile('/tmp/test2.out', '0')
     os.remove('/tmp/test1.out')
     os.remove('/tmp/test2.out')
-    shutil.rmtree(top_level_tmp)
     shutil.rmtree(results['api']['base_dir'])
 
-def test_schema_validation_error():
+def test_schema_validation_error(tmpdir):
+    tmpdir = str(tmpdir)
     with pytest.raises(jsonschema.ValidationError) as ex:
-        commit.apply(os.path.join(test_path, 'applytest1-exception'), 'node')
+        commit.apply(os.path.join(test_path, 'applytest1-exception'),
+                'node', tmpdir)
 
     assert ex.value.cause is None # make sure it was a validation error
     assert ex.value.validator_value == 'integer'
