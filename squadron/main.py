@@ -137,11 +137,14 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
 
     if this_run_sum != last_run_sum:
         if not dry_run:
-            _deploy(squadron_dir, new_dir, last_run_dir, result, 
+            _deploy(squadron_dir, new_dir, last_run_dir, result,
                     this_run_sum, last_run_sum, last_commit)
-            log.debug("Writing run info to {}, dir : {}".format(squadron_state_dir, new_dir))
-            runinfo.write_run_info(squadron_state_dir,
-                    {'dir': new_dir, 'commit':result, 'checksum': this_run_sum})
+            info = {'dir': new_dir, 'commit':result, 'checksum': this_run_sum}
+            log.debug("Writing run info to %s: %s", squadron_state_dir, info)
+
+            runinfo.write_run_info(squadron_state_dir, info)
+
+            log.info("Successfully deployed to %s", new_dir)
         else:
             log.info("Dry run changes:\n\tPaths changed: {}\n\tNew files: {}".format(paths_changed, new_paths))
     else:
