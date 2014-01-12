@@ -116,7 +116,13 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
             makedirsp(tmp_serv_dir)
             atomic = render.render(tmp_serv_dir, cfg)
 
-            result[service] = {'base_dir': base_dir, 'dir': tmp_serv_dir, 'atomic': atomic, 'version':version}
+            result[service] = {
+                    'atomic': atomic,
+                    'base_dir': base_dir,
+                    'config': cfg,
+                    'dir': tmp_serv_dir,
+                    'version':version,
+                }
 
     return result
 

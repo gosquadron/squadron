@@ -189,7 +189,7 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
     for service_name in commit_keys:
         version = commit_info[service_name]['version']
         tests_to_run = tests.get_tests(squadron_dir, service_name, version)
-        failed_tests = tests.run_tests(tests_to_run)
+        failed_tests = tests.run_tests(tests_to_run, commit_info[service_name])
 
         if failed_tests:
             # Roll back
