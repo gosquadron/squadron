@@ -37,55 +37,66 @@ Describe your service
 ---------------------
 
 So, to deploy a service, you need to tell Squadron how to do it. We’re going to
-deploy a service called apache2 as an example.
+deploy a simple website as an example.
 
 To make a service, we need to provide a service version. This isn’t the version
-of apache, but instead the version of this deployment configuration::
+of our website, but instead the version of this deployment configuration::
 
-    $ squadron init-service --service apache2 --version 0.0.1 
-    $ tree -F services/apache2
-    apache2/
+    $ squadron init --service website --version 0.0.1
+    $ tree -F services/website
+    website/
     └── 0.0.1/
         ├── actions.json
         ├── defaults.json
         ├── react.json
         ├── root/
         ├── schema.json
-        └── state.json
+        ├── state.json
+        └── tests/
 
 We won’t need all these files yet, and Squadron gives you sensible defaults if you don’t need the features they provide.
 
-Let’s make a state.json to install apache2 for our Hello Squadron demo::
+Let’s make a state.json to install apache2 for our simple website::
 
     { 
-        “apt”: [“apache2”]
+        "apt": ["apache2"]
     }
 
-That’s it! Now when we deploy we will make sure that these two packages are installed to the latest version.
+Now when we later run squadron, it'll make sure that Apache is installed.
 
 Templating
 ^^^^^^^^^^
-Squadron takes whatever files you have in root/ and deploys them to the correct directory (which in this). Let’s say there’s two files needed to configure metadata-api::
+Squadron takes whatever files you have in root/ and deploys them to the correct directory (which in this)::
 
-    $ cd services/apache2/0.0.1
+    $ cd services/website/0.0.1
     $ tree -F root
     root/
-        ├── index.html~tpl
-        └── mypage.html
+        ├── main~git
+        └── robots.txt~tpl
 
-Squadron configures The extension ~tpl means templating will be applied to that file and it will generate a file called index.html. Since mypage.html doesn’t have any extension supported by Squadron, it will just be put in the directory as-is.
+So we've got two strange looking filenames. The tilde (~) means that Squadron
+will apply that handler to that file. So the file 'main~git' will create a
+directory called 'main' which is created via git.
 
-Squadron uses the Quik templating library, so index.html~tpl will look something like this::
+main~git looks like this::
 
-    <html>
-        <body>
-            <h1>Squadron works!</h1>
-            <p>You’ve deployed the configuration for @company!</p>
-            <p>Here’s a port: @port</p>
-        </body>
-    </html>
+    http://git.example.com/website.git  master
 
-@env_type will be replaced by the value in the configuration for that environment.  @port will be replaced by the default value in our service.
+Squadron will clone this repo when it runs and place it in the 'main'
+directory. Easy enough.
+
+The '~tpl' extension is how you make files via a template.
+
+Squadron uses the Quik templating library, so robots.txt~tpl will look something like this::
+
+    User-agent: *
+    #for @d in @disallow:
+    Disallow: @d
+    #end
+    Allow: /humans.txt
+
+So the variable @disallow, which is an array, is looped over and so there are
+as many Disallow directives as elements in the array.
 
 Configuration
 ^^^^^^^^^^^^^
