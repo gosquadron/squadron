@@ -112,12 +112,14 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         node_name -- what this node is called
         dry_run -- whether or not to apply changes
     """
-    run_info = runinfo.get_last_run_info(squadron_state_dir)
-    if run_info:
+    try:
+        run_info = runinfo.get_last_run_info(squadron_state_dir)
         last_run_dir = run_info['dir']
         last_run_sum = run_info['checksum']
         last_commit = run_info['commit']
-    else:
+    except (KeyError, OSError) as e:
+        if isinstance(e, OSError) and not dry_run:
+            raise e
         last_run_dir = None
         last_run_sum = {}
         last_commit = None
