@@ -127,6 +127,19 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
     return result
 
 
+ignore_copy = shutil.ignore_patterns('.git')
+
+def _smart_copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            _smart_copytree(s, d, symlinks, ignore)
+        else:
+            if not os.path.exists(d) or os.stat(src).st_mtime - os.stat(dst).st_mtime > 1:
+                shutil.copy2(s, d)
 
 def commit(dir_info):
     """
@@ -182,10 +195,14 @@ def commit(dir_info):
             src = os.path.join(serv_dir, name)
             dst = os.path.join(base_dir, name)
             if os.path.isdir(src):
+                print "Copying {} to {} (normbase: {}".format(src, dst,
+                        os.path.basename(os.path.normpath(src)))
+                if os.path.basename(os.path.normpath(src)) == '.git':
+                    continue
+
                 # TODO: Look into how this handles file modes, it's not copying
                 # them properly
-                makedirsp(dst)
-                copy_tree(src, dst)
+                _smart_copytree(src, dst, ignore=ignore_copy)
                 result[service].extend(walk_file_list(serv_dir, src, name, done_files))
             else:
                 # TODO: Look into how this handles file modes, it's not copying

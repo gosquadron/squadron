@@ -19,6 +19,8 @@ def walk_hash(directory):
                 # Skip .lock files, as they're unimportant
                 with open(path_name) as tohash:
                     ret[path_name] = sha256(tohash.read()).hexdigest()
+        if '.git' in dirs:
+            dirs.remove('.git')
     return ret
 
 def hash_diff(old_hash, new_hash):
