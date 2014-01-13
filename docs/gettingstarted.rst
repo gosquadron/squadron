@@ -105,60 +105,54 @@ How do all those values get set? They’re set in two ways.
 
 The first is from the service configuration for each environment. Back in the top level of the Squadron directory, there’s a directory called config/. In it are your environments.
 
-Environments are distinct places you can deploy your code to that don’t interact with each other. This allows you to have multiple testing environments that don’t affect your customers. Let’s make a development environment for our apache2 service::
+Environments are distinct places you can deploy your code to that don’t interact with each other. This allows you to have multiple testing environments that don’t affect your customers. Let’s make a development environment for our website::
 
     $ cd -
     $ ls
     config/ services/ nodes/ libraries/
     $ squadron init --env dev
 
-Alright, now we can configure our apache2 service. Let’s write apache2.json in config/dev/::
+Now there's a file called config/dev/website.json, which is prepopulated with
+the latest version number. Let's add the disallow config so the file looks like
+this::
 
     {
         "version" : "0.0.1",
         "config" : {
-                "company" : "ACME Co."
+            "disallow":["/secret/*","/admin/*"]
         },
         "base_dir" : "/var/www"
     }
 
-Most of that was already filled in by squadron init. The "version" field tells Squadron which service description version to use. Different environments can use different service description versions at the same time.
+The "version" field tells Squadron which service description version to use. Different environments can use different service description versions at the same time.
 
 The “config” field is a JSON object that will be given to your service. These fields can be used in templates. If you have config that is often the same between environments, you can put it in another place.
-
-There is a defaults.json file in each service. Let’s make a JSON file that looks like this::
-
-    $ cd ../..
-    $ cat service/apache2/0.0.1/defaults.json
-    {
-        "port":80
-    }
-
-If you don’t specify “port” in the apache2.json config file, it will be set to 80 by Squadron. Setting port in the apache2.json file will override this one.
 
 The "base_dir" field tells Squadron where the root/ directory should be written to. Since we’re just deploying files to our web root, it’s /var/www.
 
 Schema
 ^^^^^^
-Squadron includes one very useful file with every service description called schema.json. This is a JSON schema describing the configuration that your service accepts. For our service it looks like this::
+Squadron includes one very useful file with every service description called schema.json. This is a `JSON schema`_ describing the configuration that your service accepts. For our service it looks like this::
 
     {
+        "$schema": "http://json-schema.org/draft-04/schema#",
         "type" : "object",
         "properties" : {
-            "port" : {
-                "description" : "a port",
-                "type" : "integer",
-                "minimum" : 0,
-                "maximum" : 65535
+            "disallow" : {
+                "description" : "a list of disallow directives",
+                "type" : "array",
+                "items": {
+                    "type: "string"
+                },
+                "uniqueItems": true
             },
-            "env_type”: {
-                "description" : "what environment type this is",
-                "type" : "string",
         },
-        "required": ["port", "env_type"]
+        "required": ["disallow"]
     }
 
-This allows you to be sure that you passed in the correct types of input in your config files and in your defaults.
+This allows you to be sure that you passed in the correct types of input in your config files and in your defaults. If you don't supply a JSON Schema, everything will still work, but it won't be checked, either.
+
+.. _JSON Schema: http://json-schema.org/
 
 Nodes
 -----
@@ -175,17 +169,19 @@ This directory should have in it exact domain name matches (FQDN, to be precise)
     dev-01.nyc.example.com # Only matches the machine with that name
     dev-#.example.com      # Matches all dev machines
     #-db#.example.com      # Matches all database machines
-    #                  # Matches all machines
+    #                      # Matches all machines
 
 Node files look like this::
 
     $ cat #
     {
         "env":"dev",
-        "services":["apache2"]
+        "services":["website"]
     }
 
-Any node will run apache2 in the dev environment for this example.
+Any node will run website in the dev environment unless overridden by another,
+more specific node file. All node files that match are sorted by length
+ascending, and applied in that order.
 
 Testing your changes locally
 ----------------------------
