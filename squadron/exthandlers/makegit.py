@@ -17,6 +17,6 @@ def ext_git(abs_source, dest, **kwargs):
     repo = git.Repo.clone_from(url, finalfile)
 
     if refspec:
-        repo.checkout(refspec)
+        repo.git.checkout(refspec)
 
     return finalfile
