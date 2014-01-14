@@ -23,5 +23,5 @@ setup(
                 ('/var/squadron',['files/info.json'])],
     tests_require=['pytest'],
     cmdclass = {'test': PyTest},
-    install_requires=['jsonschema','gitpython','quik','requests', 'py']
+    install_requires=['jsonschema','gitpython','quik','requests', 'py', 'urllib3']
 )
