@@ -13,6 +13,7 @@ from exceptions import TestException
 import tests
 import py
 import sys
+import tempfile
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
@@ -123,20 +124,26 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         last_run_sum = {}
         last_commit = None
 
-    prefix = 'sq-'
-    tempdir = os.path.join(squadron_state_dir, 'tmp')
-    makedirsp(tempdir)
-
-    if _is_current_last(prefix, tempdir, last_run_dir):
-        new_dir = py.path.local.make_numbered_dir(prefix=prefix, keep=0)
+    if not dry_run:
+        prefix = 'sq-'
+        tempdir = os.path.join(squadron_state_dir, 'tmp')
+        makedirsp(tempdir)
+        if _is_current_last(prefix, tempdir, last_run_dir):
+            new_dir = py.path.local.make_numbered_dir(prefix=prefix, keep=0)
+        else:
+            new_dir = py.path.local.make_numbered_dir(prefix=prefix)
+        new_dir = str(new_dir) # we want a str not a LocalPath
     else:
-        new_dir = py.path.local.make_numbered_dir(prefix=prefix)
-    new_dir = str(new_dir) # we want a str not a LocalPath
+        new_dir = tempfile.mkdtemp(prefix='squadron-')
 
+    log.info("Staging directory: %s", new_dir)
     result = commit.apply(squadron_dir, node_name, new_dir, dry_run)
 
     # Is this different from the last time we ran?
     this_run_sum = walk_hash(new_dir)
+
+    log.debug("Last run sum: %s", last_run_sum)
+    log.debug("This run sum: %s", this_run_sum)
 
     if this_run_sum != last_run_sum:
         if not dry_run:
