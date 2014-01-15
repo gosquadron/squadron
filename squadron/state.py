@@ -5,10 +5,11 @@ import importlib
 import sys
 from distutils.sysconfig import get_python_lib
 from log import log
+import libraries
 
 class StateHandler:
     def __init__(self, library_dir):
-        self.libraries = [library_dir, os.path.join(get_python_lib(), "squadron", "libraries")]
+        self.libraries = [library_dir, os.path.dirname(libraries.__file__)]
 
     def apply(self, library_name, inputhash, dry_run = False):
         """
