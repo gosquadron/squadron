@@ -80,14 +80,15 @@ directory called 'main' which is created via git.
 
 main~git looks like this::
 
-    http://git.example.com/website.git  master
+    https://github.com/cxxr/example-squadron-repo.git simple
 
-Squadron will clone this repo when it runs and place it in the 'main'
-directory. Easy enough.
+Squadron will clone this repo when it runs, checkout the refspec simple (which
+is a branch, a tag, or a hash) and place it in the 'main' directory. 
 
 The '~tpl' extension is how you make files via a template.
 
-Squadron uses the Quik templating library, so robots.txt~tpl will look something like this::
+Squadron uses the Quik templating library, so robots.txt~tpl will look
+something like this::
 
     User-agent: *
     #for @d in @disallow:
@@ -142,10 +143,10 @@ Squadron includes one very useful file with every service description called sch
                 "description" : "a list of disallow directives",
                 "type" : "array",
                 "items": {
-                    "type: "string"
+                    "type": "string"
                 },
                 "uniqueItems": true
-            },
+            }
         },
         "required": ["disallow"]
     }
