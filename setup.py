@@ -25,7 +25,7 @@ setup(
     cmdclass = {'test': PyTest},
     install_requires=[
         'jsonschema>=2.3.0',
-        'gitpython>=0.3.1',
+        'gitpython>=0.3.2.RC1',
         'quik>=0.2.2',
         'requests>=2.2.0',
         'py>=1.4.19']
