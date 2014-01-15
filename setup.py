@@ -21,7 +21,12 @@ setup(
     scripts=['scripts/squadron'],
     data_files=[('/etc/squadron',['files/config']),
                 ('/var/squadron',['files/info.json'])],
-    tests_require=['pytest'],
+    tests_require=['pytest>=2.5.1'],
     cmdclass = {'test': PyTest},
-    install_requires=['jsonschema','gitpython','quik','requests', 'py', 'urllib3']
+    install_requires=[
+        'jsonschema>=2.3.0',
+        'gitpython>=0.3.1',
+        'quik>=0.2.2',
+        'requests>=2.2.0',
+        'py>=1.4.19']
 )
