@@ -6,7 +6,7 @@ import json
 from log import log
 
 from requests.adapters import HTTPAdapter
-from urllib3.poolmanager import PoolManager
+from requests.packages.urllib3.poolmanager import PoolManager
 import ssl
 
 class SSLAdapter(HTTPAdapter):
