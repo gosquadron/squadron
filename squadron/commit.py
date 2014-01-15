@@ -103,8 +103,10 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
         # depend on the state of the system (like virtualenv)
         statejson = get_service_json(squadron_dir, service, version, 'state', True)
         for library, items in statejson.items():
-            log.info("{}Installing {} via {}".format(
-                    "DRYRUN: " if dry_run else "", items, library))
+            log.info("%s %s via %s",
+                    "Would install" if dry_run else "Installing",
+                    items,
+                    library)
             state.apply(library, items, dry_run)
 
         if not dry_run:
