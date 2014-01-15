@@ -8,8 +8,7 @@ from log import log
 
 class StateHandler:
     def __init__(self, library_dir):
-        self.library_dir = library_dir
-        self.community_dir = os.path.join(get_python_lib(), "squadron", "community", "libraries")
+        self.libraries = [library_dir, os.path.join(get_python_lib(), "squadron", "libraries")]
 
     def apply(self, library_name, inputhash, dry_run = False):
         """
@@ -24,10 +23,10 @@ class StateHandler:
         if library_name not in sys.modules:
             try:
                 imp.acquire_lock()
-                mod = imp.find_module(library_name, [self.library_dir, self.community_dir])
+                mod = imp.find_module(library_name, self.libraries)
                 imp.load_module(library_name, *mod)
             except ImportError:
-                log.exception("Couldn't find module in dir {}".format(self.library_dir))
+                log.exception("Couldn't find module %s in dirs %s", library_name, self.libraries)
                 raise
             finally:
                 if imp.lock_held():
