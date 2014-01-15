@@ -22,9 +22,6 @@ class SSLAdapter(HTTPAdapter):
                                        block=block,
                                        ssl_version=self.ssl_version)
 
-# Requests doesn't handle TLSv1 by default
-s = requests.Session()
-s.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
 
 def report_status(server, apikey, secret, verify, **kwargs):
     """
@@ -49,7 +46,16 @@ def report_status(server, apikey, secret, verify, **kwargs):
     hash_result = hmac.new(raw_secret, nonce, hashlib.sha256).hexdigest()
 
     log.debug("Got body: {}".format(kwargs))
+
+    # Requests doesn't handle TLSv1 by default
+    s = requests.Session()
+    s.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
+
     resp = s.post('https://{}/update/{}/{}'.format(server, apikey, hash_result),
-                data=json.dumps(kwargs), headers={'Content-Type':'application/json','X-Nonce':nonce}, verify=False)
+                data=json.dumps(kwargs),
+                headers={
+                    'Content-Type':'application/json',
+                    'X-Nonce':nonce},
+                verify=False)
 
     resp.raise_for_status()
