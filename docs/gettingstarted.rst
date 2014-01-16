@@ -191,26 +191,38 @@ We want to make sure that our configuration works as expected. Squadron allows y
 
 Here we will pretend that we are the machine mywebserver.com and see the results locally without modifying our system::
 
-    $ squadron check -n mywebserver.com
-    State library actions:
-    apt would apply [apache2, git]
+    $ squadron check
+    Staging directory: /tmp/squadron-s70Rjh
+    Would process apache2 through apt
+    Dry run changes
+    ===============
+    Paths changed:
 
-    Configuration output has been placed below
-    /tmp/squadron/2013-11-14-pfi2/mywebserver/
+    New paths:
+        website/robots.txt
+        website/main/LICENSE
+        website/main/README.md
+        website/main/index.html
 
-    $ tree /tmp/squadron/2013-11-14-pfi2/mywebserver/
-    -- index.html
-    -- mypage.html 
+    $ tree -F /tmp/squadron-s70Rjh
+    /tmp/squadron-s70Rjh
+    `-- website/
+        |-- main/
+        |   |-- index.html
+        |   |-- LICENSE
+        |   `-- README.md
+        `-- robots.txt
 
-We can now go to index.html and see that our template has been applied::
+Our template was applied as well::
 
-    <html>
-        <body>
-            <h1>Squadron works!</h1>
-            <p>You’ve deployed the configuration for ACME Co.!</p>
-            <p>Here’s a port: 80</p>
-        </body>
-    </html>
+    $ cat /tmp/squadron-s70Rjh/website/robots.txt
+    User-agent: *
+
+    Disallow: /secret/*
+
+    Disallow: /admin/*
+    Allow: /humans.txt
+
 
 Deploying your changes remotely
 -------------------------------
