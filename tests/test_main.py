@@ -56,6 +56,20 @@ def test_main_basic(tmpdir):
     assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
     shutil.rmtree('/tmp/applytest1/')
 
+def test_main_dryrun(tmpdir):
+    tmpdir = str(tmpdir)
+
+    squadron_state_dir = os.path.join(tmpdir, 'state')
+    makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
+
+    squadron_dir = os.path.join(test_path, 'main1')
+
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, True)
+
+    with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
+        assert "" == infojson.read()
+
 def test_main_with_config(tmpdir):
     tmpdir = str(tmpdir)
 
