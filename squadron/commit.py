@@ -109,22 +109,21 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
                     library)
             state.apply(library, items, dry_run)
 
-        if not dry_run:
-            service_dir = os.path.join(squadron_dir, 'services',
-                                    service, version, 'root')
-            render = DirectoryRender(service_dir)
+        service_dir = os.path.join(squadron_dir, 'services',
+                                service, version, 'root')
+        render = DirectoryRender(service_dir)
 
-            tmp_serv_dir = os.path.join(tempdir, service)
-            makedirsp(tmp_serv_dir)
-            atomic = render.render(tmp_serv_dir, cfg)
+        tmp_serv_dir = os.path.join(tempdir, service)
+        makedirsp(tmp_serv_dir)
+        atomic = render.render(tmp_serv_dir, cfg)
 
-            result[service] = {
-                    'atomic': atomic,
-                    'base_dir': base_dir,
-                    'config': cfg,
-                    'dir': tmp_serv_dir,
-                    'version':version,
-                }
+        result[service] = {
+                'atomic': atomic,
+                'base_dir': base_dir,
+                'config': cfg,
+                'dir': tmp_serv_dir,
+                'version':version,
+            }
 
     return result
 
