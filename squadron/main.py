@@ -157,9 +157,14 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
             log.info("Successfully deployed to %s", new_dir)
         else:
             paths_changed, new_paths = _get_paths_changed(last_run_sum, this_run_sum, new_dir)
-            log.info("Dry run changes:")
-            log.info("\tPaths changed: %s", paths_changed)
-            log.info("\tNew paths: %s", new_paths)
+            log.info("Dry run changes")
+            log.info("===============")
+            log.info("Paths changed:")
+            for path in paths_changed:
+                log.info("\t%s", path)
+            log.info("\nNew paths:")
+            for path in new_paths:
+                log.info("\t%s", path)
     else:
         log.info("Nothing changed.")
 

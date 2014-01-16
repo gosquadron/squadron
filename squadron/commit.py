@@ -103,9 +103,15 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
         # depend on the state of the system (like virtualenv)
         statejson = get_service_json(squadron_dir, service, version, 'state', True)
         for library, items in statejson.items():
+            # Should print these out nicely if they're just strings
+            if isinstance(items[0], str) or isinstance(items[0], unicode):
+                print_items = ', '.join(items)
+            else:
+                print_items = items
+
             log.info("%s %s through %s",
                     "Would process" if dry_run else "Processing",
-                    ', '.join(items) if isinstance(items[0], str) else items,
+                    print_items,
                     library)
             state.apply(library, items, dry_run)
 
