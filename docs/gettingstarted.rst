@@ -3,6 +3,14 @@ Getting Started
 
 Squadron configures your service. It install packages, writes out templates, and tests them.
 
+If you want to follow along with this guide, we've made a git repo for you so
+you don't have to type out all these commands if you don't feel like it.
+
+Just do this and you'll be at the end of the first part of the getting started
+guide::
+
+    $ git clone -b simple https://github.com/gosquadron/example-squadron-repo.git
+
 Install Squadron
 ----------------
 
@@ -224,8 +232,52 @@ Our template was applied as well::
     Allow: /humans.txt
 
 
-Deploying your changes remotely
--------------------------------
+Deploying your changes (locally)
+--------------------------------
+
+Now, if the machine you're developing on is the machine you'd like to set up
+your website on (which is unlikely), you can just apply your changes::
+
+    $ sudo squadron apply
+    Staging directory: /var/squadron/tmp/sq-0
+    Processing apache2 through apt
+    Applying changes
+    Successfully deployed to /var/squadron/tmp/sq-0
+    ===============
+    Paths changed:
+
+    New paths:
+        website/main/README.md
+        website/robots.txt
+        website/main/index.html
+        website/main/LICENSE
+
+And you can see that this won't work twice in a row, as nothing has changed::
+
+    $ sudo squadron apply
+    Staging directory: /var/squadron/tmp/sq-1
+    Processing apache2 through apt
+    Nothing changed.
+
+Notice how the staging directory was increased by one. This lets you have
+several staged (but not deployed) versions in case of test or deployment 
+failures. This is also how auto-rollback works.
+
+Running squadron check produces similar results::
+
+    $ squadron check
+    Staging directory: /tmp/squadron-H1Vym2
+    Would process apache2 through apt
+    Nothing changed.
+
+Deploying your changes (remotely)
+---------------------------------
+
+Squadron will work regardless of how you get your files to your remote servers.
+If you SCP them over each time and then run squadron apply, it'll work, but
+that's not very convenient. 
+
+The standard way is polling the git repository.
 
 You'll need a git server and then the squadron daemon running on your web server.
 
