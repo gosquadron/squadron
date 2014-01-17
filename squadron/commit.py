@@ -202,8 +202,6 @@ def commit(dir_info):
             src = os.path.join(serv_dir, name)
             dst = os.path.join(base_dir, name)
             if os.path.isdir(src):
-                print "Copying {} to {} (normbase: {}".format(src, dst,
-                        os.path.basename(os.path.normpath(src)))
                 if os.path.basename(os.path.normpath(src)) == '.git':
                     continue
 
