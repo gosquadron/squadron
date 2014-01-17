@@ -48,26 +48,28 @@ def run_tests(tests, test_input, timeout = 10, waittime = 0.1):
         to_send = json.dumps(test_input)
         log.debug("Sending test_input to test: %s", to_send)
 
-        import sys
         # Using write here instead of communicate because communicate
         # blocks on reading output
-        p.stdin.write(to_send + os.linesep)
+        try:
+            p.stdin.write(to_send + os.linesep)
 
-        countdown = int(timeout / waittime)
-        while countdown:
-            sys.stdout.flush()
-            retcode = p.poll()
-            
-            if retcode is not None:
-                break
+            countdown = int(timeout / waittime)
+            while countdown:
+                retcode = p.poll()
+                
+                if retcode is not None:
+                    break
 
-            time.sleep(waittime)
-            countdown = countdown - 1
-        else:
-            p.terminate()
-            log.warn("Test %s timed out", t)
-            p.wait()
-            retcode = 'TIMEOUT'
+                time.sleep(waittime)
+                countdown = countdown - 1
+            else:
+                p.terminate()
+                log.warn("Test %s timed out", t)
+                p.wait()
+                retcode = 'TIMEOUT'
+        except IOError as e:
+            log.warn("Caught IOError from process: %s", e)
+            retcode = e
 
         if retcode:
             failed_tests[t] = retcode

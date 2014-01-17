@@ -7,6 +7,10 @@ import shutil
 import pytest
 import squadron
 
+from squadron import log
+
+log.setup_log('DEBUG', True)
+
 def create_blank_infojson(statedir):
     open(os.path.join(statedir,'info.json'),'w+').close()
 
@@ -51,7 +55,7 @@ def test_main_basic(tmpdir):
 
     new_dir = info['dir']
 
-    assert old_dir != new_dir
+    assert old_dir == new_dir
     remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
     shutil.rmtree('/tmp/applytest1/')

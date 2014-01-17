@@ -1,5 +1,5 @@
-from squadron.fileio.walkhash import walk_hash, hash_diff
-from squadron.fileio.config import parse_config
+from ..walkhash import walk_hash, hash_diff
+from ..config import parse_config
 import os
 
 test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fileio_tests')
@@ -9,9 +9,9 @@ def test_basic_walkhash():
     result = walk_hash(walkhash1)
 
     assert result == {
-            os.path.join(walkhash1, 'file1.txt'):'45e3c8923e46f64b4baf68dd127e1871511d74782b1af4109435ebc9b73ad42c',
-            os.path.join(walkhash1, 'hello.alpha'):'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-            os.path.join(walkhash1, 'dir', 'a.b'):'3028acf5e4c1117ab3d2bfbf5ecffb4d3147c9acb452fb375f27a57acd0bc9b7'
+            os.path.join('file1.txt'):'45e3c8923e46f64b4baf68dd127e1871511d74782b1af4109435ebc9b73ad42c',
+            os.path.join('hello.alpha'):'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+            os.path.join('dir', 'a.b'):'3028acf5e4c1117ab3d2bfbf5ecffb4d3147c9acb452fb375f27a57acd0bc9b7'
         }
 
 def test_basic_hash_diff():

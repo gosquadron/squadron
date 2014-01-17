@@ -18,7 +18,8 @@ def walk_hash(directory):
             if filename != '.lock':
                 # Skip .lock files, as they're unimportant
                 with open(path_name) as tohash:
-                    ret[path_name] = sha256(tohash.read()).hexdigest()
+                    stripped = path_name[len(directory)+1:]
+                    ret[stripped] = sha256(tohash.read()).hexdigest()
         if '.git' in dirs:
             dirs.remove('.git')
     return ret

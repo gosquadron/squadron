@@ -158,7 +158,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
 
             log.info("Successfully deployed to %s", new_dir)
         else:
-            paths_changed, new_paths = _get_paths_changed(last_run_sum, this_run_sum, new_dir)
+            paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
             log.info("Dry run changes")
             log.info("===============")
             log.info("Paths changed:")
@@ -170,14 +170,6 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     else:
         log.info("Nothing changed.")
 
-def _get_paths_changed(last_run_sum, this_run_sum, strip_dir):
-    paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
-
-    # Remove the temp directory from the front
-    paths_changed = strip_prefix(paths_changed, strip_dir)
-    new_paths = strip_prefix(new_paths, strip_dir)
-
-    return (paths_changed, new_paths)
 
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
         this_run_sum, last_run_sum, last_commit):
@@ -201,7 +193,10 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
     log.debug("Reacting to changes: %s actions and %s reactions to run",
             len(actions), len(reactions))
 
-    paths_changed, new_paths = _get_paths_changed(last_run_sum, this_run_sum, new_dir)
+    paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
+
+    log.debug("Paths changed: %s", paths_changed)
+    log.debug("New paths: %s", new_paths)
 
     service.react(actions, reactions, paths_changed, new_paths, new_dir)
 
