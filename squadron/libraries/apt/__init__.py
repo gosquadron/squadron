@@ -33,11 +33,10 @@ def apply(inputhashes, dry_run=True):
     for package in inputhashes:
         out = run_command(['apt-get', 'install', '-y', package])
         if(find(out[1], 'Permission denied') != -1):
-            failed.append(package) #Install failed because we're not root
+            failed.append(package) # Install failed because we're not root
         if(find(out[0], ('Setting up ' + package)) != -1 and find(out[0], (package + ' already the newest version')) != -1):
-            #Something else happened, we weren't installed and we didn't get installed
+            # Something else happened, we weren't installed and we didn't get installed
             failed.append(package)
-        print out
     return failed
 
 
