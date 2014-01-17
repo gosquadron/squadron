@@ -148,6 +148,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     log.debug("This run sum: %s", this_run_sum)
 
     if this_run_sum != last_run_sum:
+        paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
         if not dry_run:
             _deploy(squadron_dir, new_dir, last_run_dir, result,
                     this_run_sum, last_run_sum, last_commit)
@@ -158,15 +159,15 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
 
             log.info("Successfully deployed to %s", new_dir)
         else:
-            paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
             log.info("Dry run changes")
-            log.info("===============")
-            log.info("Paths changed:")
-            for path in paths_changed:
-                log.info("\t%s", path)
-            log.info("\nNew paths:")
-            for path in new_paths:
-                log.info("\t%s", path)
+
+        log.info("===============")
+        log.info("Paths changed:")
+        for path in paths_changed:
+            log.info("\t%s", path)
+        log.info("\nNew paths:")
+        for path in new_paths:
+            log.info("\t%s", path)
     else:
         log.info("Nothing changed.")
 
