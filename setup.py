@@ -19,8 +19,6 @@ setup(
     packages=find_packages(),
     license='Proprietary',
     scripts=['scripts/squadron'],
-    data_files=[('/etc/squadron',['files/config']),
-                ('/var/squadron',['files/info.json'])],
     tests_require=['pytest>=2.5.1'],
     cmdclass = {'test': PyTest},
     install_requires=[

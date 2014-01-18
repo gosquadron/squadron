@@ -56,3 +56,14 @@ def test_environment(tmpdir):
     assert initialize.init_environment(tmpdir, 'staging', 'dev')
 
     assert are_dir_trees_equal(dev_dir, os.path.join(config_dir, 'staging'))
+
+def test_system(tmpdir):
+    tmpdir = str(tmpdir)
+    etcdir = os.path.join(tmpdir, 'etc', 'squadron')
+    vardir = os.path.join(tmpdir, 'var', 'squadron')
+
+    initialize.init_system(etcdir, vardir)
+
+    assert os.path.exists(os.path.join(etcdir, 'config'))
+    assert os.path.exists(os.path.join(vardir, 'info.json'))
+

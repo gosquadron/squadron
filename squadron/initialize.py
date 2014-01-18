@@ -158,3 +158,36 @@ def init_environment(squadron_dir, environment_name, copy_from):
     log.info("Initialized environment {}{}".format(environment_name,
             " copied from " + copy_from if copy_from else ""))
     return True
+
+config = """
+[daemon]
+polltime = 30
+
+[squadron]
+keydir = /etc/squadron/keys
+nodename = override.example.com
+statedir = /var/squadron
+send_status = true
+
+[status]
+status_host = status.gosquadron.com
+status_apikey = ABCDEF12345
+status_secret = 8d4ce3db954ab1bed870ce682e6765ec24a1227352b3d2688170ecaefda1165c 
+
+"""
+
+def init_system(etcdir, vardir):
+    """ Initializes the system with system wide config files """
+
+    if etcdir:
+        log.info("Initializing %s", etcdir)
+        makedirsp(etcdir)
+        with open(os.path.join(etcdir, 'config'), 'w') as cfile:
+            cfile.write(config)
+
+    if vardir:
+        log.info("Initializing %s", vardir)
+        makedirsp(vardir)
+        create_json(os.path.join(vardir, 'info.json'))
+
+    return True

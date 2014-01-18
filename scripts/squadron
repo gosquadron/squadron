@@ -55,6 +55,8 @@ def init(args, parent):
     parser.add_argument('-g', '--gitrepo', help='Git repo to use')
     parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
+    parser.add_argument('--config', help='Initialize config directory')
+    parser.add_argument('--state', help='Initialize state directory')
 
     output = parser.parse_args(args)
 
@@ -64,6 +66,8 @@ def init(args, parent):
         return initialize.init_service(output.directory, output.service, output.version)
     elif output.env:
         return initialize.init_environment(output.directory, output.env, output.copyfrom)
+    elif output.config or output.state:
+        return initialize.init_system(output.config, output.state)
     else:
         return initialize.init(output.directory, output.gitrepo, output.force, output.example)
 
