@@ -88,17 +88,8 @@ Squadron takes whatever files you have in root/ and deploys them to the correct 
         └── robots.txt~tpl
 
 So we've got two strange looking filenames. The tilde (~) means that Squadron
-will apply that handler to that file. So the file 'main~git' will create a
-directory called 'main' which is created via git.
-
-main~git looks like this::
-
-    https://github.com/cxxr/example-squadron-repo.git simple
-
-Squadron will clone this repo when it runs, checkout the refspec simple (which
-is a branch, a tag, or a hash) and place it in the 'main' directory. 
-
-The '~tpl' extension is how you make files via a template.
+will apply that handler to that file. The '~tpl' extension is how you make
+files via a template.
 
 Squadron uses the Quik templating library, so robots.txt~tpl will look
 something like this::
@@ -111,6 +102,14 @@ something like this::
 
 So the variable @disallow, which is an array, is looped over and so there are
 as many Disallow directives as elements in the array.
+
+main~git looks like this::
+
+    https://github.com/cxxr/example-squadron-repo.git @release
+
+Squadron will clone this repo when it runs, checkout the refspec simple (which
+is a branch, a tag, or a hash) and place it in the 'main' directory. The
+variable '@release' will be replaced by whatever we set that to later
 
 Configuration
 ^^^^^^^^^^^^^
@@ -133,7 +132,8 @@ this::
     {
         "version" : "0.0.1",
         "config" : {
-            "disallow":["/secret/*","/admin/*"]
+            "disallow":["/secret/*","/admin/*"],
+            "release":"master"
         },
         "base_dir" : "/var/www"
     }
@@ -143,6 +143,16 @@ The "version" field tells Squadron which service description version to use. Dif
 The “config” field is a JSON object that will be given to your service. These fields can be used in templates. If you have config that is often the same between environments, you can put it in another place.
 
 The "base_dir" field tells Squadron where the root/ directory should be written to. Since we’re just deploying files to our web root, it’s /var/www.
+
+The second way in which these values are set is via defaults.json. This file
+can be used to set default values in case none are set. Keys are the key in
+question, and the values are the values you would set in the config.
+
+An equivalent defaults.json for our website would be::
+    
+    {
+        "disallow":["/secret/*","/admin/*"]
+    }
 
 Schema
 ^^^^^^
@@ -159,12 +169,20 @@ Squadron includes one very useful file with every service description called sch
                     "type": "string"
                 },
                 "uniqueItems": true
+            },
+            "release" : {
+                "description" : "what to checkout from the git repository",
+                "type" : "string"
             }
         },
-        "required": ["disallow"]
+        "required": ["disallow", "release"]
     }
 
 This allows you to be sure that you passed in the correct types of input in your config files and in your defaults. If you don't supply a JSON Schema, everything will still work, but it won't be checked, either.
+
+You can do some fairly advanced things with JSON Schema, such as regular
+expression matching. With this you could ensure that "release" met some tag
+pattern or similar.
 
 .. _JSON Schema: http://json-schema.org/
 
