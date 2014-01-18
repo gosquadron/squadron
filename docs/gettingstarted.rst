@@ -25,6 +25,11 @@ or, if you're on OS X::
 Now let's install squadron::
 
     $ sudo pip install squadron
+    $ sudo squadron init --config /etc/squadron --state /var/squadron
+
+Squadron can also be installed into a virtualenv without root. The default
+configuration lives in /etc/squadron/config, so if you want it somewhere else,
+you'll need to specify that via -c on the command line.
 
 Start a Squadron repository
 ---------------------------
