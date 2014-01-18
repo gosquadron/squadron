@@ -12,6 +12,19 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+#Handle other dirs
+default_conf_dir = '/etc/squadron'
+default_tmp_dir = '/var/squadron'
+
+if '--conf_dir' in sys.argv:
+	sys.argv.remove('--conf_dir')
+
+if '--tmp_dir' in sys.argv:
+	sys.argv.remove('--tmp_dir')
+
+conf_dir = default_conf_dir
+tmp_dir = default_tmp_dir
+
 from setuptools import setup, find_packages
 setup(
     name='squadron',
@@ -19,8 +32,8 @@ setup(
     packages=find_packages(),
     license='Proprietary',
     scripts=['scripts/squadron'],
-    data_files=[('/etc/squadron',['files/config']),
-                ('/var/squadron',['files/info.json'])],
+    data_files=[(conf_dir,['files/config']),
+                (tmp_dir,['files/info.json'])],
     tests_require=['pytest>=2.5.1'],
     cmdclass = {'test': PyTest},
     install_requires=[
