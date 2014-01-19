@@ -20,7 +20,7 @@ First, get the prerequisites::
 
 or, if you're on OS X::
 
-    $ brew install python python-pip git 
+    $ brew install python python-pip git tree (???)
 
 Now let's install squadron::
 
