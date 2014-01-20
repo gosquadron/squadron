@@ -91,7 +91,7 @@ So we've got two strange looking filenames. The tilde (~) means that Squadron
 will apply that handler to that file. The '~tpl' extension is how you make
 files via a template.
 
-Squadron uses the Quik templating library, so robots.txt~tpl will look
+Squadron uses the `Quik <http://quik.readthedocs.org/en/latest/>`_ templating library, so robots.txt~tpl will look
 something like this::
 
     User-agent: *
@@ -130,12 +130,12 @@ the latest version number. Let's add the disallow config so the file looks like
 this::
 
     {
-        "version" : "0.0.1",
-        "config" : {
+        "base_dir": "/var/www",
+        "config": {
             "disallow":["/secret/*","/admin/*"],
             "release":"master"
         },
-        "base_dir" : "/var/www"
+        "version": "0.0.1"
     }
 
 The "version" field tells Squadron which service description version to use. Different environments can use different service description versions at the same time.
@@ -156,7 +156,7 @@ An equivalent defaults.json for our website would be::
 
 Schema
 ^^^^^^
-Squadron includes one very useful file with every service description called schema.json. This is a `JSON schema`_ describing the configuration that your service accepts. For our service it looks like this::
+Squadron includes one very useful file with every service description called services/website/0.0.1/schema.json. This is a `JSON schema`_ describing the configuration that your service accepts. For our service it looks like this::
 
     {
         "$schema": "http://json-schema.org/draft-04/schema#",
