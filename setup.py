@@ -17,7 +17,7 @@ setup(
     name='squadron',
     version='0.0.1',
     packages=find_packages(),
-    license='Proprietary',
+    license='MIT',
     scripts=['scripts/squadron'],
     tests_require=['pytest>=2.5.1'],
     cmdclass = {'test': PyTest},
