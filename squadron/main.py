@@ -7,7 +7,6 @@ from fileio.config import parse_config, config_defaults
 from fileio.dirio import makedirsp
 import shutil
 import status
-import traceback
 from log import log
 from exceptions import TestException
 import tests
@@ -56,8 +55,6 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
         log.exception('Caught exception')
-        import traceback
-        traceback.print_exc()
         raise e
     else:
         if send_status and not dry_run:
