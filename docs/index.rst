@@ -7,13 +7,7 @@ Contents:
    :maxdepth: 2
 
    gettingstarted
+   nextsteps
+   userguide
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
