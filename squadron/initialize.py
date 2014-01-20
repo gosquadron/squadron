@@ -31,7 +31,7 @@ def init(squadron_dir, gitrepo, force=False, example=False):
 
                 squadron_dir = os.path.join(squadron_dir, repo_name)
             else:
-                log.error("Directory already exists and isn't empty.")
+                log.error("Directory [" + squadron_dir + "] already exists and isn't empty.")
                 log.error("Please provide a new directory or use -f.")
                 return False
 
