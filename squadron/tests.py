@@ -52,6 +52,7 @@ def run_tests(tests, test_input, timeout = 10, waittime = 0.1):
         # blocks on reading output
         try:
             p.stdin.write(to_send + os.linesep)
+            p.stdin.close()
 
             countdown = int(timeout / waittime)
             while countdown:
