@@ -9,6 +9,8 @@ import shutil
 from pkg_resources import parse_version
 from log import log
 
+default_schema = { "$schema": "http://json-schema.org/draft-04/schema#", "type": "object", "properties": {}, "required": []}
+
 def _test_for_git():
     try:
         return Git('.').version()
@@ -105,7 +107,7 @@ def init_service(squadron_dir, service_name, service_ver):
     create_json(os.path.join(service_dir, 'defaults.json'))
     # react.json's top level is an array
     create_json(os.path.join(service_dir, 'react.json'), [])
-    create_json(os.path.join(service_dir, 'schema.json'))
+    create_json(os.path.join(service_dir, 'schema.json'), default_schema)
     create_json(os.path.join(service_dir, 'state.json'))
 
     log.info("Initialized service {} version {}".format(service_name,
