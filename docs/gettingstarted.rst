@@ -16,11 +16,11 @@ Install Squadron
 
 First, get the prerequisites::
 
-    $ sudo apt-get install git python python-pip
+    $ sudo apt-get install git python python-pip tree
 
 or, if you're on OS X::
 
-    $ brew install python python-pip git
+    $ brew install python python-pip git 
 
 Now let's install squadron::
 
