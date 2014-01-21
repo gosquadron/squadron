@@ -24,12 +24,22 @@ or, if you're on OS X::
 
 Now let's install squadron::
 
-    $ sudo pip install squadron
-    $ sudo squadron init --config /etc/squadron --state /var/squadron
+    $ pip install squadron
+    $ squadron setup
+    Location for config [/home/user/.squadron]: 
+    Location for state [/home/user/.squadron/state]: 
+    Initializing config dir /home/user/.squadron
+    Initializing state dir /home/user/.squadron/state
 
-Squadron can also be installed into a virtualenv without root. It uses a directory to store global configuration and another one to store the state change of your services. 
+Squadron can be installed into a virtualenv. It uses a directory to store global configuration and another one to store the state change of your services. 
 
-The default configuration lives in /etc/squadron/config, so if you want it somewhere else, you'll need to specify that via -c on the command line.
+Squadron looks for config in the following places:
+
+* /etc/squadron/config
+* /usr/local/etc/squadron/config
+* ~/.squadron/config
+
+From there it reads the location of its state directory.
 
 Start a Squadron repository
 ---------------------------
