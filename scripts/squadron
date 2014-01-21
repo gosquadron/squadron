@@ -94,28 +94,35 @@ if __name__ == "__main__":
             description = parser.description,
             epilog = parser.epilog,
             parents=[parser])
-    command_parser.add_argument('command',
-            choices=['init','check','apply','daemon','help', 'setup'],
-            help='Which action to execute')
+    command_parser.add_argument('init', help='Initialization of repositories')
+    command_parser.add_argument('check', help='Perform a dry run of an apply')
+    command_parser.add_argument('apply', help='Apply this configuration')
+    command_parser.add_argument('daemon', help='Background apply config')
+    command_parser.add_argument('help', help='Print out help')
+    command_parser.add_argument('setup', help='Perform one-time setup')
 
-    output = command_parser.parse_args(sys.argv[1:2])
+    if len(sys.argv[1]) <= 1:
+        command_parser.print_help()
+        exit(1)
+
+    command = sys.argv[1]
 
     other_args = sys.argv[2:]
 
-    if output.command == 'init':
+    if command == "init":
         if not _init(other_args, parser):
             exit(1)
-    elif output.command == 'apply' or output.command =='check':
-        if not _apply(other_args, parser, output.command == 'check'):
+    elif command == "apply" or command == "check":
+        if not _apply(other_args, parser, command == "check"):
             exit(1)
-    elif output.command == 'daemon':
+    elif command == "daemon":
         if not _daemonize(other_args, parser):
             exit(1)
-    elif output.command == 'setup':
+    elif command == "setup":
         if not _setup(other_args, parser):
             exit(1)
-    elif output.command == 'help':
-        parser.print_help()
+    elif command == "help" or command == "-h" or command == "--help":
+        command_parser.print_help()
     else:
         print "Unsupported command {}".format(output.command)
         exit(1)
