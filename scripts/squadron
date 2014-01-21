@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from squadron import main,initialize,daemon,log
+from squadron import main,initialize,daemon,log,setup
 from argparse import ArgumentParser
 import json
 import os
@@ -7,7 +7,7 @@ import socket
 import sys
 import logging
 
-def apply(args, parent, dry_run):
+def _apply(args, parent, dry_run):
     parser = ArgumentParser(prog='{} {}'.format(parent.prog, 'check' if dry_run else 'apply'),
                 description=parent.description,
                 epilog=parent.epilog,
@@ -26,7 +26,7 @@ def apply(args, parent, dry_run):
     return main.go(output.directory, output.sysdir, output.config,
             output.node_name, output.status, dry_run)
 
-def daemonize(args, parent):
+def _daemonize(args, parent):
     parser = ArgumentParser(prog='{} daemon',
                 description=parent.description,
                 epilog=parent.epilog,
@@ -41,7 +41,7 @@ def daemonize(args, parent):
 
     return daemon.daemonize(output.directory, output.config, output.polltime, output.repo, output.loglevel)
 
-def init(args, parent):
+def _init(args, parent):
     parser = ArgumentParser(prog='{} init'.format(parent.prog),
                 description=parent.description,
                 epilog=parent.epilog,
@@ -55,8 +55,6 @@ def init(args, parent):
     parser.add_argument('-g', '--gitrepo', help='Git repo to use')
     parser.add_argument('-x', '--example', help='initialize with an example', action='store_true')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
-    parser.add_argument('--config', help='Initialize config directory')
-    parser.add_argument('--state', help='Initialize state directory')
 
     output = parser.parse_args(args)
 
@@ -66,10 +64,23 @@ def init(args, parent):
         return initialize.init_service(output.directory, output.service, output.version)
     elif output.env:
         return initialize.init_environment(output.directory, output.env, output.copyfrom)
-    elif output.config or output.state:
-        return initialize.init_system(output.config, output.state)
     else:
         return initialize.init(output.directory, output.gitrepo, output.force, output.example)
+
+def _setup(args, parent):
+    parser = ArgumentParser(prog='{} setup'.format(parent.prog),
+                description=parent.description,
+                epilog=parent.epilog,
+                parents=[parent])
+    parser.add_argument('-c', '--config', help='Initialize config directory')
+    parser.add_argument('-s', '--state', help='Initialize state directory')
+    parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
+
+    output = parser.parse_args(args)
+
+    log.setup_log(output.loglevel, console=True)
+
+    return setup.setup(output.config, output.state)
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -83,20 +94,25 @@ if __name__ == "__main__":
             description = parser.description,
             epilog = parser.epilog,
             parents=[parser])
-    command_parser.add_argument('command', choices=['init','check','apply','daemon','help'], help='Which action to execute')
+    command_parser.add_argument('command',
+            choices=['init','check','apply','daemon','help', 'setup'],
+            help='Which action to execute')
 
     output = command_parser.parse_args(sys.argv[1:2])
 
     other_args = sys.argv[2:]
 
     if output.command == 'init':
-        if not init(other_args, parser):
+        if not _init(other_args, parser):
             exit(1)
     elif output.command == 'apply' or output.command =='check':
-        if not apply(other_args, parser, output.command == 'check'):
+        if not _apply(other_args, parser, output.command == 'check'):
             exit(1)
     elif output.command == 'daemon':
-        if not daemonize(other_args, parser):
+        if not _daemonize(other_args, parser):
+            exit(1)
+    elif output.command == 'setup':
+        if not _setup(other_args, parser):
             exit(1)
     elif output.command == 'help':
         parser.print_help()

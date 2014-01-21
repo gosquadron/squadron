@@ -27,7 +27,11 @@ def parse_config(config_file = None, defaults = config_defaults()):
 
     if config_file is None:
         # Try defaults
-        parser.read(['/etc/squadron/config',os.path.expanduser('~/.squadron/config')])
+        parser.read([
+                '/etc/squadron/config',
+                '/usr/local/etc/squadron/config',
+                os.path.expanduser('~/.squadron/config'),
+            ])
     else:
         with open(config_file) as cfile:
             parser.readfp(cfile, config_file)
