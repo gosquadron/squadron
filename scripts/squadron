@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from squadron import main,initialize,daemon,log,setup
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawTextHelpFormatter
 import json
 import os
 import socket
@@ -9,7 +9,7 @@ import logging
 
 def _apply(args, parent, dry_run):
     parser = ArgumentParser(prog='{} {}'.format(parent.prog, 'check' if dry_run else 'apply'),
-                description=parent.description,
+                description='Parses a squadron repo and applies configuration',
                 epilog=parent.epilog,
                 parents=[parent])
     parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
@@ -28,7 +28,7 @@ def _apply(args, parent, dry_run):
 
 def _daemonize(args, parent):
     parser = ArgumentParser(prog='{} daemon',
-                description=parent.description,
+                description='Starts squadron up in daemonized mode',
                 epilog=parent.epilog,
                 parents=[parent])
     parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
@@ -43,7 +43,12 @@ def _daemonize(args, parent):
 
 def _init(args, parent):
     parser = ArgumentParser(prog='{} init'.format(parent.prog),
-                description=parent.description,
+                formatter_class=RawTextHelpFormatter,
+                description='Initializes a squadron repository\n' +
+                            'Typical usage:\n' +
+                            '\tsquadron init -i squadron-repo\n' +
+                            '\tsquadron init -i squadron-repo --service name\n' +
+                            '\tsquadron init -i squadron-repo --env dev',
                 epilog=parent.epilog,
                 parents=[parent])
     parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
@@ -69,7 +74,10 @@ def _init(args, parent):
 
 def _setup(args, parent):
     parser = ArgumentParser(prog='{} setup'.format(parent.prog),
-                description=parent.description,
+                formatter_class=RawTextHelpFormatter,
+                description='Initializes config and state directories.\n' +
+                            'Typical usage:\n' +
+                            '\tsquadron setup',
                 epilog=parent.epilog,
                 parents=[parent])
     parser.add_argument('-c', '--config', help='Initialize config directory')
@@ -93,6 +101,7 @@ if __name__ == "__main__":
     command_parser = ArgumentParser(
             description = parser.description,
             epilog = parser.epilog,
+            usage= parser.usage,
             parents=[parser])
     command_parser.add_argument('init', help='Initialization of repositories')
     command_parser.add_argument('check', help='Perform a dry run of an apply')
