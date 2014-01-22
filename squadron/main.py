@@ -5,6 +5,7 @@ import runinfo
 from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, config_defaults
 from fileio.dirio import makedirsp
+from fileio.gotoroot import *
 import shutil
 import status
 from log import log
@@ -17,6 +18,7 @@ import tempfile
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
+@go_to_root
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
     """
     Gets the config and applies it if it's not a dry run.
@@ -99,6 +101,7 @@ def _is_current_last(prefix, tempdir, last_run_dir):
                 matched = bn == path
     return matched
 
+@go_to_root
 def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
     """
     Runs apply to set up the temp directory, and then runs commit if
@@ -169,6 +172,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         log.info("Nothing changed.")
 
 
+@go_to_root
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
         this_run_sum, last_run_sum, last_commit):
     log.info("Applying changes")
