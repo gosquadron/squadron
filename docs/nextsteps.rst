@@ -72,7 +72,21 @@ Let's make our new root directory::
     $ mv main~git var/www/
     $ mv robots.txt~tpl var/www/
 
-You can see how this reflects our new `base_dir` of root.
+You can see how this reflects our new `base_dir` of root. It would also be nice
+if we released our web root atomically so that if anyone happens to load it
+while we're copying over, they don't get half new and half old assets.
+Fortunately, this is really easy with Squadron::
+
+    $ cat > config.sq
+    var/www/ atomic:true user:nobody group:nobody
+
+The `config.sq` file in the `root` directory of a service is special. It's not
+copied to your `base_dir`, but instead configures some metadata, such as
+setting the user, group, or mode for a file or directory.
+
+What we've done here is to tell Squadron to do an atomic deploy of `var/www/`,
+which means it will use a symbolic link from /var/www/ to Squadron's deployment
+directory.
 
 Apache module
 ^^^^^^^^^^
