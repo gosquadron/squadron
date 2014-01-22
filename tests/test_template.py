@@ -18,6 +18,17 @@ def test_template_basic(tmpdir):
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path, 'test1result'))
 
+def test_template_chown_problem(tmpdir):
+    dirname = str(tmpdir)
+    test = template.DirectoryRender(os.path.join(test_path, 'test1-notpermitted'))
+
+    with pytest.raises(OSError) as ex:
+        test.render(dirname, {'name':'user'}, False)
+
+    test.render(dirname, {'name':'user'}, True)
+
+    assert are_dir_trees_equal(dirname, os.path.join(test_path, 'test1result'))
+
 def test_template_with_config(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path,'test2'))
@@ -156,9 +167,17 @@ def test_apply_config(tmpdir):
     with open(filepath, 'w') as cfile:
         cfile.write('test')
 
-    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'))
+    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'), False)
     st = os.stat(filepath)
     assert stat.S_IMODE(st.st_mode) == 0777
+
+    filepath = os.path.join(tmpdir, 'test2.txt')
+    with open(filepath, 'w') as cfile:
+        cfile.write('test2')
+
+    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'), True)
+    st = os.stat(filepath)
+    assert stat.S_IMODE(st.st_mode) != 0777
 
 def test_git_repo(tmpdir):
     dirname = str(tmpdir)

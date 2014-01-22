@@ -121,7 +121,7 @@ def apply(squadron_dir, node_name, tempdir, dry_run=False):
 
         tmp_serv_dir = os.path.join(tempdir, service)
         makedirsp(tmp_serv_dir)
-        atomic = render.render(tmp_serv_dir, cfg)
+        atomic = render.render(tmp_serv_dir, cfg, dry_run)
 
         result[service] = {
                 'atomic': atomic,

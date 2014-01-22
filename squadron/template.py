@@ -95,7 +95,7 @@ def get_config(filename, config):
 
     return file_setting
 
-def apply_config(filepath, file_config):
+def apply_config(filepath, file_config, dry_run):
     uid = -1
     gid = -1
     if file_config.user is not None:
@@ -103,11 +103,19 @@ def apply_config(filepath, file_config):
     if file_config.group is not None:
         gid = grp.getgrnam(file_config.group).gr_gid
 
-    os.chown(filepath, uid, gid)
+    if not dry_run:
+        log.debug("Changing %s to uid %s gid %s", filepath, uid, gid)
+        os.chown(filepath, uid, gid)
 
-    if file_config.mode is not None:
-        mode = int(file_config.mode, 8)
-        os.chmod(filepath, int(file_config.mode, 8))
+        if file_config.mode is not None:
+            mode = int(file_config.mode, 8)
+            log.debug("Changing mode of %s to %s", filepath, file_config.mode)
+            os.chmod(filepath, mode)
+    else:
+        log.info("Would change %s to uid %s gid %s", filepath, uid, gid)
+
+        if file_config.mode is not None:
+            log.debug("Would change mode of %s to %s", filepath, file_config.mode)
 
 
 class DirectoryRender:
@@ -117,7 +125,8 @@ class DirectoryRender:
         self.loader = FileLoader(basedir)
         self.basedir = basedir
 
-    def render(self, destdir, inputhash, currpath = "", config = {}):
+    def render(self, destdir, inputhash, dry_run = False,
+            currpath = "", config = {}):
         """
         Transforms all templates and downloads all files in the directory
         supplied with the input values supplied. Output goes in destdir.
@@ -157,8 +166,8 @@ class DirectoryRender:
                 if key in config:
                     result[key] = config[key].atomic
 
-                apply_config(dest, get_config(stripped, config))
-                result.update(self.render(destdir, inputhash, relpath, config))
+                apply_config(dest, get_config(stripped, config), dry_run)
+                result.update(self.render(destdir, inputhash, dry_run, relpath, config))
             else:
                 ext = get_sq_ext(filename)
                 if ext in extension_handles:
@@ -180,7 +189,7 @@ class DirectoryRender:
                     if stripped in config:
                         result[stripped] = config[stripped].atomic
 
-                apply_config(finalfile, get_config(stripped, config))
+                apply_config(finalfile, get_config(stripped, config), dry_run)
 
                 # if there's an automatic way to test this type of file,
                 # try it
