@@ -326,3 +326,36 @@ Then set up the daemon::
 TODO
 
 It’s really that easy. Any node running the Squadron daemon will pull down your changes over the next 30 minutes.
+
+More environments
+-----------------
+
+Now that you've tested your website in your development environment, it's time for it to go to production::
+
+    $ squadron init --env prod --copyfrom dev
+    Initialized environment prod copied from dev
+
+This is another way to initialize environments. It copies all the config from the dev environment to the prod environment. Now we have this in `config`::
+
+    $ tree -F config
+    config/
+    |-- dev
+    |   `-- website.json
+    `-- prod
+        `-- website.json
+    $ diff -u config/dev/website.json config/prod/website.json
+    $
+
+No differences because they're the same!
+
+Let's change our nodes so that nodes can choose to be dev or production::
+
+    $ cd nodes
+    $ mv # dev#
+    $ cat > prod#
+    {                     
+        "env":"prod",      
+        "services":["website"]
+    }
+
+Any node whose name begins with dev will get the dev environment, while any node that begins with prod will get the prod environment. This allows you to test your changes before making them live.

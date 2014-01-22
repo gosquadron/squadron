@@ -25,8 +25,8 @@ The 'download' extension downloads a file over HTTP.
 
 **Contents**
 
-A single line of the HTTP endpoint with an optional SHA256 prefix hash of the 
-file. Will have a template applied to it, so variable substitution and logic 
+A single line of the HTTP endpoint with an optional SHA256 prefix hash of the
+file. Will have a template applied to it, so variable substitution and logic
 is possible.
 
 Examples::
@@ -79,7 +79,7 @@ virtualenv
 ^^^^^^^^^^
 
 Creates a Python `virtualenv <http://www.virtualenv.org>`_. The virtualenv and
-`pip <http://www.pip-installer.org>`_ commands must be available and in the 
+`pip <http://www.pip-installer.org>`_ commands must be available and in the
 current user's PATH. Run through a template so variable substitution is
 possible.
 
@@ -173,7 +173,7 @@ Here's what one might look like::
             "commands" : ["/etc/init.d/service restart"],
             "not_after" : ["start"]
         }
-    } 
+    }
 
 So this service has three actions. The `start` command starts up the service.
 The `restart` command restarts it, but only if the `start` command didn't just
@@ -194,7 +194,7 @@ One might look like this::
             "execute": ["start", "apache2.restart"],
             "when" : {
                 "command": "pidof service",
-                "exitcode": 1
+                "exitcode_not": 0
             }
         },
         {
@@ -211,7 +211,7 @@ One might look like this::
         }
     ]
 
-The first reaction starts this service and restarts another service called 
+The first reaction starts this service and restarts another service called
 `apache2` when it's not running.
 
 The second reaction restarts this service if there are any modules created or
@@ -235,13 +235,13 @@ On standard input, a JSON string is provided which describes the various
 configuration options for this service. It looks like this::
 
     {
-        "version": "0.0.1", 
+        "version": "0.0.1",
         "config": {
             "debug": false,
             "workers": 100
         },
-        "atomic": {}, 
-        "dir": "/var/squadrontmp/sq-0/service", 
+        "atomic": {},
+        "dir": "/var/squadrontmp/sq-0/service",
         "base_dir": "/var/service/"
     }
 
