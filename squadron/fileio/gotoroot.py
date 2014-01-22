@@ -1,4 +1,5 @@
 import os
+from git import Git
 
 def go_to_root(fn):
     """
