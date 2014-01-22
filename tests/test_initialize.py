@@ -20,9 +20,8 @@ def test_service(tmpdir):
     items = os.listdir(os.path.join(tmpdir, 'services', 'api'))
 
     assert len(items) > 0
-    schema_path = os.path.join(tmpdir, 'services', 'api', 'schema.json') 
+    schema_path = os.path.join(tmpdir, 'services', 'api', '0.0.1', 'schema.json') 
     schema_handle = open(schema_path, 'r')
-    #schema_str = schema_handle.read()
     json.load(schema_handle)
 
 def test_environment(tmpdir):
