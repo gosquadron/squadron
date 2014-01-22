@@ -10,7 +10,7 @@ import shutil
 from pkg_resources import parse_version
 from log import log
 
-default_schema = { "$schema": "http://json-schema.org/draft-04/schema#", "type": "object", "properties": {}, "required": []}
+default_schema = { "$schema": "http://json-schema.org/draft-04/schema#", "type": "object", "properties": {}}
 
 def _test_for_git():
     try:
