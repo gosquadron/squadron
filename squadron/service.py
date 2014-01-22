@@ -46,11 +46,11 @@ _reaction_schema = {
                 'type':'object',
                 'properties':{
                     'command':{
-                        'description':'command to run, use with exitcode',
+                        'description':'command to run, use with exitcode_not',
                         'type':'string'
                     },
-                    'exitcode':{
-                        'description':'exit code to match',
+                    'exitcode_not':{
+                        'description':'exit code to match against (inverted)',
                         'type':'integer'
                     },
                     'files':{
@@ -77,6 +77,13 @@ _reaction_schema = {
                     'always':{
                         'description':'run always',
                         'type':'boolean'
+                    },
+                    'not_exist':{
+                        'description':'list of absolute paths to files to check for existence',
+                        'type':'array',
+                        'items':{
+                            'type':'string'
+                        }
                     }
                 }
             }
@@ -183,7 +190,13 @@ def _checkfiles(filepatterns, paths_changed):
 
 def _runcommand(command, retcode):
     ret = subprocess.call(command)
-    return ret == retcode
+    return ret != retcode
+
+def _checknotexists(files):
+    for f in files:
+        if not os.path.exists(f):
+            return True
+    return False
 
 def react(actions, reactions, paths_changed, new_files, base_dir):
     """
@@ -204,13 +217,15 @@ def react(actions, reactions, paths_changed, new_files, base_dir):
 
         if 'always' in when and when['always']:
             run_action = True
-        elif 'command' in when and _runcommand(when['command'], when['exitcode']):
+        elif 'command' in when and _runcommand(when['command'], when['exitcode_not']):
             run_action = True
         elif 'files' in when and _checkfiles(when['files'], paths_changed + new_files):
             run_action = True
         elif 'files_modified' in when and _checkfiles(when['files_modified'], paths_changed):
             run_action = True
         elif 'files_created' in when and _checkfiles(when['files_created'], new_files):
+            run_action = True
+        elif 'not_exist' in when and _checknotexists(when['not_exist']):
             run_action = True
 
         if not run_action:

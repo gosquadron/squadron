@@ -37,7 +37,7 @@ def test_get_reactions():
     assert 'service1.start' in start['execute']
     assert 'apache2.restart' in start['execute']
     assert len(start['when']['command']) > 0
-    assert start['when']['exitcode'] == 0
+    assert start['when']['exitcode_not'] == 0
 
     reload = reactions[1]
     assert 'service1.reload' in reload['execute']
@@ -121,3 +121,11 @@ def test_react_precendence():
         assert os.path.exists('/tmp/service1/test.restart') == False
     finally:
         delete_react_tmp()
+
+def test_not_exists():
+    reaction = get_reactions(test_path, 'service1', '3.0')[0]
+
+    assert 'service1.go' == reaction['execute'][0]
+    not_exists = reaction['when']['not_exist']
+    assert len(not_exists) == 1
+    assert not_exists[0] == '/non/existant'

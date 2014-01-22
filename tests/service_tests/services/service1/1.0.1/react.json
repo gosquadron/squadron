@@ -2,8 +2,8 @@
     {
         "execute": ["start", "apache2.restart"],
         "when" : {
-            "command": "true",
-            "exitcode": 0
+            "command": "false",
+            "exitcode_not": 0
         }
     },
     {

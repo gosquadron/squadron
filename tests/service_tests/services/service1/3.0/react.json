@@ -1,0 +1,8 @@
+[   
+    {
+        "execute": ["go"],
+        "when" : {
+            "not_exist": ["/non/existant"]
+        }
+    }
+]
