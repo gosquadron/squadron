@@ -1,7 +1,7 @@
 import os
 from ..virtualenv import ext_virtualenv
 
-def test_basic(tmpdir):
+def integration(tmpdir):
     tmpdir = str(tmpdir)
 
     abs_source = os.path.join(tmpdir, 'requirements.txt')
