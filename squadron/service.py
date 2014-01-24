@@ -15,7 +15,8 @@ _action_schema = {
             'type': 'array',
             'items': {
                 'type':'string'
-            }
+            },
+            'minItems': 1
         },
         'not_after': {
             'description': 'don\'t run this after any of these actions',

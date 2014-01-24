@@ -234,6 +234,16 @@ The `restart` command restarts it, but only if the `start` command didn't just
 succeed. This way you can avoid restarting a service immediately after starting
 it.
 
+Here are the possible fields to put in an action:
+
++-----------+-----------------------------------------+
+| **Field** | **Description**                         |
++-----------+-----------------------------------------+
+| commands  | Required. A list of commands to run     |
++-----------+-----------------------------------------+
+| not_after | A list of actions to not run this after |
++-----------+-----------------------------------------+
+
 Reactions
 ^^^^^^^^^
 
@@ -275,6 +285,37 @@ The third reaction reloads this service when any of the config files change.
 
 The executing actions must be defined in `actions.json` or an error will be
 raised.
+
+Here is a list of fields the top level reaction object can contain:
+
++-----------+-------------------------------------------------+
+| **Field** | **Description**                                 |
++-----------+-------------------------------------------------+
+| execute   | Required. A list of actions to run              |
++-----------+-------------------------------------------------+
+| when      | Required. An object with fields described below |
++-----------+-------------------------------------------------+
+
+Here is a list of fields that a `when` object can contain:
+
++----------------+------------------------------------------------------------------------------------+
+| **Field**      | **Description**                                                                    |
++----------------+------------------------------------------------------------------------------------+
+| command        | Command to run, used with exitcode_not                                             |
++----------------+------------------------------------------------------------------------------------+
+| exitcode_not   | Run action if exit code for command isn't this                                     |
++----------------+------------------------------------------------------------------------------------+
+| files          | List. Run if any of these files were created or modified by Squadron. Can be globs |
++----------------+------------------------------------------------------------------------------------+
+| files_created  | List. Run if any of these files were created by Squadron. Can be globs             |
++----------------+------------------------------------------------------------------------------------+
+| files_modified | List. Run if any of these files were modified by Squadron. Can be globs            |
++----------------+------------------------------------------------------------------------------------+
+| always         | Boolean. Whether or not to always run. Default: false                              |
++----------------+------------------------------------------------------------------------------------+
+| not_exist      | List of globs/absolute paths to run if these files don't exist                     |
++----------------+------------------------------------------------------------------------------------+
+
 
 Tests
 -----
