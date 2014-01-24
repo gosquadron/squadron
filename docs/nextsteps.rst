@@ -147,3 +147,81 @@ The file `react.json` describes how to react to various events. It gives criteri
     ]
 
 
+Let's do it::
+
+    $ sudo squadron apply -n dev
+    Staging directory: /var/squadron/tmp/sq-8
+    Processing apache2, libapache2-mod-php5 through apt
+    Applying changes
+    Running action website.run a2enmod php in reaction {u'execute': [u'website.run a2enmod php'], u'when': {u'not_exist': [u'/etc/apache2/mods-enabled/php5']}}
+    Module php5 already enabled
+    * Restarting web server apache2
+        apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1 for ServerName
+    ... waiting apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1 for ServerName   [ OK ]
+    Apache2 is running (pid 2332).
+    Successfully deployed to /var/squadron/tmp/sq-8
+    ===============
+    Paths changed:
+
+    New paths:
+        website/var/www/main/LICENSE
+        website/var/www/main/index.html
+        website/var/www/main/README.md
+        website/var/www/robots.txt
+    $ ls -l /var/www
+    lrwxrwxrwx 1 root root 39 Jan 01 00:00 /var/www -> /var/squadron/tmp/sq-8/website/var/www/
+
+And navigating to http://localhost works!
+
+Keeping state between runs
+--------------------------
+
+Squadron keeps a file in the state directory (`/var/squadron/info.json` for 
+some nodes) which describes what the last successful run did. Here is the 
+`info.json` file from our last run::
+
+    {
+      "commit":{
+        "website":{
+          "version":"1.0.0",
+          "config":{
+            "release":"master",
+            "disallow":[
+              "/secret/*",
+              "/admin/*"
+            ]
+          },
+          "atomic":{
+            "var/www/":true
+          },
+          "dir":"/var/squadron/tmp/sq-8/website",
+          "base_dir":"/"
+        }
+      },
+      "dir":"/var/squadron/tmp/sq-8",
+      "checksum":{
+        "website/var/www/main/LICENSE":"3d8f45ba8ca6ebf6e9990f580df8387d49f3e72e9119ff19e63393c12d236aff",
+        "website/var/www/main/index.html":"f680e220f5e58408b233b700d0106b70582765937ca983e7969fd9b66dee599e",
+        "website/var/www/main/README.md":"0b3b1635d69e0e501e82d9ec70d15d650f17febc4ea3d4a47adbd07a6025a739",
+        "website/var/www/robots.txt":"1bb88650e0ac17db58a556033c0e9cda3534902f8c9cef87ffa8ac4ca6e0635f"
+      }
+    }
+
+The `commit` block describes what was committed. It is a dictionary of all 
+services, what version was deployed, and what configuration was used. We can 
+see that we deployed version 1.0.0 of our website service description, with 
+the expected configuration. It's also shown that `var/www/` was deployed 
+atomically.
+
+There is also a checksum dictionary which keeps the SHA-256 sum of each file it
+deploys. If Squadron notices that one of the next run's files has a different
+SHA-256 sum, it will replace it.
+
+If we try to rerun Squadron it won't reapply anything because nothing is
+different::
+
+    $ !sudo
+    sudo squadron apply -n dev
+    Staging directory: /var/squadron/tmp/sq-9
+    Processing apache2, libapache2-mod-php5 through apt
+    Nothing changed.
