@@ -146,6 +146,56 @@ apt
 Installs packages via apt. Takes a list of string names, each string is a
 package to be installed via apt.
 
+Example state.json with apt::
+
+    {
+        "apt": ["screen","tmux"]
+    }
+
+user
+""""
+
+Creates users. Takes an object with the following fields.
+
++--------------+--------------------------+
+| **Field**    | **Description**          |
++----------+---+--------------------------+
+| username | Required. Sets the user name |
++----------+------------------------------+
+| shell    | User's command shell         |
++----------+------------------------------+
+| realname | User's real name             |
++----------+------------------------------+
+| homedir  | User's home directory        |
++----------+------------------------------+
+| uid      | Integer. Specific user id    |
++----------+------------------------------+
+| gid      | Integer. Specific group id   |
++----------+------------------------------+
+| system   | Boolean. Is a system user?   |
++----------+------------------------------+
+
+Example state.json with user::
+
+    {
+        "user": [
+            {
+                "username": "newuser"
+            },
+            {
+                "username": "specificuser",
+                "shell":"/bin/bash",
+                "homedir":"/users/specificuser"
+                "realname":"Specific User"
+            },
+            {
+                "username":"windows",
+                "uid":666,
+                "system":true
+            }
+        ]
+    }
+
 Action and reaction
 -------------------
 
