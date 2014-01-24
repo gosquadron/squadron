@@ -5,6 +5,7 @@ import fnmatch
 import os
 from fileio import dirio
 from log import log
+import glob
 
 _action_schema = {
     'type': 'object',
@@ -79,7 +80,7 @@ _reaction_schema = {
                         'type':'boolean'
                     },
                     'not_exist':{
-                        'description':'list of absolute paths to files to check for existence',
+                        'description':'list of absolute paths (can use glob match) to files to check for existence',
                         'type':'array',
                         'items':{
                             'type':'string'
@@ -194,7 +195,7 @@ def _runcommand(command, retcode):
 
 def _checknotexists(files):
     for f in files:
-        if not os.path.exists(f):
+        if not any(glob.iglob(f)):
             return True
     return False
 

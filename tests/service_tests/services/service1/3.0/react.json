@@ -4,5 +4,11 @@
         "when" : {
             "not_exist": ["/non/existant"]
         }
+    },
+    {
+        "execute": ["nogo"],
+        "when" : {
+            "not_exist": ["/*", "/etc*"]
+        }
     }
 ]

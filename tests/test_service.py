@@ -4,6 +4,7 @@ import os
 from squadron.fileio.dirio import makedirsp
 import shutil
 from helper import get_test_path
+import pytest
 
 test_path = os.path.join(get_test_path(), 'service_tests')
 
@@ -123,9 +124,29 @@ def test_react_precendence():
         delete_react_tmp()
 
 def test_not_exists():
-    reaction = get_reactions(test_path, 'service1', '3.0')[0]
+    reactions = get_reactions(test_path, 'service1', '3.0')
+
+    assert len(reactions) == 2
+
+    if reactions[0]['execute'][0] == 'service1.go':
+        reaction = reactions[0]
+        noreaction = reactions[1]
+    else:
+        reaction = reactions[1]
+        noreaction = reactions[0]
 
     assert 'service1.go' == reaction['execute'][0]
     not_exists = reaction['when']['not_exist']
     assert len(not_exists) == 1
     assert not_exists[0] == '/non/existant'
+
+    # Raising a ValueError is a cheap way to find out if it actually
+    # tried to run the reaction. Since the action list is empty, this will
+    # raise
+    with pytest.raises(ValueError) as ex:
+        react([], [reaction], [], [], '/')
+
+    assert ex is not None
+
+    # It won't raise if it's not going to be run
+    react([], [noreaction], [], [], '/')
