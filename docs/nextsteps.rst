@@ -146,6 +146,8 @@ The file `react.json` describes how to react to various events. It gives criteri
         }
     ]
 
+For a complete description of actions and reactions, see :ref:`actionreaction` 
+in the :ref:`userguide`.
 
 Let's do it::
 
@@ -217,11 +219,19 @@ There is also a checksum dictionary which keeps the SHA-256 sum of each file it
 deploys. If Squadron notices that one of the next run's files has a different
 SHA-256 sum, it will replace it.
 
-If we try to rerun Squadron it won't reapply anything because nothing is
-different::
+If we try to rerun Squadron it won't reapply anything because nothing tracked
+by Squadron is different::
 
     $ !sudo
     sudo squadron apply -n dev
     Staging directory: /var/squadron/tmp/sq-9
     Processing apache2, libapache2-mod-php5 through apt
     Nothing changed.
+
+
+Where to go from here
+---------------------
+
+The :ref:`userguide` describes all of the functionality of Squadron. If you're
+looking for more extension handlers or more state libraries, that's the place
+to go. You could even write your own.

@@ -1,3 +1,5 @@
+.. _userguide:
+
 User Guide
 ==========
 
@@ -195,6 +197,8 @@ Example state.json with user::
             }
         ]
     }
+
+.. _actionreaction:
 
 Action and reaction
 -------------------
