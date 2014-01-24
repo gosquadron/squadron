@@ -1,5 +1,7 @@
 # Squadron
 
+![Squadron build status](https://travis-ci.org/gosquadron/squadron.png)
+
 Squadron is an easy-to-use configuration tool designed for programmers. Deploy your website, service or backend to different environments quickly and easily.
 
 ## Features
