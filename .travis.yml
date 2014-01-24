@@ -2,3 +2,11 @@ language: python
 python:
     - "2.7"
 script: python setup.py test
+notifications:
+  email:
+    - sean@gosquadron.com
+    - gus@gosquadron.com
+  irc: 
+    channels: 
+        - "irc.freenode.net#squadron"
+    use_notice: true
