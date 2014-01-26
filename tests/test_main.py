@@ -20,6 +20,12 @@ def remove_lock_file(d, lockfile='.lock'):
     except OSError:
         pass
 
+def teardown_function(function):
+    try:
+        shutil.rmtree('/tmp/main2test/')
+    except:
+        pass
+
 test_path = os.path.join(get_test_path(), 'main_tests')
 
 def test_main_basic(tmpdir):
@@ -32,7 +38,7 @@ def test_main_basic(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main1')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -45,7 +51,7 @@ def test_main_basic(tmpdir):
 
     old_dir = info['dir']
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -58,7 +64,6 @@ def test_main_basic(tmpdir):
     assert old_dir == new_dir
     remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path, 'main1result'), info['dir']) == True
-    shutil.rmtree('/tmp/applytest1/')
 
 def test_main_dryrun(tmpdir):
     tmpdir = str(tmpdir)
@@ -69,7 +74,7 @@ def test_main_dryrun(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main1')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, True)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, True)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         assert "" == infojson.read()
@@ -85,7 +90,7 @@ def test_main_with_config(tmpdir):
     squadron_dir = os.path.join(test_path, 'main1')
 
     # Gets the node name from the config file
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), None, None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), None, None, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -104,7 +109,7 @@ def test_main_git(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main2')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), 'dev', None, False)
+    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), 'dev', None, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -114,7 +119,6 @@ def test_main_git(tmpdir):
     assert os.path.isdir(info['dir']) == True
     remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path,'main2result'), info['dir']) == True
-    shutil.rmtree('/tmp/main2test/')
 
 def test_dont_current():
     prefix = 'test1-'
@@ -126,8 +130,13 @@ def test_dont_current():
             os.path.join(tempdir, 'test1-1'))
 
 
-@pytest.mark.parametrize("dry_run", [(True,), (False,)])
-def test_rollback(tmpdir, dry_run):
+@pytest.mark.parametrize("dry_run,dont_rollback", [
+    (True, False),
+    (True, True),
+    (False, False),
+    (False, True)
+])
+def test_rollback(tmpdir, dry_run, dont_rollback):
     tmpdir = str(tmpdir)
     rollback_test = os.path.join(test_path, 'rollback1')
 
@@ -150,13 +159,13 @@ def test_rollback(tmpdir, dry_run):
 
     if dry_run:
         # Should not raise
-        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dry_run)
+        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dont_rollback, dry_run)
     else:
         # This should raise every time
         for i in range(3):
             with pytest.raises(squadron.exceptions.TestException) as ex:
                 makedirsp('/tmp/main2test/')
-                main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dry_run)
+                main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dont_rollback, dry_run)
 
             assert ex is not None
 
@@ -167,5 +176,5 @@ def test_rollback(tmpdir, dry_run):
             assert os.path.isdir(info['dir']) == True
             remove_lock_file(info['dir'])
             assert are_dir_trees_equal(old_dir, info['dir'])
+            shutil.rmtree('/tmp/main2test/')
 
-        shutil.rmtree('/tmp/main2test/')

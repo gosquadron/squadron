@@ -18,13 +18,14 @@ def _apply(args, parent, dry_run):
     parser.add_argument('-c', '--config', help='Override which configuration file to read')
     parser.add_argument('-d', '--sysdir', help='Directory to store Squadron state in')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
+    parser.add_argument('-x', '--dontrollback', help='Don\'t rollback automatically', action='store_true')
 
     output = parser.parse_args(args)
 
     log.setup_log(output.loglevel, console=True)
 
     return main.go(output.directory, output.sysdir, output.config,
-            output.node_name, output.status, dry_run)
+            output.node_name, output.status, output.dontrollback, dry_run)
 
 def _daemonize(args, parent):
     parser = ArgumentParser(prog='{} daemon',

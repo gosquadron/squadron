@@ -19,7 +19,8 @@ def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
 @go_to_root
-def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None, dry_run = True):
+def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None,
+        dont_rollback = False, dry_run = True):
     """
     Gets the config and applies it if it's not a dry run.
 
@@ -30,6 +31,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         node_name -- what this node is called
         status_server -- the hostname (and optionally port) of the HTTPS server to
             send status to
+        dont_rollback -- if true, doesn't automatically rollback to the previous version
         dry_run -- whether or not to apply changes
     """
     config = parse_config(config_file)
@@ -52,7 +54,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
 
     try:
-        _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run)
+        _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
     except Exception as e:
         if send_status and not dry_run:
             status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
@@ -102,7 +104,7 @@ def _is_current_last(prefix, tempdir, last_run_dir):
     return matched
 
 @go_to_root
-def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
+def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run):
     """
     Runs apply to set up the temp directory, and then runs commit if
     dry_run is false.
@@ -111,6 +113,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         squadron_dir -- where the Squadron description dir is
         squadron_state_dir -- where Squadron should store its state between runs
         node_name -- what this node is called
+        dont_rollback -- if true, doesn't automatically rollback to the previous version
         dry_run -- whether or not to apply changes
     """
     try:
@@ -151,7 +154,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
         if not dry_run:
             _deploy(squadron_dir, new_dir, last_run_dir, result,
-                    this_run_sum, last_run_sum, last_commit)
+                    this_run_sum, last_run_sum, last_commit, dont_rollback)
             info = {'dir': new_dir, 'commit':result, 'checksum': this_run_sum}
             log.debug("Writing run info to %s: %s", squadron_state_dir, info)
 
@@ -176,7 +179,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
 
 @go_to_root
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
-        this_run_sum, last_run_sum, last_commit):
+        this_run_sum, last_run_sum, last_commit, dont_rollback):
     log.info("Applying changes")
     log.debug("Changes: %s", commit_info)
     commit.commit(commit_info)
@@ -208,11 +211,11 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
         _run_tests(squadron_dir, commit_info)
     except TestException:
         # Roll back
-        if last_commit:
+        if last_commit and not dont_rollback:
             log.error("Rolling back to %s because tests failed", last_commit)
             # Flip around the paths changed and new_paths
             _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
-                    {}, None)
+                    {}, None, dont_rollback)
         raise
 
 @go_to_root
