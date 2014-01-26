@@ -316,6 +316,7 @@ Here is a list of fields that a `when` object can contain:
 | not_exist      | List of globs/absolute paths to run if these files don't exist                     |
 +----------------+------------------------------------------------------------------------------------+
 
+.. _tests:
 
 Tests
 -----

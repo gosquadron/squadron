@@ -175,6 +175,60 @@ Let's do it::
 
 And navigating to http://localhost works!
 
+Testing
+^^^^^^^
+
+An important part of deploying software is making sure it's correct. For our
+purposes, we want to check that PHP is working and that Apache was set up
+correctly.
+
+In Squadron, :ref:`tests` are located in the service's `tests` directory. Let's
+make one now::
+
+    $ mkdir -p services/website/1.0.0/tests
+    $ cat > services/website/1.0.0/tests/check_php.sh
+    #!/bin/bash
+                            
+    while read line; do
+        true
+    done
+
+    OUTPUT=`curl http://localhost/main/test.php 2>/dev/null`
+
+    if [ "$?" -eq "0" ]; then  
+        if [[ $OUTPUT == *php* ]]; then
+            echo "PHP not enabled"
+            exit 1
+        fi
+    else
+        echo "Couldn't connect"
+        exit 1
+    fi
+
+Tests must read in the JSON object passed via standard in. For our test, we
+don't care about the configuration, so we just throw it away.
+
+We then test that the connection worked via the exit code flag `$?`. If curl
+was successful, we check to make sure the output didn't have the string "php"
+in it, which would indicate that PHP wasn't configured properly.
+
+Almost done. We just need to make sure this test is executable and that curl is
+installed::
+
+    $ chmod +x services/website/1.0.0/tests/check_php.sh
+    $ cat > services/website/1.0.0/state.json
+    {
+        "apt": ["apache2", "libapache2-mod-php5", "curl"]
+    }
+
+And now we're done. Let's run it::
+
+    $ sudo squadron apply -n dev
+    Staging directory: /var/squadron/tmp/sq-11
+    Processing apache2, libapache2-mod-php5, curl through apt
+    Running 1 tests for website v1.0.0
+    Nothing changed.
+
 Keeping state between runs
 --------------------------
 
@@ -227,6 +281,11 @@ by Squadron is different::
     Staging directory: /var/squadron/tmp/sq-9
     Processing apache2, libapache2-mod-php5 through apt
     Nothing changed.
+
+You can grab the completed example for this section by checking out the
+nextsteps branch from the example repo::
+
+    $ git clone -b nextsteps https://github.com/gosquadron/example-squadron-repo.git
 
 
 Where to go from here
