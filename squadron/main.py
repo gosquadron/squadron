@@ -169,6 +169,8 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dry_run):
         for path in new_paths:
             log.info("\t%s", path)
     else:
+        if not dry_run:
+            _run_tests(squadron_dir, result)
         log.info("Nothing changed.")
 
 
@@ -201,21 +203,33 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
     log.debug("New paths: %s", new_paths)
 
     service.react(actions, reactions, paths_changed, new_paths, new_dir)
-
     # Now test
+    try:
+        _run_tests(squadron_dir, commit_info)
+    except TestException:
+        # Roll back
+        if last_commit:
+            log.error("Rolling back to %s because tests failed", last_commit)
+            # Flip around the paths changed and new_paths
+            _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
+                    {}, None)
+        raise
+
+@go_to_root
+def _run_tests(squadron_dir, commit_info):
+    commit_keys = sorted(commit_info)
     for service_name in commit_keys:
         version = commit_info[service_name]['version']
         tests_to_run = tests.get_tests(squadron_dir, service_name, version)
+
+        log.info("Running %s tests for %s v%s", len(tests_to_run),
+                service_name, version)
         failed_tests = tests.run_tests(tests_to_run, commit_info[service_name])
 
         if failed_tests:
-            # Roll back
-            if last_commit is not None:
-                log.error("Rolling back because tests failed")
-                log.debug("Rolling back to: %s", last_commit)
-                # Flip around the paths changed and new_paths
-                _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
-                        {}, None)
+            log.error("Failed tests for %s v%s: ", service_name, version)
+            for failed_test, exitcode in failed_tests.items():
+                log.error("\t%s failed with exitcode %s", failed_test, exitcode)
 
             log.error("Aborting due to %s failed tests (total tests %s)",
                     len(failed_tests), len(tests_to_run))

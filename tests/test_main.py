@@ -125,7 +125,9 @@ def test_dont_current():
     assert main._is_current_last(prefix, tempdir,
             os.path.join(tempdir, 'test1-1'))
 
-def test_rollback(tmpdir):
+
+@pytest.mark.parametrize("dry_run", [(True,), (False,)])
+def test_rollback(tmpdir, dry_run):
     tmpdir = str(tmpdir)
     rollback_test = os.path.join(test_path, 'rollback1')
 
@@ -146,17 +148,24 @@ def test_rollback(tmpdir):
     # Now let's get back to testing
     squadron_dir = os.path.join(rollback_test, 'squadron_dir')
 
-    with pytest.raises(squadron.exceptions.TestException) as ex:
-        makedirsp('/tmp/main2test/')
-        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, False)
+    if dry_run:
+        # Should not raise
+        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dry_run)
+    else:
+        # This should raise every time
+        for i in range(3):
+            with pytest.raises(squadron.exceptions.TestException) as ex:
+                makedirsp('/tmp/main2test/')
+                main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dry_run)
 
-    assert ex is not None
+            assert ex is not None
 
-    with open(os.path.join(tmpdir, 'info.json')) as infojson:
-        assert info == json.loads(infojson.read())
+            with open(os.path.join(tmpdir, 'info.json')) as infojson:
+                assert info == json.loads(infojson.read())
 
-    assert 'dir' in info
-    assert os.path.isdir(info['dir']) == True
-    remove_lock_file(info['dir'])
-    assert are_dir_trees_equal(old_dir, info['dir'])
-    shutil.rmtree('/tmp/main2test/')
+            assert 'dir' in info
+            assert os.path.isdir(info['dir']) == True
+            remove_lock_file(info['dir'])
+            assert are_dir_trees_equal(old_dir, info['dir'])
+
+        shutil.rmtree('/tmp/main2test/')
