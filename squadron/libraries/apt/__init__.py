@@ -21,10 +21,9 @@ def verify(inputhashes):
     """ 
     failed = []
     for package in inputhashes:
-        out = run_command(['dpkg-query', '-W', package])[0]
-        #We expect the output to contain the version
-        #Any error doesn't get captured, so out will be empty (yes this is weird)
-        if(find(out, package) == -1):
+        out = run_command(['dpkg-query', '-W', package])[0].split()
+
+        if len(out) <= 1:
             failed.append(package)
     return failed
 
