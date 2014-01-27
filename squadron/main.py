@@ -139,7 +139,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
             new_dir = py.path.local.make_numbered_dir(rootdir=local_tempdir, prefix=prefix)
         new_dir = str(new_dir) # we want a str not a LocalPath
     else:
-        new_dir = tempfile.mkdtemp(prefix='squadron-')
+        new_dir = str(py.path.local.make_numbered_dir(prefix='squadron'))
 
     log.info("Staging directory: %s", new_dir)
     result = commit.apply(squadron_dir, node_name, new_dir, dry_run)
