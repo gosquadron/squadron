@@ -17,7 +17,7 @@ def diff_dict(a, b):
         if not item in intersect:
             diff.append(item)
     for item in b.keys():
-        if not item in intersect:
+        if not item in intersect and not item in diff:
             diff.append(item)
     return diff
 
@@ -36,16 +36,12 @@ def create_config(output_file, config_func):
     output_file.close()
 
 def create_fake_config(output_file):
-    #config = SafeConfigParser()
     def anon(config):
         for sec in squadron_config.CONFIG_SECTIONS():
             config.add_section(sec)
             config.set(sec, 'fakesetting', 'dog')
 
     create_config(output_file, anon)
-    #output_file = open(output_file, 'w')
-    #config.write(output_file)
-    #output_file.close()
 
 def test_defaults():
     squadron_config.CONFIG_PATHS = ['/tmp/test_config']
@@ -58,5 +54,16 @@ def test_defaults():
     assert(diff[0] == 'fakesetting')
 
 
-#def test_overrides():
-    
+def test_overrides():
+    def override_func(config):
+        config.add_section('squadron')
+        for item in squadron_config.CONFIG_DEFAULTS():
+            config.set('squadron', item, 'not-default')
+    output_file = '/tmp/test_override_config'
+    squadron_config.CONFIG_PATHS = [output_file]
+    create_config(output_file, override_func)
+    result = squadron_config.parse_config()
+    diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS())
+    assert(len(diff) == len(squadron_config.CONFIG_DEFAULTS()))
+    assert(len(diff) > 0)
+        
