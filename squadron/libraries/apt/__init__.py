@@ -1,6 +1,7 @@
 import os
 import subprocess
 from string import find
+from ..log import log
 
 def run_command(command):
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -36,6 +37,7 @@ def apply(inputhashes, dry_run=True):
         if(find(out[0], ('Setting up ' + package)) != -1 and find(out[0], (package + ' already the newest version')) != -1):
             # Something else happened, we weren't installed and we didn't get installed
             failed.append(package)
+            log.error(out[1])
     return failed
 
 

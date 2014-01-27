@@ -36,6 +36,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
         log.debug('Git pull: ' + git.pull('--rebase'))
 
         if not main.go(squadron_dir, config_file=config_file):
+            #TODO: Squadron sends bug to status API or some other remote server?
             log.error('Squadron had an error')
 
         time.sleep(polltime)
