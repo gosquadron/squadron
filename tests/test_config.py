@@ -33,7 +33,6 @@ def create_config(output_file, config_func):
     config_func(config_parser)
     output_file = open(output_file, 'w')
     config_parser.write(output_file)
-    print result
     output_file.close()
 
 def create_fake_config(output_file):
