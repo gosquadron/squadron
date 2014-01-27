@@ -28,14 +28,25 @@ def intersect_dict(initial, diff):
             intersect.append(item)
     return intersect
 
-def create_fake_config(output_file):
-    config = SafeConfigParser()
-    for sec in squadron_config.CONFIG_SECTIONS():
-        config.add_section(sec)
-        config.set(sec, 'fakesetting', 'dog')
+def create_config(output_file, config_func):
+    config_parser = SafeConfigParser()
+    config_func(config_parser)
     output_file = open(output_file, 'w')
-    config.write(output_file)
+    config_parser.write(output_file)
+    print result
     output_file.close()
+
+def create_fake_config(output_file):
+    #config = SafeConfigParser()
+    def anon(config):
+        for sec in squadron_config.CONFIG_SECTIONS():
+            config.add_section(sec)
+            config.set(sec, 'fakesetting', 'dog')
+
+    create_config(output_file, anon)
+    #output_file = open(output_file, 'w')
+    #config.write(output_file)
+    #output_file.close()
 
 def test_defaults():
     squadron_config.CONFIG_PATHS = ['/tmp/test_config']
@@ -46,3 +57,7 @@ def test_defaults():
     #There should only be one difference, the fakesetting
     assert(len(diff) == 1)
     assert(diff[0] == 'fakesetting')
+
+
+#def test_overrides():
+    
