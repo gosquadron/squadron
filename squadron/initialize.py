@@ -79,8 +79,21 @@ def init_service(squadron_dir, service_name, service_ver):
     service_dir = os.path.join(squadron_dir, 'services', service_name,
                     service_ver)
 
-    makedirsp(os.path.join(service_dir, 'root'))
-    makedirsp(os.path.join(service_dir, 'tests'))
+    rootdir = os.path.join(service_dir, 'root')
+    makedirsp(rootdir)
+    # rootdir shouldn't be empty
+    with open(os.path.join(rootdir, 'config.sq'), 'w') as rfile:
+        pass
+
+    testdir = os.path.join(service_dir, 'tests')
+    makedirsp(testdir)
+    # testdir shouldn't be empty
+    with open(os.path.join(testdir, 'example.sh'), 'w') as tfile:
+        tfile.write("""#!/bin/bash
+while read line; do
+    echo $line
+done
+""")
 
     # Create the base files
     create_json(os.path.join(service_dir, 'actions.json'))

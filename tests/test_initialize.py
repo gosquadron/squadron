@@ -17,12 +17,20 @@ def test_service(tmpdir):
     assert initialize.init(tmpdir, None, force=True)
     assert initialize.init_service(tmpdir, 'api', '0.0.1')
 
-    items = os.listdir(os.path.join(tmpdir, 'services', 'api'))
+    service_dir = os.path.join(tmpdir, 'services', 'api')
+    version_dir = os.path.join(service_dir, '0.0.1')
+    root_dir = os.path.join(version_dir, 'root')
+    test_dir = os.path.join(version_dir, 'tests')
+
+    items = os.listdir(service_dir)
 
     assert len(items) > 0
-    schema_path = os.path.join(tmpdir, 'services', 'api', '0.0.1', 'schema.json') 
+    schema_path = os.path.join(version_dir, 'schema.json')
     schema_handle = open(schema_path, 'r')
     json.load(schema_handle)
+
+    assert os.path.exists(os.path.join(root_dir, 'config.sq'))
+    assert os.path.exists(os.path.join(test_dir, 'example.sh'))
 
 def test_environment(tmpdir):
     tmpdir = str(tmpdir)
