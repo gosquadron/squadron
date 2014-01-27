@@ -15,7 +15,7 @@ def CONFIG_DEFAULTS():
 #This is not a func so that we can change it in a test
 CONFIG_PATHS = ['/etc/squadron.config',
         '/usr/local/etc/squadron/config',
-        os.path.expanduser('~/.squadron.config'),
+        os.path.expanduser('~/.squadron/config'),
         ]
 
 def CONFIG_SECTIONS():
