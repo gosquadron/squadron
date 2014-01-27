@@ -1,8 +1,9 @@
 from ConfigParser import SafeConfigParser, NoSectionError
 import socket
 import os
+from ..log import log
 
-def config_defaults():
+def CONFIG_DEFAULTS():
     return {
         'polltime':'30',
         'keydir':'/etc/squadron/keydir',
@@ -11,7 +12,16 @@ def config_defaults():
         'send_status': 'false'
     }
 
-def parse_config(config_file = None, defaults = config_defaults()):
+#This is not a func so that we can change it in a test
+CONFIG_PATHS = ['/etc/squadron.config',
+        '/usr/local/etc/squadron/config',
+        os.path.expanduser('~/.squadron.config'),
+        ]
+
+def CONFIG_SECTIONS():
+    return ['squadron', 'status', 'daemon']
+
+def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
     """
     Parses a given config file using SafeConfigParser. If the specified
     config_file is None, it searches in the usual places. Returns a
@@ -23,27 +33,24 @@ def parse_config(config_file = None, defaults = config_defaults()):
             None, searches for system-wide configuration and from
             the local user's configuration.
     """
-    parser = SafeConfigParser(defaults)
-
+    parser = SafeConfigParser()
+    
     if config_file is None:
         # Try defaults
-        parser.read([
-                '/etc/squadron/config',
-                '/usr/local/etc/squadron/config',
-                os.path.expanduser('~/.squadron/config'),
-            ])
+        parsed_files = parser.read(CONFIG_PATHS)
+        log.debug("Using log files: " + str(parsed_files))
     else:
         with open(config_file) as cfile:
             parser.readfp(cfile, config_file)
 
     if parser.sections():
-        result = dict()
-        for section in ['squadron', 'status', 'daemon']:
+        log.debug("Original section squadron: " + str(parser.items('squadron')))
+        result = defaults.copy()
+        for section in CONFIG_SECTIONS():
             try:
                 result.update(parser.items(section))
             except NoSectionError:
                 pass
-
         return result
     else:
-        return {}
+        raise Exception('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))

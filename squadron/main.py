@@ -3,7 +3,7 @@ import commit
 import service
 import runinfo
 from fileio.walkhash import walk_hash, hash_diff
-from fileio.config import parse_config, config_defaults
+from fileio.config import parse_config, CONFIG_DEFAULTS
 from fileio.dirio import makedirsp
 from fileio.gotoroot import *
 import shutil
