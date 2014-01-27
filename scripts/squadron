@@ -111,7 +111,7 @@ if __name__ == "__main__":
     command_parser.add_argument('help', help='Print out help')
     command_parser.add_argument('setup', help='Perform one-time setup')
 
-    if len(sys.argv[1]) <= 1:
+    if len(sys.argv) <= 1:
         command_parser.print_help()
         exit(1)
 
