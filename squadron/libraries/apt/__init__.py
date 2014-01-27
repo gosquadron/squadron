@@ -1,7 +1,7 @@
 import os
 import subprocess
 from string import find
-from ..log import log
+from log import log
 
 def run_command(command):
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
