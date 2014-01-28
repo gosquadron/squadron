@@ -4,7 +4,7 @@ python:
 install:
     - pip install coveralls
 script:
-    coveralls run --source=squadron setup.py test
+    coverage run --source=squadron setup.py test
 after_success:
     coveralls
 notifications:
