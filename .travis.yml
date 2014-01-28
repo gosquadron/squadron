@@ -1,7 +1,12 @@
 language: python
 python:
     - "2.7"
-script: python setup.py test
+install:
+    - pip install coveralls
+script:
+    coveralls run --source=squadron setup.py test
+after_success:
+    coveralls
 notifications:
   email:
     - sean@gosquadron.com
