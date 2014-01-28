@@ -1,6 +1,6 @@
 # Squadron
 
-![Squadron build status](https://travis-ci.org/gosquadron/squadron.png) &nbsp; [![PyPI version](https://badge.fury.io/py/squadron.png)](http://badge.fury.io/py/squadron)
+![Squadron build status](https://travis-ci.org/gosquadron/squadron.png) &nbsp; [![Coverage Status](https://coveralls.io/repos/gosquadron/squadron/badge.png)](https://coveralls.io/r/gosquadron/squadron) &nbsp; [![PyPI version](https://badge.fury.io/py/squadron.png)](http://badge.fury.io/py/squadron)
 
 Squadron is an easy-to-use configuration tool designed for programmers. Deploy your website, service or backend to different environments quickly and easily.
 
