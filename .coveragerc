@@ -1,0 +1,6 @@
+[run]
+source = squadron
+
+[report]
+omit = */libraries/*
+
