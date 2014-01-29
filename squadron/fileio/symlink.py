@@ -13,8 +13,8 @@ def force_create_symlink(src, dst):
             try:
                 os.symlink(src, tmpfile)
                 os.rename(tmpfile, dst)
-            except:
+            except: # pragma: no cover
                 os.remove(tmpfile)
                 raise
-        else:
+        else: # pragma: no cover
             raise e
