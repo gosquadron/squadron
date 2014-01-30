@@ -19,7 +19,10 @@ setup(
     packages=find_packages(),
     license='MIT',
     scripts=['scripts/squadron'],
-    tests_require=['pytest>=2.5.1'],
+    tests_require=[
+        'pytest>=2.5.1',
+        'mock>=1.0.1'
+        ],
     cmdclass = {'test': PyTest},
     install_requires=[
         'jsonschema>=2.3.0',

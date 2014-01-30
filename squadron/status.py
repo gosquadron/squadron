@@ -23,7 +23,7 @@ class SSLAdapter(HTTPAdapter):
                                        ssl_version=self.ssl_version)
 
 
-def report_status(server, apikey, secret, verify, **kwargs):
+def report_status(session, server, apikey, secret, nonce, verify, **kwargs):
     """
     Reports status via the HTTPS API. Given the server, API key and
     secret, this method generates the hash_result of a nonce.
@@ -32,30 +32,30 @@ def report_status(server, apikey, secret, verify, **kwargs):
     when a non-200 result code is returned.
 
     Keyword arguments:
+        session -- a requests session object
         server -- The server to report status to. Can be host:port
         apikey -- The API key to use
         secret -- The API secret associated with this API key
+        nonce -- a random string only to be used once
         verify -- Whether or not to verify the SSL connection
         hostname -- The hostname to identify this server by
         status -- OK or ERROR
         info -- Dictionary of more information
     """
     raw_secret = secret.decode('hex')
-    nonce = str(uuid.uuid4())
 
     hash_result = hmac.new(raw_secret, nonce, hashlib.sha256).hexdigest()
 
     log.debug("Got body: {}".format(kwargs))
 
     # Requests doesn't handle TLSv1 by default
-    s = requests.Session()
-    s.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
+    session.mount('https://', SSLAdapter(ssl.PROTOCOL_TLSv1))
 
-    resp = s.post('https://{}/update/{}/{}'.format(server, apikey, hash_result),
+    resp = session.post('https://{}/update/{}/{}'.format(server, apikey, hash_result),
                 data=json.dumps(kwargs),
                 headers={
                     'Content-Type':'application/json',
                     'X-Nonce':nonce},
-                verify=False)
+                verify=verify)
 
     resp.raise_for_status()

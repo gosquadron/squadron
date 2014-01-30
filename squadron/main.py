@@ -54,15 +54,17 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
 
     try:
-        _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
+        info = _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
     except Exception as e:
         if send_status and not dry_run:
-            status.report_status(status_server, status_apikey, status_secret, True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
+            status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),
+                    True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
         log.exception('Caught exception')
         raise e
     else:
-        if send_status and not dry_run:
-            status.report_status(status_server, status_apikey, status_secret, True, status='OK', hostname=node_name, info={'info':True})
+        if send_status and not dry_run and info:
+            status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),
+                    True, status='OK', hostname=node_name, info=info)
 
 def _is_current_last(prefix, tempdir, last_run_dir):
     """
@@ -161,6 +163,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
             runinfo.write_run_info(squadron_state_dir, info)
 
             log.info("Successfully deployed to %s", new_dir)
+            return info
         else:
             log.info("Dry run changes")
 
@@ -175,7 +178,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
         if not dry_run:
             _run_tests(squadron_dir, result)
         log.info("Nothing changed.")
-
+    return None
 
 @go_to_root
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
