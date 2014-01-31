@@ -29,8 +29,8 @@ with::
     |       `-- website.json
     |-- libraries/
     |-- nodes/
-    |   |-- dev#
-    |   `-- prod#
+    |   |-- dev%
+    |   `-- prod%
     `-- services/
         `-- website/
             `-- 0.0.1/

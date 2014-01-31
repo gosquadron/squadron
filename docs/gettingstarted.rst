@@ -205,17 +205,17 @@ Now, how can you make sure that each node which runs Squadron runs the correct s
     config/ services/ nodes/ libraries/
     $ cd nodes
 
-This directory should have in it exact domain name matches (FQDN, to be precise) of the machine, or you can use glob style matching with pound (#) being the glob marker, instead of the usual asterisk (*). Files would look like these::
+This directory should have in it exact domain name matches (FQDN, to be precise) of the machine, or you can use glob style matching with percent (%) being the glob marker, instead of the usual asterisk (*). Files would look like these::
 
     $ ls
     dev-01.nyc.example.com # Only matches the machine with that name
-    dev-#.example.com      # Matches all dev machines
-    #-db#.example.com      # Matches all database machines
-    #                      # Matches all machines
+    dev-%.example.com      # Matches all dev machines
+    %-db%.example.com      # Matches all database machines
+    %                      # Matches all machines
 
 Node files look like this::
 
-    $ cat #
+    $ cat %
     {
         "env":"dev",
         "services":["website"]
@@ -351,8 +351,8 @@ No differences because they're the same!
 Let's change our nodes so that nodes can choose to be dev or production::
 
     $ cd nodes
-    $ mv # dev#
-    $ cat > prod#
+    $ mv % dev%
+    $ cat > prod%
     {                     
         "env":"prod",      
         "services":["website"]

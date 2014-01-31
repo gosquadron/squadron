@@ -15,8 +15,8 @@ def get_node_info(node_dir, node_name):
         node_name = 'dev-sea1.api.example.com'
 
         files = os.listdir(node_dir)
-        # Returns ['dev#','dev#.api.example.com', 'staging#']
-        get_node_info(node_dir, node_name) = json of 'dev#.api.example.com'
+        # Returns ['dev%','dev%.api.example.com', 'staging%']
+        get_node_info(node_dir, node_name) = json of 'dev%.api.example.com'
 
     Keyword arguments:
         node_dir -- the directory to start
@@ -26,8 +26,8 @@ def get_node_info(node_dir, node_name):
 
     # sort by length with only the basename and with all hashes removed
     result.sort(lambda x,y: cmp(
-        len(os.path.basename(x).translate(None, '#*')), # remove all hashes
-        len(os.path.basename(y).translate(None, '#*'))))# and asterisks
+        len(os.path.basename(x).translate(None, '%*')), # remove all percents
+        len(os.path.basename(y).translate(None, '%*'))))# and asterisks
 
 
     ret = {}
@@ -53,7 +53,7 @@ def _descend(base_dir, node_name):
         if os.path.isdir(srcfile):
             result.extend(_descend(srcfile, node_name))
         else:
-            if fnmatch.filter([node_name], f.replace('#','*')):
+            if fnmatch.filter([node_name], f.replace('%','*')):
                 result.append(srcfile)
     return result
 

@@ -8,10 +8,10 @@ def test_descend():
     results = _descend(test_path, 'dev-a1.api.example.com')
 
     assert len(results) == 4
-    assert os.path.join(test_path, '#') in results
-    assert os.path.join(test_path, 'dev#') in results
-    assert os.path.join(test_path, 'base', '#.example.com') in results
-    assert os.path.join(test_path, 'dev#.api.example.com') in results
+    assert os.path.join(test_path, '%') in results
+    assert os.path.join(test_path, 'dev%') in results
+    assert os.path.join(test_path, 'base', '%.example.com') in results
+    assert os.path.join(test_path, 'dev%.api.example.com') in results
 
 def test_get_node_info():
     result = get_node_info(test_path, 'dev-a1.api.example.com')
