@@ -78,7 +78,7 @@ def verify(inputhashes):
 
     return failed
 
-def apply(inputhashes, dry_run=True):
+def apply(inputhashes, log):
     failed = []
     for user in inputhashes:
         username = user['username']

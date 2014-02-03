@@ -27,7 +27,15 @@ def verify(inputhashes):
             failed.append(package)
     return failed
 
-def apply(inputhashes, dry_run=True, log=None):
+#def apply(inputhashes, log):
+def apply(**kwargs):
+    if not 'inputhashes' in dict.keys():
+        raise NameError('Apply did not pass inputhashes')
+    if not 'log' in dict.keys():
+        raise NameError('Apply did not pass a logger')
+    inputhashes = kwargs['inputhashes']
+    log = kwargs['log']
+
     failed = []
     for package in inputhashes:
         out = run_command(['apt-get', 'install', '-y', package])
@@ -36,8 +44,7 @@ def apply(inputhashes, dry_run=True, log=None):
         if(find(out[0], ('Setting up ' + package)) != -1 and find(out[0], (package + ' already the newest version')) != -1):
             # Something else happened, we weren't installed and we didn't get installed
             failed.append(package)
-            if(log is not None):
-                log.error(out[1])
+            #log.error(out[1])
     return failed
 
 

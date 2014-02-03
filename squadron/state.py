@@ -40,9 +40,9 @@ class StateHandler:
             jsonschema.validate(item, schema)
 
         failed = library.verify(inputhash)
-
+        
         if not dry_run:
-            library.apply(failed)
+            library.apply(input_hashes=failed, logger="")
             failed = library.verify(inputhash)
             if len(failed) > 0:
                 log.error("Failed for good on {}".format(failed))

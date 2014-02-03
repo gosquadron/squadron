@@ -9,5 +9,5 @@ def schema():
 def verify(inputhashes):
     return []
 
-def apply(inputhashes):
+def apply(**kwargs):
     return []
