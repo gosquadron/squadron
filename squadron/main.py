@@ -9,7 +9,7 @@ from fileio.gotoroot import *
 import shutil
 import status
 from log import log
-from exceptions import TestException
+from exceptions import TestException, UserException
 import tests
 import py
 import sys
@@ -55,6 +55,9 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
 
     try:
         info = _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
+    except UserException as e:
+        # This is a user error, don't print a stack trace
+        log.error(e.message)
     except Exception as e:
         if send_status and not dry_run:
             status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),

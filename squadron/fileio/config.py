@@ -2,6 +2,7 @@ from ConfigParser import SafeConfigParser, NoSectionError
 import socket
 import os
 from ..log import log
+from ..exceptions import UserException
 
 def CONFIG_DEFAULTS():
     return {
@@ -53,4 +54,4 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                 pass
         return result
     else:
-        raise Exception('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))
+        raise UserException('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))
