@@ -29,9 +29,9 @@ def verify(inputhashes):
 
 #def apply(inputhashes, log):
 def apply(**kwargs):
-    if not 'inputhashes' in dict.keys():
+    if not 'inputhashes' in kwargs.keys():
         raise NameError('Apply did not pass inputhashes')
-    if not 'log' in dict.keys():
+    if not 'log' in kwargs.keys():
         raise NameError('Apply did not pass a logger')
     inputhashes = kwargs['inputhashes']
     log = kwargs['log']
