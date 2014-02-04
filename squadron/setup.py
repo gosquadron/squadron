@@ -12,7 +12,7 @@ polltime = 30
 keydir = {}
 nodename = override.example.com
 statedir = {}
-send_status = true
+send_status = false
 
 [status]
 status_host = status.gosquadron.com
