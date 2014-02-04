@@ -1,13 +1,14 @@
 import shutil
 import pytest
 from squadron.fileio import config as squadron_config
+from squadron.exceptions import UserException
 from ConfigParser import SafeConfigParser
 
 
 def test_no_config():
     squadron_config.CONFIG_PATHS = []
-    with pytest.raises(Exception) as ex:
-        config.parse_config()
+    with pytest.raises(UserException) as ex:
+        squadron_config.parse_config()
     assert ex is not None
 
 def diff_dict(a, b):
