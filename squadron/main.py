@@ -34,26 +34,26 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         dont_rollback -- if true, doesn't automatically rollback to the previous version
         dry_run -- whether or not to apply changes
     """
-    config = parse_config(config_file)
-    log.debug("Got config {}".format(config))
-
-    if squadron_state_dir is None:
-        squadron_state_dir = config['statedir']
-    if node_name is None:
-        node_name = config['nodename']
-
-    send_status = False
-    if config['send_status'].lower() == 'true':
-        send_status = True
-
-        if status_server is None:
-            status_server = config['status_host']
-
-        status_apikey = config['status_apikey']
-        status_secret = config['status_secret']
-        log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
-
     try:
+        config = parse_config(config_file)
+        log.debug("Got config {}".format(config))
+
+        if squadron_state_dir is None:
+            squadron_state_dir = config['statedir']
+        if node_name is None:
+            node_name = config['nodename']
+
+        send_status = False
+        if config['send_status'].lower() == 'true':
+            send_status = True
+
+            if status_server is None:
+                status_server = config['status_host']
+
+            status_apikey = config['status_apikey']
+            status_secret = config['status_secret']
+            log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
+
         info = _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
     except UserException as e:
         # This is a user error, don't print a stack trace
