@@ -25,8 +25,7 @@ def verify(inputhashes):
             failed.append(ih)
     return failed
 
-def apply(**kwargs):
-    inputhashes = kwargs['input_hashes']
+def apply(inputhashes, **kwargs):
     for ih in inputhashes:
         with open(ih['tmpfile'], 'w') as tmpfile:
             tmpfile.write(str(ih['num']))

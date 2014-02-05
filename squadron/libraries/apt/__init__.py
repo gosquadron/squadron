@@ -27,15 +27,7 @@ def verify(inputhashes):
             failed.append(package)
     return failed
 
-#def apply(inputhashes, log):
-def apply(**kwargs):
-    if not 'inputhashes' in kwargs.keys():
-        raise NameError('Apply did not pass inputhashes')
-    if not 'log' in kwargs.keys():
-        raise NameError('Apply did not pass a logger')
-    inputhashes = kwargs['inputhashes']
-    log = kwargs['log']
-
+def apply(inputhashes, log, **kwargs):
     failed = []
     for package in inputhashes:
         out = run_command(['apt-get', 'install', '-y', package])
