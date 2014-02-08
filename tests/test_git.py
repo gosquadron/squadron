@@ -47,11 +47,12 @@ def test_sshkey(tmpdir):
     tmpdir = str(tmpdir)
 
     # we need to do this to avoid ssh-agent problems
-    ssh = _get_ssh_wrapper().format('{} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null','{}')
+    test_path = os.path.dirname(os.path.realpath(__file__))
+    known_hosts = os.path.join(test_path, 'known_hosts')
+    ssh = _get_ssh_wrapper().format('{} -o StrictHostKeyChecking=no -o UserKnownHostsFile=' + known_hosts + ' -o IdentitiesOnly=yes ','{}')
     _set_ssh_wrapper(ssh)
     assert _get_ssh_wrapper() == ssh
 
-    test_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(test_path, 'private_key')) as k:
         private_key = k.read()
 

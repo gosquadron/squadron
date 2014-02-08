@@ -60,8 +60,8 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
             repo = git.Repo.clone_from(url, finalfile)
         finally:
             os.environ = old_environ
-            #os.remove(keyfile)
-            #os.remove(wrapper)
+            os.remove(keyfile)
+            os.remove(wrapper)
     else:
         repo = git.Repo.clone_from(url, finalfile)
 
