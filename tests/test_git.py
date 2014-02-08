@@ -47,7 +47,7 @@ def test_sshkey(tmpdir):
     tmpdir = str(tmpdir)
 
     # we need to do this to avoid ssh-agent problems
-    ssh = _get_ssh_wrapper().format('{} -o IdentitiesOnly=yes','{}')
+    ssh = _get_ssh_wrapper().format('{} -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null','{}')
     _set_ssh_wrapper(ssh)
     assert _get_ssh_wrapper() == ssh
 
