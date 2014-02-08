@@ -15,7 +15,7 @@ test_path = os.path.join(get_test_path(), 'applytests')
 def test_apply_only(tmpdir):
     tmpdir = str(tmpdir)
     results = commit.apply(
-            os.path.join(test_path,'applytest1'), 'node', tmpdir)
+            os.path.join(test_path,'applytest1'), 'node', tmpdir, {})
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
@@ -33,7 +33,7 @@ def test_apply_commit(tmpdir):
 
     tmpdir = str(tmpdir)
     results = commit.apply(os.path.join(test_path,'applytest2'),
-            'node', tmpdir)
+            'node', tmpdir, {})
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
@@ -55,7 +55,7 @@ def test_schema_validation_error(tmpdir):
     tmpdir = str(tmpdir)
     with pytest.raises(jsonschema.ValidationError) as ex:
         commit.apply(os.path.join(test_path, 'applytest1-exception'),
-                'node', tmpdir)
+                'node', tmpdir, {})
 
     assert ex.value.cause is None # make sure it was a validation error
     assert ex.value.validator_value == 'integer'

@@ -127,7 +127,7 @@ class DirectoryRender:
         self.loader = FileLoader(basedir)
         self.basedir = basedir
 
-    def render(self, destdir, inputhash, dry_run = False,
+    def render(self, destdir, inputhash, resources, dry_run = False,
             currpath = "", config = {}):
         """
         Transforms all templates and downloads all files in the directory
@@ -169,7 +169,7 @@ class DirectoryRender:
                     result[key] = config[key].atomic
 
                 apply_config(dest, get_config(stripped, config), dry_run)
-                result.update(self.render(destdir, inputhash, dry_run, relpath, config))
+                result.update(self.render(destdir, inputhash, resources, dry_run, relpath, config))
             else:
                 ext = get_sq_ext(filename)
                 if ext in extension_handles:
@@ -178,7 +178,8 @@ class DirectoryRender:
                         'inputhash':inputhash,
                         'relpath':relpath,
                         'abs_source': abs_source,
-                        'dest':dest})
+                        'dest':dest,
+                        'resources':resources})
                 else:
                     # otherwise, just copy the file
                     copyfile(abs_source, dest)
