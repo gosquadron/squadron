@@ -43,7 +43,7 @@ def test_refspec(tmpdir):
     with open(install_file) as ifile:
         assert ifile.read().strip() == 'echo "Success"'
 
-def test_sshkey(tmpdir):
+def broken_test_sshkey(tmpdir):
     tmpdir = str(tmpdir)
 
     # we need to do this to avoid ssh-agent problems
