@@ -108,11 +108,10 @@ def apply(inputhashes, log):
                 args.append('--home')
                 args.append(user['homedir'])
 
-            if not dry_run:
-                result = subprocess.call(args)
+            result = subprocess.call(args)
 
-                if result != 0:
-                    failed.append(user)
+            if result != 0:
+                failed.append(user)
 
     return failed
 
