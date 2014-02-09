@@ -10,6 +10,7 @@ import shutil
 import status
 from log import log
 from exceptions import TestException, UserException
+from resources import load_resources
 import tests
 import py
 import sys
@@ -146,8 +147,10 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
     else:
         new_dir = str(py.path.local.make_numbered_dir(prefix='squadron'))
 
+    resources = load_resources(squadron_dir)
+
     log.info("Staging directory: %s", new_dir)
-    result = commit.apply(squadron_dir, node_name, new_dir, dry_run)
+    result = commit.apply(squadron_dir, node_name, new_dir, resources, dry_run)
 
     # Is this different from the last time we ran?
     this_run_sum = walk_hash(new_dir)

@@ -14,7 +14,7 @@ test_path = os.path.join(get_test_path(), 'template_tests')
 def test_template_basic(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path, 'test1'))
-    test.render(dirname, {'name':'user'})
+    test.render(dirname, {'name':'user'}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path, 'test1result'))
 
@@ -23,16 +23,16 @@ def test_template_chown_problem(tmpdir):
     test = template.DirectoryRender(os.path.join(test_path, 'test1-notpermitted'))
 
     with pytest.raises(OSError) as ex:
-        test.render(dirname, {'name':'user'}, False)
+        test.render(dirname, {'name':'user'}, {}, False)
 
-    test.render(dirname, {'name':'user'}, True)
+    test.render(dirname, {'name':'user'}, {}, True)
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path, 'test1result'))
 
 def test_template_with_config(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path,'test2'))
-    result = test.render(dirname, {'name':'user'})
+    result = test.render(dirname, {'name':'user'}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path,'test2result'))
 
@@ -55,7 +55,7 @@ def test_template_with_config_dir_error(tmpdir):
 
     with pytest.raises(ValueError) as ex:
         test = template.DirectoryRender(os.path.join(test_path,'config-dir-error'))
-        result = test.render(dirname, {'name':'user'})
+        result = test.render(dirname, {'name':'user'}, {})
     assert ex is not None
 
 def test_extensions():
@@ -88,7 +88,7 @@ def test_extensions():
 def test_autotest(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path,'test-autotest'))
-    test.render(dirname, {'name':'user'})
+    test.render(dirname, {'name':'user'}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path,'test-autotest-result'))
 
@@ -97,7 +97,7 @@ def test_autotest_fail(tmpdir):
     test = template.DirectoryRender(os.path.join(test_path,'test-autotest2'))
 
     with pytest.raises(ValueError) as ex:
-        test.render(dirname, {'name':'user'})
+        test.render(dirname, {'name':'user'}, {})
 
     assert ex is not None
 
@@ -182,14 +182,14 @@ def test_apply_config(tmpdir):
 def test_git_repo(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path,'test-git'))
-    test.render(dirname, {})
+    test.render(dirname, {}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path,'test-git-result'))
 
 def test_ext_created_dir(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path,'test-ext-created-dir'))
-    atomic = test.render(dirname, {})
+    atomic = test.render(dirname, {}, {})
 
     assert 'testdir/' in atomic
     assert atomic['testdir/'] == True

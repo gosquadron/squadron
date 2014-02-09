@@ -40,10 +40,11 @@ def init(squadron_dir, gitrepo, force=False, example=False):
         if gitrepo is None:
             log.info("Creating Squadron config in {}".format(squadron_dir))
             makedirsp(squadron_dir)
-            makedirsp(os.path.join(squadron_dir, 'libraries'))
             makedirsp(os.path.join(squadron_dir, 'config'))
-            makedirsp(os.path.join(squadron_dir, 'services'))
+            makedirsp(os.path.join(squadron_dir, 'libraries'))
             makedirsp(os.path.join(squadron_dir, 'nodes'))
+            makedirsp(os.path.join(squadron_dir, 'resources'))
+            makedirsp(os.path.join(squadron_dir, 'services'))
             repo = Repo.init(squadron_dir) # initialize repo
         else:
             log.info("Cloning Squadron config from {}".format(gitrepo))
