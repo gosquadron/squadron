@@ -56,7 +56,6 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
         old_environ = os.environ.copy()
         try:
             os.environ['GIT_SSH'] = wrapper
-            print "Calling {}".format(wrapper)
             repo = git.Repo.clone_from(url, finalfile)
         finally:
             os.environ = old_environ
