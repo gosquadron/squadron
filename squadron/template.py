@@ -107,17 +107,14 @@ def apply_config(filepath, file_config, dry_run):
         if uid != -1 or gid != -1:
             log.debug("Changing %s to uid %s gid %s", filepath, uid, gid)
             os.chown(filepath, uid, gid)
-
-        if file_config.mode is not None:
-            mode = int(file_config.mode, 8)
-            log.debug("Changing mode of %s to %s", filepath, file_config.mode)
-            os.chmod(filepath, mode)
     else:
         if uid != -1 or gid != -1:
             log.info("Would change %s to uid %s gid %s", filepath, uid, gid)
 
-        if file_config.mode is not None:
-            log.debug("Would change mode of %s to %s", filepath, file_config.mode)
+    if file_config.mode is not None:
+        mode = int(file_config.mode, 8)
+        log.debug("Changing mode of %s to %s", filepath, file_config.mode)
+        os.chmod(filepath, mode)
 
 
 class DirectoryRender:

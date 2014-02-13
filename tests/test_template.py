@@ -177,7 +177,8 @@ def test_apply_config(tmpdir):
 
     apply_config(filepath, FileConfig(filepath, False, None, None, '0777'), True)
     st = os.stat(filepath)
-    assert stat.S_IMODE(st.st_mode) != 0777
+    # dry run doesn't affect mode
+    assert stat.S_IMODE(st.st_mode) == 0777
 
 def test_git_repo(tmpdir):
     dirname = str(tmpdir)
