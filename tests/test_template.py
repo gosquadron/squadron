@@ -2,12 +2,15 @@ from __future__ import print_function
 from squadron import template
 from squadron.template import FileConfig, get_config, apply_config
 from squadron.exthandlers.extutils import get_filename
+from squadron.log import log, setup_log
 from tempfile import mkdtemp
 from shutil import rmtree
 import pytest
 from helper import are_dir_trees_equal, get_test_path
 import os
 import stat
+
+setup_log('DEBUG', True)
 
 test_path = os.path.join(get_test_path(), 'template_tests')
 
@@ -48,7 +51,7 @@ def test_template_with_config(tmpdir):
     assert stat.S_IMODE(st_test3.st_mode) == 0775
 
     st_test3_file = os.stat(os.path.join(dirname, 'test3', 'hello.txt'))
-    assert stat.S_IMODE(st_test3_file.st_mode) == 0775
+    assert stat.S_IMODE(st_test3_file.st_mode) != 0775 # not recursive
 
 def test_template_with_config_dir_error(tmpdir):
     dirname = str(tmpdir)
@@ -154,11 +157,11 @@ def test_get_config():
     config = {'conf.d/' : FileConfig('conf.d/', True, None, None, 0755),
               'conf.d/config' : FileConfig('conf.d/config', False, 'user', 'group', None)}
 
-    assert get_config('conf.d/', config) == config['conf.d/']
-    assert get_config('conf.d/config', config) == config['conf.d/config']
-    assert get_config('conf.d/non-existant-file', config) == config['conf.d/']
-    assert get_config('non-exist', config) == FileConfig('non-exist',
-            False, None, None, None)
+    log.debug(get_config('conf.d/','conf.d/', config))
+    assert get_config('conf.d/','conf.d/', config) == [config['conf.d/']]
+    assert get_config('conf.d/config', 'conf.d/config', config) == [config['conf.d/'], config['conf.d/config']]
+    assert get_config('conf.d/non-existant-file', 'conf.d/non-existant-file', config) == [config['conf.d/']]
+    assert get_config('non-exist', 'non-exist', config) == []
 
 def test_apply_config(tmpdir):
     tmpdir = str(tmpdir)
@@ -167,7 +170,7 @@ def test_apply_config(tmpdir):
     with open(filepath, 'w') as cfile:
         cfile.write('test')
 
-    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'), False)
+    apply_config(tmpdir, [FileConfig(filepath, False, None, None, '0777')], False)
     st = os.stat(filepath)
     assert stat.S_IMODE(st.st_mode) == 0777
 
@@ -175,7 +178,7 @@ def test_apply_config(tmpdir):
     with open(filepath, 'w') as cfile:
         cfile.write('test2')
 
-    apply_config(filepath, FileConfig(filepath, False, None, None, '0777'), True)
+    apply_config(tmpdir, [FileConfig(filepath, False, None, None, '0777')], True)
     st = os.stat(filepath)
     # dry run doesn't affect mode
     assert stat.S_IMODE(st.st_mode) == 0777
@@ -186,6 +189,18 @@ def test_git_repo(tmpdir):
     test.render(dirname, {}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path,'test-git-result'))
+
+def test_git_repo_chmod(tmpdir):
+    dirname = str(tmpdir)
+    test = template.DirectoryRender(os.path.join(test_path,'test-git-chmod'))
+    test.render(dirname, {}, {})
+
+    result_dir = os.path.join(test_path,'test-git-result')
+    assert are_dir_trees_equal(dirname, result_dir)
+
+    st = os.stat(os.path.join(dirname, 'test', 'install'))
+    # Chose some weird mode that wouldn't normally be set
+    assert stat.S_IMODE(st.st_mode) == 0604
 
 def test_ext_created_dir(tmpdir):
     dirname = str(tmpdir)

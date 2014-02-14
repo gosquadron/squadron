@@ -80,41 +80,52 @@ def parse_config(filename):
             result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
     return result
 
-def get_config(filename, config):
+def get_config(finalfile, filename, config):
     path_items = filename.split(os.path.sep)
     accum = ""
-    file_setting = FileConfig(filename, False, None, None, None)
+    file_settings = []
     for item in path_items[:-1]:
         # loop over all the directories, but not the filename
         path = os.path.join(accum, item)
         if path + os.path.sep in config:
-            file_setting = config[path + os.path.sep]
+            file_settings.append(config[path + os.path.sep])
+        accum = path
 
-    if filename in config:
-        file_setting = config[filename]
+    if filename in config and config[filename] not in file_settings:
+        file_settings.append(config[filename])
 
-    return file_setting
+    if os.path.isdir(finalfile):
+        new_files = os.listdir(finalfile)
+        for f in new_files:
+            new_finalfile = os.path.join(finalfile, f)
+            new_filename = os.path.join(filename, f)
+            file_settings.extend(get_config(new_finalfile, new_filename, config))
 
-def apply_config(filepath, file_config, dry_run):
-    uid = -1
-    gid = -1
-    if file_config.user is not None:
-        uid = pwd.getpwnam(file_config.user).pw_uid
-    if file_config.group is not None:
-        gid = grp.getgrnam(file_config.group).gr_gid
+    return file_settings
 
-    if not dry_run:
-        if uid != -1 or gid != -1:
-            log.debug("Changing %s to uid %s gid %s", filepath, uid, gid)
-            os.chown(filepath, uid, gid)
-    else:
-        if uid != -1 or gid != -1:
-            log.info("Would change %s to uid %s gid %s", filepath, uid, gid)
+def apply_config(base_path, file_configs, dry_run):
+    for file_config in file_configs:
+        uid = -1
+        gid = -1
+        if file_config.user is not None:
+            uid = pwd.getpwnam(file_config.user).pw_uid
+        if file_config.group is not None:
+            gid = grp.getgrnam(file_config.group).gr_gid
 
-    if file_config.mode is not None:
-        mode = int(file_config.mode, 8)
-        log.debug("Changing mode of %s to %s", filepath, file_config.mode)
-        os.chmod(filepath, mode)
+        actual_file = os.path.join(base_path, file_config.filepath)
+
+        if not dry_run:
+            if uid != -1 or gid != -1:
+                log.debug("Changing %s to uid %s gid %s", actual_file, uid, gid)
+                os.chown(actual_file, uid, gid)
+        else:
+            if uid != -1 or gid != -1:
+                log.info("Would change %s to uid %s gid %s", actual_file, uid, gid)
+
+        if file_config.mode is not None:
+            mode = int(file_config.mode, 8)
+            log.debug("Changing mode of %s to %s", actual_file, file_config.mode)
+            os.chmod(actual_file, mode)
 
 
 class DirectoryRender:
@@ -165,7 +176,7 @@ class DirectoryRender:
                 if key in config:
                     result[key] = config[key].atomic
 
-                apply_config(dest, get_config(stripped, config), dry_run)
+                apply_config(destdir, get_config(dest, stripped, config), dry_run)
                 result.update(self.render(destdir, inputhash, resources, dry_run, relpath, config))
             else:
                 ext = get_sq_ext(filename)
@@ -189,7 +200,7 @@ class DirectoryRender:
                     if stripped in config:
                         result[stripped] = config[stripped].atomic
 
-                apply_config(finalfile, get_config(stripped, config), dry_run)
+                apply_config(destdir, get_config(finalfile, stripped, config), dry_run)
 
                 # if there's an automatic way to test this type of file,
                 # try it
