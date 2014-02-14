@@ -177,6 +177,8 @@ def commit(dir_info):
         serv_dir = dir_info[service]['dir']
         base_dir = dir_info[service]['base_dir']
 
+        log.info("Deploying %s to %s", service, base_dir)
+
         files = set(os.listdir(serv_dir))
         done_files = set()
         for dirname, atomic in dir_info[service]['atomic'].items():
