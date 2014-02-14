@@ -172,6 +172,10 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
             return info
         else:
             log.info("Dry run changes")
+            actions, reactions = _get_action_reaction(squadron_dir, result)
+            log.info("%s actions, %s reactions", len(actions), len(reactions))
+            log.debug("Actions are: %s", actions)
+            log.debug("Reactions are: %s", reactions)
 
         log.info("===============")
         log.info("Paths changed:")
@@ -186,13 +190,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
         log.info("Nothing changed.")
     return None
 
-@go_to_root
-def _deploy(squadron_dir, new_dir, last_dir, commit_info,
-        this_run_sum, last_run_sum, last_commit, dont_rollback):
-    log.info("Applying changes")
-    log.debug("Changes: %s", commit_info)
-    commit.commit(commit_info)
-
+def _get_action_reaction(squadron_dir, commit_info):
     actions = {}
     reactions = []
 
@@ -204,6 +202,16 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
             service_name, version))
         reactions.extend(service.get_reactions(squadron_dir,
             service_name, version))
+    return (actions, reactions)
+
+@go_to_root
+def _deploy(squadron_dir, new_dir, last_dir, commit_info,
+        this_run_sum, last_run_sum, last_commit, dont_rollback):
+    log.info("Applying changes")
+    log.debug("Changes: %s", commit_info)
+    commit.commit(commit_info)
+
+    actions, reactions = _get_action_reaction(squadron_dir, commit_info)
 
     # Then react to the changes
     log.debug("Reacting to changes: %s actions and %s reactions to run",
