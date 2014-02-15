@@ -5,6 +5,7 @@ import os
 from ..log import log
 from ..exceptions import UserException
 import logging
+import logging.handlers
 
 #For some reason we're reading the config file twice.
 #Once that is fixed this should be removed
@@ -110,6 +111,14 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                     sh = logging.StreamHandler(param)
                     sh.setLevel(level)
                     log.addHandler(sh)
+                if(handler == 'rotatingfile'):
+                    if(len(logline) < 4):
+                        log.error('Rotating log handler needs a file name, max size and maxCount')
+                        continue
+                    #TODO: Verify parameters
+                    rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
+                    rh.setLevel(level)
+                    log.addHandler(rh)
             except:
                 log.error('Error creating log handler for %s', item)
                 raise
