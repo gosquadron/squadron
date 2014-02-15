@@ -37,7 +37,7 @@ def _daemonize(args, parent):
     parser.add_argument('-p', '--polltime', help='How long in minutes to wait between polls')
     parser.add_argument('-r', '--repo', help='What source code repository to poll')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
-    parser.add_argument('-o', '--outfile', help='What file to output to', default=None)
+    parser.add_argument('-o', '--outfile', help='What file to output log messages to', default=None)
 
     output = parser.parse_args(args)
     log.setup_log(output.loglevel, output_file=output.outfile)

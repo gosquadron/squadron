@@ -37,7 +37,7 @@ def get_node_info(node_dir, node_name):
         with open(r) as node_file:
             ret.update(json.loads(node_file.read()))
 
-    log.debug('leaving node.get_node_info: ' + str(ret))
+    log.debug('leaving node.get_node_info: %s', ret)
     return ret
 
 def _descend(base_dir, node_name):

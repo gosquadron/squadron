@@ -16,8 +16,8 @@ def daemonize(squadron_dir, config_file, polltime, repo):
         repo -- source code for the squadron_dir for updating
         loglevel -- how much to log
     """
-    log.debug('entering daemon.daemonize[' + str(squadron_dir) + ', ' +
-            str(config_file) + ', ' + str(polltime) + ', ' + str(repo))
+    log.debug('entering daemon.daemonize %s', 
+            [squadron_dir, config_file, polltime, repo])
     parsed_config = parse_config(config_file)
 
     if not polltime:
@@ -32,15 +32,15 @@ def daemonize(squadron_dir, config_file, polltime, repo):
         git = repo.git
         log.debug("Doing git checkout")
         out = git.checkout('master')
-        log.debug('Git checkout returned: ' + str(out))
+        log.debug('Git checkout returned: %s', out)
         log.debug('Doing git pull --rebase')
         out = git.pull('--rebase')
-        log.debug('Git pull returned: ' + str(out))
+        log.debug('Git pull returned: %s', out)
 
         ret = main.go(squadron_dir, config_file=config_file)
-        log.debug('main.go returned: ' + str(ret))
+        log.debug('main.go returned: %s', ret)
         if ret:
             #TODO: Squadron sends bug to status API or some other remote server?
             log.error('Squadron had an error')
-        log.debug('daemon is sleeping: ' + str(polltime))
+        log.debug('daemon is sleeping: %s', polltime)
         time.sleep(polltime)

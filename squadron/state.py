@@ -21,7 +21,7 @@ class StateHandler:
             inputhash -- the list of dictionaries of config for the library
             dry_run -- whether or not to actually change the system
         """
-        log.debug('entering state.apply [' + str(library_name) + ', ' + str(inputhash) + ', ' + str(dry_run) + ']')
+        log.debug('entering state.apply %s', [library_name, inputhash, dry_run])
         if library_name not in sys.modules:
             try:
                 imp.acquire_lock()
@@ -33,7 +33,7 @@ class StateHandler:
             finally:
                 if imp.lock_held():
                     imp.release_lock()
-        log.debug('loading library: ' + str(library_name))
+        log.debug('loading library: %s', library_name)
         library = importlib.import_module(library_name)
         schema = library.schema()
 
@@ -41,12 +41,12 @@ class StateHandler:
             jsonschema.validate(item, schema)
 
         failed = library.verify(inputhashes=inputhash, log=log)
-        log.debug('dry run? ' + str(dry_run)) 
+        log.debug('dry run: %s', dry_run) 
         if not dry_run:
             log.debug('applying state...')
             library.apply(inputhashes=failed, log=log)
             failed = library.verify(inputhashes=inputhash, log=log)
             if len(failed) > 0:
                 log.error("Failed for good on {}".format(failed))
-
+        log.debug('Leaving state.apply %s', failed)
         return failed

@@ -1,5 +1,4 @@
 import wrap_apt
-#from log import log
 def schema():
     """
     This returns
@@ -16,9 +15,9 @@ def verify(inputhashes, log, **kwargs):
     for package in inputhashes:
         if(wrap_apt.check_package_is_installed(package) == False):
             failed.append(package)
-            log.debug("Apt package " + str(package) + " is not installed")
+            log.debug("Apt package %s is not installed", package)
         else:
-            log.debug("Apt package " + str(package) + " was installed already")
+            log.debug("Apt package %s was installed already", package)
     return failed
 
 def apply(inputhashes, log, **kwargs):
@@ -26,9 +25,9 @@ def apply(inputhashes, log, **kwargs):
     for package in inputhashes:
         if(wrap_apt.install_package(package) == False):
             failed.append(package)
-            log.debug("Failed to install apt package: " + str(package))
+            log.debug("Failed to install apt package: %s", package)
         else:
-            log.debug("Installed successfully apt package: " + str(package))
+            log.debug("Installed successfully apt package: %s", package)
     return failed
 
 
