@@ -5,7 +5,7 @@ import main
 from fileio.config import parse_config
 from log import setup_log, log
 
-def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
+def daemonize(squadron_dir, config_file, polltime, repo):
     """
     Runs squadron every polltime minutes.
 
@@ -16,8 +16,6 @@ def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
         repo -- source code for the squadron_dir for updating
         loglevel -- how much to log
     """
-
-    setup_log(loglevel)
 
     parsed_config = parse_config(config_file)
 
@@ -35,8 +33,10 @@ def daemonize(squadron_dir, config_file, polltime, repo, loglevel):
         log.debug('Git checkout: ' + git.checkout('master'))
         log.debug('Git pull: ' + git.pull('--rebase'))
 
-        if not main.go(squadron_dir, config_file=config_file):
+        ret = main.go(squadron_dir, config_file=config_file)
+        log.debug('main.go returned: ' + str(ret))
+        if ret:
             #TODO: Squadron sends bug to status API or some other remote server?
             log.error('Squadron had an error')
-
+        log.debug('daemon is sleeping: ' + str(polltime))
         time.sleep(polltime)

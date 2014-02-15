@@ -39,8 +39,9 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
     if config_file is None:
         # Try defaults
         parsed_files = parser.read(CONFIG_PATHS)
-        log.debug("Using log files: " + str(parsed_files))
+        log.debug("Using config files: " + str(parsed_files))
     else:
+        log.debug("Using config file: " + str(config_file))
         with open(config_file) as cfile:
             parser.readfp(cfile, config_file)
 

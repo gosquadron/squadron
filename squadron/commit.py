@@ -69,12 +69,17 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
         dry_run -- whether or not to actually create the temp directory
             or change any system-wide configuration via state.json
     """
+    log.debug('entering commit.apply [' + str(squadron_dir) + ', ' + 
+            str(node_name) + ', ' + str('tempdir') + ', ' + 
+            str(resources) + ', ' + str(dry_run) + ']')
     node_info = get_node_info(os.path.join(squadron_dir, 'nodes'), node_name)
 
     if not check_node_info(node_info):
         # Return early if there's an error
+        log.debug('leaving commit.apply, check_node_info returned error')
         return (False, None)
 
+    log.debug("node_info['env']: " + str(node_info['env']))
     conf_dir = os.path.join(squadron_dir, 'config', node_info['env'])
 
     result = {}
@@ -82,7 +87,7 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
     # handle the state of the system via the library
     library_dir = os.path.join(squadron_dir, 'libraries')
     state = StateHandler(library_dir)
-
+    log.debug('using library dir: ' + str(library_dir))
     for service in node_info['services']:
         with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
             configdata = json.loads(cfile.read())
@@ -130,7 +135,7 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
                 'dir': tmp_serv_dir,
                 'version':version,
             }
-
+    log.debug('leaving commit.apply: ' + str(result))
     return result
 
 

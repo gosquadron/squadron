@@ -1,6 +1,7 @@
 import os
 import fnmatch
 import json
+from log import log
 
 def get_node_info(node_dir, node_name):
     """
@@ -22,6 +23,7 @@ def get_node_info(node_dir, node_name):
         node_dir -- the directory to start
         node_name -- the name of the host to match against
     """
+    log.debug('entering node.get_node_info')
     result = _descend(node_dir, node_name)
 
     # sort by length with only the basename and with all hashes removed
@@ -35,6 +37,7 @@ def get_node_info(node_dir, node_name):
         with open(r) as node_file:
             ret.update(json.loads(node_file.read()))
 
+    log.debug('leaving node.get_node_info: ' + str(ret))
     return ret
 
 def _descend(base_dir, node_name):

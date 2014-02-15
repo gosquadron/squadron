@@ -63,12 +63,12 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         if send_status and not dry_run:
             status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),
                     True, status='ERROR', hostname=node_name, info={'info':True, 'message':str(e)})
-        log.exception('Caught exception')
+            log.exception('Caught exception')
         raise e
-    else:
+    else: #executes on no exception
         if send_status and not dry_run and info:
             status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),
-                    True, status='OK', hostname=node_name, info=info)
+            True, status='OK', hostname=node_name, info=info)
 
 def _is_current_last(prefix, tempdir, last_run_dir):
     """
@@ -122,13 +122,14 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
         dont_rollback -- if true, doesn't automatically rollback to the previous version
         dry_run -- whether or not to apply changes
     """
+    log.debug('entering _run_squadron')
     try:
         run_info = runinfo.get_last_run_info(squadron_state_dir, dry_run)
         last_run_dir = run_info['dir']
         last_run_sum = run_info['checksum']
         last_commit = run_info['commit']
     except KeyError:
-        log.debug("Looks like info.json is empty or malformated")
+        log.debug("Looks like info.json is empty or malformated") #Is this bad?
         last_run_dir = None
         last_run_sum = {}
         last_commit = None
@@ -151,7 +152,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
 
     log.info("Staging directory: %s", new_dir)
     result = commit.apply(squadron_dir, node_name, new_dir, resources, dry_run)
-
+    log.debug("commit.apply returned: " + str(result))
     # Is this different from the last time we ran?
     this_run_sum = walk_hash(new_dir)
 

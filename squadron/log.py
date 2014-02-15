@@ -12,18 +12,20 @@ class SpecialFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-def setup_log(loglevel, console=False):
+def setup_log(loglevel, output_file=None, console=False):
     level = getattr(logging, loglevel.upper(), None)
     if not isinstance(level, int):
         raise ValueError('Invalid log level {}'.format(loglevel))
 
     log.setLevel(level)
 
+    #We always output to console
     ch = logging.StreamHandler()
     ch.setLevel(level)
-
-    if console:
-        # If we're logging to a console, format it better
-        ch.setFormatter(SpecialFormatter())
-
+    ch.setFormatter(SpecialFormatter())
     log.addHandler(ch)
+
+    if(output_file != None and output_file != False and output_file != True): 
+        fh = logging.FileHandler(output_file, 'a', None, False)
+        fh.setLevel(level)
+        log.addHandler(fh)

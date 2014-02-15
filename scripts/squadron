@@ -37,10 +37,12 @@ def _daemonize(args, parent):
     parser.add_argument('-p', '--polltime', help='How long in minutes to wait between polls')
     parser.add_argument('-r', '--repo', help='What source code repository to poll')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
+    parser.add_argument('-o', '--outfile', help='What file to output to', default=None)
 
     output = parser.parse_args(args)
+    log.setup_log(output.loglevel, output_file=output.outfile)
 
-    return daemon.daemonize(output.directory, output.config, output.polltime, output.repo, output.loglevel)
+    return daemon.daemonize(output.directory, output.config, output.polltime, output.repo)
 
 def _init(args, parent):
     parser = ArgumentParser(prog='{} init'.format(parent.prog),
@@ -84,7 +86,6 @@ def _setup(args, parent):
     parser.add_argument('-c', '--config', help='Initialize config directory')
     parser.add_argument('-s', '--state', help='Initialize state directory')
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
-
     output = parser.parse_args(args)
 
     log.setup_log(output.loglevel, console=True)

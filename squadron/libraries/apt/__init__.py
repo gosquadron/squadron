@@ -21,6 +21,7 @@ def verify(inputhashes):
 def apply(inputhashes, log, **kwargs):
     failed = []
     for package in inputhashes:
+        log.error('test')
         if(wrap_apt.install_package(package) == False):
             failed.append(package)
     return failed
