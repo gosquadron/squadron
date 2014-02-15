@@ -63,7 +63,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
         PARSED_LOG_CONFIG = True
         for item in parser.items('log'):
             try:
-                #key is just a friendly name (maybe it should be something else?)
+                #key is just a friendly name and it's not used
                 #reason is that key's are usually unique in these configs
                 logline = item[1].split(' ')
                 if(len(logline) < 2):
@@ -103,7 +103,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
 
                     #TODO: Do this better (casting)
                     if param == 'stdout':
-                        param = None
+                        param = sys.stdout
                     if param == 'stderr':
                         param = sys.stderr
 
