@@ -6,7 +6,7 @@ def schema():
             'type': 'string',
         }
 
-def verify(inputhashes):
+def verify(**kwargs):
     return []
 
 def apply(**kwargs):

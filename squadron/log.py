@@ -1,5 +1,5 @@
 import logging
-
+import datetime
 log = logging.getLogger('normal')
 
 class SpecialFormatter(logging.Formatter):
@@ -27,5 +27,10 @@ def setup_log(loglevel, output_file=None, console=False):
 
     if(output_file != None and output_file != False and output_file != True): 
         fh = logging.FileHandler(output_file, 'a', None, False)
-        fh.setLevel(level)
+        fh.setLevel(logging.DEBUG)
         log.addHandler(fh)
+        log.setLevel(logging.DEBUG)
+
+    log.info("==================================================")
+    log.info("==== New log started: " + str(datetime.datetime.now()))
+    log.info("==================================================")

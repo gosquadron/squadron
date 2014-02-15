@@ -48,7 +48,7 @@ def schema():
 class VerifyError(Exception):
     pass
 
-def verify(inputhashes):
+def verify(inputhashes, **kwargs):
     """
     Checks if the user specified is present with the exact matching
     configuration provided.

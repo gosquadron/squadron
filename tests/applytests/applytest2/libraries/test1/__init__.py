@@ -14,7 +14,7 @@ def schema():
             }
         }
 
-def verify(inputhashes):
+def verify(inputhashes, **kwargs):
     failed = []
     for ih in inputhashes:
         if os.path.isfile(ih['tmpfile']):
@@ -25,7 +25,7 @@ def verify(inputhashes):
             failed.append(ih)
     return failed
 
-def apply(inputhashes):
+def apply(inputhashes, **kwargs):
     for ih in inputhashes:
         with open(ih['tmpfile'], 'w') as tmpfile:
             tmpfile.write(str(ih['num']))

@@ -14,7 +14,7 @@ def schema():
             }
         }
 
-def verify(inputhashes):
+def verify(inputhashes, **kwargs):
     failed = []
     for ih in inputhashes:
         if os.path.isfile(ih['tmpfile']):
