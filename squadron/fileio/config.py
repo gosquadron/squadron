@@ -35,6 +35,21 @@ def VALID_LOG_HANDLERS():
 def VALID_STREAMS():
     return ['stdout', 'stderr']
 
+
+def _get_parser(config_file, defaults):
+    parser = SafeConfigParser()
+
+    if config_file is None:
+        # Try defaults
+        parsed_files = parser.read(CONFIG_PATHS)
+        log.debug("Using config files: %s", parsed_files)
+    else:
+        log.debug("Using config file: %s", config_file)
+        with open(config_file) as cfile:
+            parser.readfp(cfile, config_file)
+
+    return parser
+
 def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
     """
     Parses a given config file using SafeConfigParser. If the specified
@@ -47,19 +62,23 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
             None, searches for system-wide configuration and from
             the local user's configuration.
     """
-    parser = SafeConfigParser()
-    global PARSED_LOG_CONFIG
-    
-    if config_file is None:
-        # Try defaults
-        parsed_files = parser.read(CONFIG_PATHS)
-        log.debug("Using config files: %s", parsed_files)
-    else:
-        log.debug("Using config file: %s", config_file)
-        with open(config_file) as cfile:
-            parser.readfp(cfile, config_file)
+    parser = _get_parser(config_file, defaults)
 
-    #Here we setup any extra logging
+    if parser.sections():
+        log.debug("Original section squadron: %s", parser.items('squadron'))
+        result = defaults.copy()
+        for section in CONFIG_SECTIONS():
+            try:
+                result.update(parser.items(section))
+            except NoSectionError:
+                pass
+        return result
+    else:
+        raise UserException('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))
+
+def parse_log_config(config_file):
+    parser = _get_parser(config_file, {})
+    global PARSED_LOG_CONFIG
     if 'log' in parser.sections() and not PARSED_LOG_CONFIG:
         PARSED_LOG_CONFIG = True
         for item in parser.items('log'):
@@ -67,12 +86,14 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                 #key is just a friendly name and it's not used
                 #reason is that key's are usually unique in these configs
                 logline = item[1].split(' ')
+                print "Got logline: {}".format(logline)
                 if(len(logline) < 2):
                     log.error('Invalid log config passed: %s', item)
                     continue
 
                 #parse level
                 levelStr = logline[0]
+                print "Level: {}".format(levelStr)
                 level = getattr(logging, levelStr.upper(), None)
                 if not isinstance(level, int):
                     log.error('Invalid log level passed for: %s', item)
@@ -92,6 +113,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                     fh = logging.FileHandler(param, 'a', None, False)
                     fh.setLevel(level)
                     log.addHandler(fh)
+                    print "Set up file log: {}".format(logline)
     
                 if(handler == 'stream'):
                     if(len(logline) < 3):
@@ -111,6 +133,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                     sh = logging.StreamHandler(param)
                     sh.setLevel(level)
                     log.addHandler(sh)
+                    print "Set up stream log: {}".format(logline)
                 if(handler == 'rotatingfile'):
                     if(len(logline) < 4):
                         log.error('Rotating log handler needs a file name, max size and maxCount')
@@ -119,20 +142,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                     rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
                     rh.setLevel(level)
                     log.addHandler(rh)
+                    print "Set up rotatingfile log: {}".format(logline)
             except:
                 log.error('Error creating log handler for %s', item)
                 raise
-
-    if parser.sections():
-        log.debug("Original section squadron: %s", parser.items('squadron'))
-        result = defaults.copy()
-        for section in CONFIG_SECTIONS():
-            try:
-                result.update(parser.items(section))
-            except NoSectionError:
-                pass
-        return result
-    else:
-        raise UserException('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))
-
-    
