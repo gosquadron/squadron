@@ -21,16 +21,6 @@ CONFIG_PATHS = ['/etc/squadron/config',
         os.path.expanduser('~/.squadron/config'),
         ]
 
-def CONFIG_SECTIONS():
-    return ['squadron', 'status', 'daemon', 'log']
-
-def VALID_LOG_HANDLERS():
-    return ['file', 'stream', 'rotatingfile']
-
-def VALID_STREAMS():
-    return ['stdout', 'stderr']
-
-
 def _get_parser(log, config_file, defaults):
     parser = SafeConfigParser()
 
@@ -45,6 +35,7 @@ def _get_parser(log, config_file, defaults):
 
     return parser
 
+CONFIG_SECTIONS = set(['squadron', 'status', 'daemon'])
 def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
     """
     Parses a given config file using SafeConfigParser. If the specified
@@ -57,12 +48,13 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
             None, searches for system-wide configuration and from
             the local user's configuration.
     """
+
     parser = _get_parser(log, config_file, defaults)
 
     if parser.sections():
         log.debug("Original section squadron: %s", parser.items('squadron'))
         result = defaults.copy()
-        for section in CONFIG_SECTIONS():
+        for section in CONFIG_SECTIONS:
             try:
                 result.update(parser.items(section))
             except NoSectionError:
@@ -72,30 +64,31 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
         raise _log_throw(log, 'No config file could be loaded. Make sure at least one of these exists and can be parsed: %s', CONFIG_PATHS)
 
 def parse_log_config(log, config_file):
+    VALID_LOG_HANDLERS = set(['file', 'stream', 'rotatingfile'])
+    VALID_STREAMS = set(['stdout', 'stderr'])
+
     parser = _get_parser(log, config_file, {})
     if 'log' in parser.sections():
         PARSED_LOG_CONFIG = True
-        for item in parser.items('log'):
-            _, value = item
-
+        for _, value in parser.items('log'):
             logline = value.split()
             if len(logline) < 2:
-                raise _log_throw(log, 'Invalid log config passed: %s', item)
+                raise _log_throw(log, 'Invalid log config passed: %s', value)
 
-            #parse level
+            # parse level
             level_str = logline[0]
             level = getattr(logging, level_str.upper(), None)
             if not isinstance(level, int):
-                raise _log_throw(log, 'Invalid log level passed for: %s', item)
+                raise _log_throw(log, 'Invalid log level passed for: %s', value)
 
-            #parse handler
+            # parse handler
             handler = logline[1].lower()
-            if handler not in VALID_LOG_HANDLERS():
-                raise _log_throw(log, 'Invalid log handler passed for: %s', item)
+            if handler not in VALID_LOG_HANDLERS:
+                raise _log_throw(log, 'Invalid log handler passed for: %s', value)
 
             if handler == 'file':
                 if len(logline) < 3:
-                    raise _log_throw(log, 'File log handler needs output file as last parameter: %s', item)
+                    raise _log_throw(log, 'File log handler needs output file as last parameter: %s', value)
                 param = logline[2]
                 fh = logging.FileHandler(param, 'a', None, False)
                 fh.setLevel(level)
@@ -103,10 +96,10 @@ def parse_log_config(log, config_file):
 
             if handler == 'stream':
                 if len(logline) < 3:
-                    raise _log_throw(log, 'File log handler needs stream such as sys.stderr as last parameter: %s', item)
+                    raise _log_throw(log, 'File log handler needs stream such as sys.stderr as last parameter: %s', value)
                 param = logline[2].lower()
-                if param not in VALID_STREAMS():
-                    raise _log_throw(log, 'Invalid stream param passed: %s', item)
+                if param not in VALID_STREAMS:
+                    raise _log_throw(log, 'Invalid stream param passed: %s', value)
 
                 if param == 'stdout':
                     param = sys.stdout

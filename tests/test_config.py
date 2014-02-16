@@ -45,7 +45,7 @@ def create_config(output_file, config_func):
 
 def create_fake_config(output_file):
     def anon(config):
-        for sec in squadron_config.CONFIG_SECTIONS():
+        for sec in squadron_config.CONFIG_SECTIONS:
             config.add_section(sec)
             config.set(sec, 'fakesetting', 'dog')
 
