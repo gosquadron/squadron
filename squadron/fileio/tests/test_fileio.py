@@ -1,6 +1,8 @@
 from ..walkhash import walk_hash, hash_diff
 from ..config import parse_config
 import os
+import logging
+log = logging.getLogger('normal')
 
 test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fileio_tests')
 
@@ -48,7 +50,7 @@ go_for_it=yes
         cfile.write(test_config)
 
     defaults = {'override_this':'/tmp','not_present':'false555'}
-    result = parse_config(config_file, defaults)
+    result = parse_config(log, config_file, defaults)
     assert len(result) == 4
     assert 'test' in result
     assert result['test'] == '5'

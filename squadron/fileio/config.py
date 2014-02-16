@@ -2,14 +2,9 @@ from ConfigParser import SafeConfigParser, NoSectionError
 import sys
 import socket
 import os
-from ..log import log
 from ..exceptions import UserException
 import logging
 import logging.handlers
-
-#For some reason we're reading the config file twice.
-#Once that is fixed this should be removed
-PARSED_LOG_CONFIG = False
 
 def CONFIG_DEFAULTS():
     return {
@@ -36,7 +31,7 @@ def VALID_STREAMS():
     return ['stdout', 'stderr']
 
 
-def _get_parser(config_file, defaults):
+def _get_parser(log, config_file, defaults):
     parser = SafeConfigParser()
 
     if config_file is None:
@@ -50,7 +45,7 @@ def _get_parser(config_file, defaults):
 
     return parser
 
-def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
+def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
     """
     Parses a given config file using SafeConfigParser. If the specified
     config_file is None, it searches in the usual places. Returns a
@@ -62,7 +57,7 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
             None, searches for system-wide configuration and from
             the local user's configuration.
     """
-    parser = _get_parser(config_file, defaults)
+    parser = _get_parser(log, config_file, defaults)
 
     if parser.sections():
         log.debug("Original section squadron: %s", parser.items('squadron'))
@@ -74,75 +69,61 @@ def parse_config(config_file = None, defaults = CONFIG_DEFAULTS()):
                 pass
         return result
     else:
-        raise UserException('No config file could be loaded. Make sure at least one of these exists and can be parsed: ' + str(CONFIG_PATHS))
+        raise _log_throw(log, 'No config file could be loaded. Make sure at least one of these exists and can be parsed: %s', CONFIG_PATHS)
 
-def parse_log_config(config_file):
-    parser = _get_parser(config_file, {})
-    global PARSED_LOG_CONFIG
-    if 'log' in parser.sections() and not PARSED_LOG_CONFIG:
+def parse_log_config(log, config_file):
+    parser = _get_parser(log, config_file, {})
+    if 'log' in parser.sections():
         PARSED_LOG_CONFIG = True
         for item in parser.items('log'):
-            try:
-                #key is just a friendly name and it's not used
-                #reason is that key's are usually unique in these configs
-                logline = item[1].split(' ')
-                print "Got logline: {}".format(logline)
-                if(len(logline) < 2):
-                    log.error('Invalid log config passed: %s', item)
-                    continue
+            _, value = item
 
-                #parse level
-                levelStr = logline[0]
-                print "Level: {}".format(levelStr)
-                level = getattr(logging, levelStr.upper(), None)
-                if not isinstance(level, int):
-                    log.error('Invalid log level passed for: %s', item)
-                    continue
-    
-                #parse handler
-                handler = logline[1].lower()
-                if not handler in VALID_LOG_HANDLERS():
-                    log.error('Invalid log handler passed for: %s', item)
-                    continue
-    
-                if(handler == 'file'):
-                    if(len(logline) < 3):
-                        log.error('File log handler needs output file as last parameter: %s', item)
-                        continue
-                    param = logline[2]
-                    fh = logging.FileHandler(param, 'a', None, False)
-                    fh.setLevel(level)
-                    log.addHandler(fh)
-                    print "Set up file log: {}".format(logline)
-    
-                if(handler == 'stream'):
-                    if(len(logline) < 3):
-                        log.error('File log handler needs stream such as sys.stderr as last parameter: %s', item)
-                        continue
-                    param = logline[2].lower()
-                    if not param in VALID_STREAMS():
-                        log.error('Invalid stream param passed: %s', item)
-                        continue
+            logline = value.split()
+            if len(logline) < 2:
+                raise _log_throw(log, 'Invalid log config passed: %s', item)
 
-                    #TODO: Do this better (casting)
-                    if param == 'stdout':
-                        param = sys.stdout
-                    if param == 'stderr':
-                        param = sys.stderr
+            #parse level
+            level_str = logline[0]
+            level = getattr(logging, level_str.upper(), None)
+            if not isinstance(level, int):
+                raise _log_throw(log, 'Invalid log level passed for: %s', item)
 
-                    sh = logging.StreamHandler(param)
-                    sh.setLevel(level)
-                    log.addHandler(sh)
-                    print "Set up stream log: {}".format(logline)
-                if(handler == 'rotatingfile'):
-                    if(len(logline) < 4):
-                        log.error('Rotating log handler needs a file name, max size and maxCount')
-                        continue
-                    #TODO: Verify parameters
-                    rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
-                    rh.setLevel(level)
-                    log.addHandler(rh)
-                    print "Set up rotatingfile log: {}".format(logline)
-            except:
-                log.error('Error creating log handler for %s', item)
-                raise
+            #parse handler
+            handler = logline[1].lower()
+            if handler not in VALID_LOG_HANDLERS():
+                raise _log_throw(log, 'Invalid log handler passed for: %s', item)
+
+            if handler == 'file':
+                if len(logline) < 3:
+                    raise _log_throw(log, 'File log handler needs output file as last parameter: %s', item)
+                param = logline[2]
+                fh = logging.FileHandler(param, 'a', None, False)
+                fh.setLevel(level)
+                log.addHandler(fh)
+
+            if handler == 'stream':
+                if len(logline) < 3:
+                    raise _log_throw(log, 'File log handler needs stream such as sys.stderr as last parameter: %s', item)
+                param = logline[2].lower()
+                if param not in VALID_STREAMS():
+                    raise _log_throw(log, 'Invalid stream param passed: %s', item)
+
+                if param == 'stdout':
+                    param = sys.stdout
+                if param == 'stderr':
+                    param = sys.stderr
+
+                sh = logging.StreamHandler(param)
+                sh.setLevel(level)
+                log.addHandler(sh)
+            if handler == 'rotatingfile':
+                if len(logline) < 4:
+                    raise _log_throw(log, 'Rotating log handler needs a file name, max size and maxCount')
+
+                rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
+                rh.setLevel(level)
+                log.addHandler(rh)
+
+def _log_throw(log, error, *args):
+    log.error(error, *args)
+    raise UserException(error)

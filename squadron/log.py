@@ -1,5 +1,6 @@
 import logging
 import datetime
+from fileio.config import parse_log_config
 log = logging.getLogger('normal')
 
 class SpecialFormatter(logging.Formatter):
@@ -12,19 +13,17 @@ class SpecialFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-def setup_log(loglevel, console=False):
-    level = getattr(logging, loglevel.upper(), None)
-    if not isinstance(level, int):
-        raise ValueError('Invalid log level {}'.format(loglevel))
+def setup_log(loglevel, config_file=None, console=False):
+    if console:
+        level = getattr(logging, loglevel.upper(), None)
+        if not isinstance(level, int):
+            raise ValueError('Invalid log level {}'.format(loglevel))
 
-    log.setLevel(level)
+        log.setLevel(level)
 
-    if(console):
         ch = logging.StreamHandler()
         ch.setLevel(level)
         ch.setFormatter(SpecialFormatter())
         log.addHandler(ch)
     else:
-        #Not sure if we want to do this
-        nh = logging.NullHandler()
-        log.addHandler(nh)
+        parse_log_config(log, config_file)

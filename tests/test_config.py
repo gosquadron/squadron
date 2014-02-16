@@ -2,17 +2,20 @@ import shutil
 import pytest
 from squadron.fileio import config as squadron_config
 from squadron.exceptions import UserException
-from squadron.log import log
+from squadron.log import log, setup_log
 from ConfigParser import SafeConfigParser
 from helper import get_test_path
 import os
+import pytest
 
 test_path = os.path.join(get_test_path(), 'config_tests')
+
+setup_log('DEBUG', console=True)
 
 def test_no_config():
     squadron_config.CONFIG_PATHS = []
     with pytest.raises(UserException) as ex:
-        squadron_config.parse_config()
+        squadron_config.parse_config(log)
     assert ex is not None
 
 def diff_dict(a, b):
@@ -51,7 +54,7 @@ def create_fake_config(output_file):
 def test_defaults():
     squadron_config.CONFIG_PATHS = ['/tmp/test_config']
     create_fake_config(squadron_config.CONFIG_PATHS[0])
-    result = squadron_config.parse_config()
+    result = squadron_config.parse_config(log)
     #We have a fake config file that is parsable, but missing everything
     diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS()) 
     #There should only be one difference, the fakesetting
@@ -67,7 +70,7 @@ def test_overrides():
     output_file = '/tmp/test_override_config'
     squadron_config.CONFIG_PATHS = [output_file]
     create_config(output_file, override_func)
-    result = squadron_config.parse_config()
+    result = squadron_config.parse_config(log)
     diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS())
     assert(len(diff) == len(squadron_config.CONFIG_DEFAULTS()))
     assert(len(diff) > 0)
@@ -84,10 +87,15 @@ def test_logging(tmpdir):
         with open(log_config_template) as tfile:
             lfile.write(tfile.read().format(log_file, rotate_file))
 
-    config = squadron_config.parse_log_config(log_config)
+    config = squadron_config.parse_log_config(log, log_config)
 
     log.debug('Log debug: %s', tmpdir)
     log.error('Log error')
 
     assert os.path.exists(log_file)
     assert os.path.exists(rotate_file)
+
+@pytest.mark.parametrize("error_file", os.listdir(os.path.join(test_path, 'error')))
+def test_logging_error(error_file):
+    with pytest.raises(UserException) as ex:
+        squadron_config.parse_log_config(log, os.path.join(test_path, 'error', error_file))

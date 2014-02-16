@@ -36,7 +36,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         dry_run -- whether or not to apply changes
     """
     try:
-        config = parse_config(config_file)
+        config = parse_config(log, config_file)
         log.debug("Got config {}".format(config))
 
         if squadron_state_dir is None:

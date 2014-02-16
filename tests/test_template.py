@@ -10,7 +10,7 @@ from helper import are_dir_trees_equal, get_test_path
 import os
 import stat
 
-setup_log('DEBUG', True)
+setup_log('DEBUG', console=True)
 
 test_path = os.path.join(get_test_path(), 'template_tests')
 

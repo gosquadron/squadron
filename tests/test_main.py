@@ -9,7 +9,7 @@ import squadron
 
 from squadron import log
 
-log.setup_log('DEBUG', True)
+log.setup_log('DEBUG', console=True)
 
 def create_blank_infojson(statedir):
     open(os.path.join(statedir,'info.json'),'w+').close()

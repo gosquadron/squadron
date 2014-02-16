@@ -2,7 +2,7 @@ from squadron import resources, log
 from helper import get_test_path
 import os
 
-log.setup_log('DEBUG', True)
+log.setup_log('DEBUG', console=True)
 
 test_path = os.path.join(get_test_path(), 'resources_tests')
 

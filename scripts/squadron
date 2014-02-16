@@ -39,7 +39,7 @@ def _daemonize(args, parent):
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
 
     output = parser.parse_args(args)
-    log.setup_log(output.loglevel, console=False)
+    log.setup_log(output.loglevel, output.config, False)
 
     return daemon.daemonize(output.directory, output.config, output.polltime, output.repo)
 
