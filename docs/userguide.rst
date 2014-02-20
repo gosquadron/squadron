@@ -316,6 +316,51 @@ Here is a list of fields that a `when` object can contain:
 | not_exist      | List of globs/absolute paths to run if these files don't exist                     |
 +----------------+------------------------------------------------------------------------------------+
 
+Resources
+---------
+
+Resources are files that are available to multiple services, such as ssh
+private keys, which allow Squadron to deploy software from a private git
+server.
+
+Resources are located in the `resources` directory at the top level of
+Squadron::
+
+    $ ls -1F
+    config/
+    nodes/
+    resources/
+    services/
+
+And inside `resources` can be any number of subdirectories and files. Like
+this::
+
+    $ tree -F resources/
+    resources/
+    |-- ssh_keys/
+    |   |-- deploy1
+    |   |-- deploy1.pub
+    |   `-- old_keys/
+    |       |-- deploy_key
+    |       `-- deploy_key.pub
+    `-- other/
+        `-- script.sh
+
+So now, in ~git files within your `root` in a service, you can reference these
+keys by relative path.
+
+Like this::
+
+    $ cat services/example/0.0.1/root/test~git
+    http://example.com/repo.git master ssh_keys/deploy1
+
+The ~git extension knows to look in the `resources` directory for the file
+`ssh_keys/deploy1`, which is the secret key needed to deploy that git
+repository.
+
+In future releases, :ref:`actionreaction` will be able to reference scripts in
+`resources`.
+
 .. _tests:
 
 Tests
