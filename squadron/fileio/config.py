@@ -66,10 +66,9 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
 def parse_log_config(log, config_file):
     VALID_LOG_HANDLERS = set(['file', 'stream', 'rotatingfile'])
     VALID_STREAMS = set(['stdout', 'stderr'])
-
     parser = _get_parser(log, config_file, {})
+    log.setLevel(10) #DO NOT REMOVE THIS LINE (Ideally this should be the lowest level logged)
     if 'log' in parser.sections():
-        PARSED_LOG_CONFIG = True
         for _, value in parser.items('log'):
             logline = value.split()
             if len(logline) < 2:
@@ -109,6 +108,7 @@ def parse_log_config(log, config_file):
                 sh = logging.StreamHandler(param)
                 sh.setLevel(level)
                 log.addHandler(sh)
+
             if handler == 'rotatingfile':
                 if len(logline) < 4:
                     raise _log_throw(log, 'Rotating log handler needs a file name, max size and maxCount')

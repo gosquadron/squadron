@@ -27,3 +27,4 @@ def setup_log(loglevel, config_file=None, console=False):
         log.addHandler(ch)
     else:
         parse_log_config(log, config_file)
+
