@@ -358,8 +358,25 @@ The ~git extension knows to look in the `resources` directory for the file
 `ssh_keys/deploy1`, which is the secret key needed to deploy that git
 repository.
 
-In future releases, :ref:`actionreaction` will be able to reference scripts in
-`resources`.
+You can also use resources with :ref:`actionreaction`. Just specify the command
+like this::
+
+    {
+        "run" : {
+            "commands" : ["resources/test.sh"]
+        },
+        "go for it" : {
+            "commands" : ["resources/other/file arg1 arg2", "resources/this.py", "touch /tmp/out"]
+        }
+    } 
+
+This defines two actions. The first, `run`, uses one resource called test.sh.
+The file resources/test.sh will be extracted to a temporary location, made
+executable, and then executed with no arguments.
+
+The second action `go for it` defines three commands to run in order. The first
+two are resources. The first resource will have two command line arguments
+passed to it.
 
 .. _tests:
 
