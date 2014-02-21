@@ -5,6 +5,7 @@ import os
 from ..exceptions import UserException
 import logging
 import logging.handlers
+from time import strftime
 
 def CONFIG_DEFAULTS():
     return {
@@ -91,6 +92,14 @@ def parse_log_config(log, config_file):
                 param = logline[2]
                 fh = logging.FileHandler(param, 'a', None, False)
                 fh.setLevel(level)
+                
+                #Send an event only to this logger so we know when it started since we append
+                timestr = strftime("%Y-%m-%d %H:%M:%S")
+                breaker = '========================================================='
+                args = breaker, timestr, breaker
+                record = logging.LogRecord('normal', 10, '', 0, '\n\n%s\nLogging started at %s\n%s\n', args, None) 
+                fh.handle(record)
+
                 log.addHandler(fh)
 
             if handler == 'stream':
