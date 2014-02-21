@@ -89,11 +89,25 @@ def test_logging(tmpdir):
 
     config = squadron_config.parse_log_config(log, log_config)
 
-    log.debug('Log debug: %s', tmpdir)
-    log.error('Log error')
+    debug_str = 'Log debug: %s'.format(tmpdir)
+    error_str = 'Log error'
+
+    log.debug(debug_str)
+    log.error(error_str)
 
     assert os.path.exists(log_file)
     assert os.path.exists(rotate_file)
+    assert verify_log_content(log_file, debug_str)
+    assert verify_log_content(log_file, error_str)
+    assert verify_log_content(rotate_file, error_str)
+
+    #Assert that we don't log debug since it wasn't specified
+    assert not verify_log_content(rotate_file, debug_str)
+
+def verify_log_content(filename, verification):
+    f = open(filename, 'r')
+    log_content = f.read()
+    return (verification in log_content)
 
 @pytest.mark.parametrize("error_file", os.listdir(os.path.join(test_path, 'error')))
 def test_logging_error(error_file):
