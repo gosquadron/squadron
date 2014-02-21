@@ -1,0 +1,5 @@
+{
+    "run" : {
+        "commands" : ["resources/test.sh"]
+    }
+}

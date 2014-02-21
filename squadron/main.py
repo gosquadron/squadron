@@ -163,7 +163,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
         paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
         if not dry_run:
             _deploy(squadron_dir, new_dir, last_run_dir, result,
-                    this_run_sum, last_run_sum, last_commit, dont_rollback)
+                    this_run_sum, last_run_sum, last_commit, dont_rollback, resources)
             info = {'dir': new_dir, 'commit':result, 'checksum': this_run_sum}
             log.debug("Writing run info to %s: %s", squadron_state_dir, info)
 
@@ -207,7 +207,7 @@ def _get_action_reaction(squadron_dir, commit_info):
 
 @go_to_root
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
-        this_run_sum, last_run_sum, last_commit, dont_rollback):
+        this_run_sum, last_run_sum, last_commit, dont_rollback, resources):
     log.info("Applying changes")
     log.debug("Changes: %s", commit_info)
     commit.commit(commit_info)
@@ -223,7 +223,7 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
     log.debug("Paths changed: %s", paths_changed)
     log.debug("New paths: %s", new_paths)
 
-    service.react(actions, reactions, paths_changed, new_paths, new_dir)
+    service.react(actions, reactions, paths_changed, new_paths, new_dir, resources)
     # Now test
     try:
         _run_tests(squadron_dir, commit_info)
@@ -233,7 +233,7 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
             log.error("Rolling back to %s because tests failed", last_commit)
             # Flip around the paths changed and new_paths
             _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
-                    {}, None, dont_rollback)
+                    {}, None, dont_rollback, resources)
         raise
 
 @go_to_root

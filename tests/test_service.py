@@ -78,7 +78,7 @@ def test_react_basic():
         actions.update({'apache2.restart': {
             'commands':['touch /tmp/service1/test.apache2.restart']
         }})
-        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'], [], '/tmp')
+        react(actions, get_reactions(**args), ['conf.d/test', 'mods-enabled/mod'], [], '/tmp', {})
 
         assert os.path.exists('/tmp/service1/test.start') == True
         assert os.path.exists('/tmp/service1/test.apache2.restart') == True
@@ -104,7 +104,7 @@ def test_react_precendence():
         }})
 
         paths_changed = ['service1/conf.d/new-virtual-host', 'service1/mods-enabled/new-mod']
-        react(actions, get_reactions(**args), paths_changed, [], '/tmp')
+        react(actions, get_reactions(**args), paths_changed, [], '/tmp', {})
 
         assert os.path.exists('/tmp/service1/test.start') == False
         assert os.path.exists('/tmp/service1/test.apache2.restart') == False
@@ -114,7 +114,7 @@ def test_react_precendence():
         delete_react_tmp()
         make_react_tmp()
 
-        react(actions, get_reactions(**args), paths_changed[:1], [], '/tmp')
+        react(actions, get_reactions(**args), paths_changed[:1], [], '/tmp', {})
 
         assert os.path.exists('/tmp/service1/test.start') == False
         assert os.path.exists('/tmp/service1/test.apache2.restart') == False
@@ -144,9 +144,30 @@ def test_not_exists():
     # tried to run the reaction. Since the action list is empty, this will
     # raise
     with pytest.raises(ValueError) as ex:
-        react([], [reaction], [], [], '/')
+        react([], [reaction], [], [], '/', {})
 
     assert ex is not None
 
     # It won't raise if it's not going to be run
-    react([], [noreaction], [], [], '/')
+    react([], [noreaction], [], [], '/', {})
+
+def test_resource_react(tmpdir):
+    tmpdir = str(tmpdir)
+    check_file = os.path.join(tmpdir, 'ran_successfully')
+    script = '''#!/bin/sh
+    if [ ! -r {} ]; then
+        touch {}
+    else
+        exit 1
+    fi
+    '''.format(check_file, check_file)
+
+    actions = get_service_actions(test_path, 'resources', '1.0')
+    reactions = get_reactions(test_path, 'resources', '1.0')
+
+    assert len(actions) == 1
+    assert len(reactions) == 1
+   
+    react(actions, reactions, [], [], os.path.join(test_path, 'services'), {'test.sh':lambda:script})
+
+    assert os.path.exists(check_file)

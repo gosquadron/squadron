@@ -1,0 +1,8 @@
+[   
+    {
+        "execute": ["run"],
+        "when" : {
+            "always": true
+        }
+    }
+]

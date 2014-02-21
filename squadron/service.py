@@ -6,6 +6,8 @@ import os
 from fileio import dirio
 from log import log
 import glob
+import tempfile
+import stat
 
 _action_schema = {
     'type': 'object',
@@ -123,6 +125,7 @@ def get_service_actions(service_dir, service_name, service_ver):
 
             v['not_after'] = not_after
 
+
         # Prepend dot for the action name always
         result[service_name + '.' + k] = v
 
@@ -200,7 +203,34 @@ def _checknotexists(files):
             return True
     return False
 
-def react(actions, reactions, paths_changed, new_files, base_dir):
+def _execute(command, resources):
+    args = command.split()
+    executable = args[0]
+    tmp_file = None
+
+    try:
+        prefix = 'resources' + os.path.sep
+        if executable.startswith(prefix):
+            log.debug('%s in "%s" is a resource', executable, command)
+            tmp_file = tempfile.NamedTemporaryFile(prefix='sq-', suffix='-cmd', delete=False)
+
+            script = resources[executable[len(prefix):]]()
+            tmp_file.write(script)
+
+            stat_result = os.fstat(tmp_file.fileno())
+            new_mode = stat_result.st_mode | stat.S_IXUSR
+
+            os.fchmod(tmp_file.fileno(), new_mode)
+            tmp_file.close()
+            args[0] = tmp_file.name
+
+        log.debug('Executing %s', args)
+        subprocess.check_call(args)
+    finally:
+        if tmp_file:
+            os.remove(tmp_file.name)
+
+def react(actions, reactions, paths_changed, new_files, base_dir, resources):
     """
     Performs actions based on reaction criteria. Each action is only performed
     once, and reactions are handled in order.
@@ -254,7 +284,7 @@ def react(actions, reactions, paths_changed, new_files, base_dir):
                         with dirio.SafeChdir(os.path.join(base_dir, service_name)):
                             for command in action_item['commands']:
                                 try:
-                                    subprocess.check_call(command.split())
+                                    _execute(command, resources)
                                 except subprocess.CalledProcessError as e:
                                     log.error("Command {} errored with code {}".format(command, e.returncode))
                                     raise e
