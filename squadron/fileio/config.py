@@ -22,21 +22,61 @@ CONFIG_PATHS = ['/etc/squadron/config',
         os.path.expanduser('~/.squadron/config'),
         ]
 
-def _get_parser(log, config_file, defaults):
-    parser = SafeConfigParser()
-
-    if config_file is None:
-        # Try defaults
-        parsed_files = parser.read(CONFIG_PATHS)
-        log.debug("Using config files: %s", parsed_files)
-    else:
-        log.debug("Using config file: %s", config_file)
-        with open(config_file) as cfile:
-            parser.readfp(cfile, config_file)
-
-    return parser
 
 CONFIG_SECTIONS = set(['squadron', 'status', 'daemon'])
+
+#http://legacy.python.org/dev/peps/pep-0318/#examples
+#TODO: move elsewhere
+def singleton(cls):
+    instances = {}
+    def getinstance():
+        if cls not in instances:
+            instances[cls] = cls()
+        return instances[cls]
+    return getinstance
+
+@singleton
+class SquadronConfig:
+
+    def __init__(self):
+        self._config_file = None
+        self._defaults = None
+        self._log = None
+        self._loaded_parser = None
+        self._initialized = False
+
+    #Only called by tests
+    def _reset(self):
+        self._initialized = False
+        self._loaded_parser = None
+
+    #This is not the constructor for a reason
+    #It's hard to mix the singleton with a static method
+    #TODO: Research a better way 
+    def initialize(self, log, config_file, defaults):
+        self._config_file = config_file
+        self._defaults = defaults
+        self._log = log
+        self._initialized = True
+
+    def get_config(self):
+        #TODO: handle race conditions with a lock
+        if not self._initialized:
+            raise Exception("Must call initialize in SquadronConfig once")
+
+        if self._loaded_parser is None:
+            self._loaded_parser = SafeConfigParser()
+    
+        if self._config_file is None:
+            # Try defaults
+            parsed_files = self._loaded_parser.read(CONFIG_PATHS)
+            self._log.debug("Using config files: %s", parsed_files)
+        else:
+            self._log.debug("Using config file: %s", self._config_file)
+            with open(self._config_file) as cfile:
+                self._loaded_parser.readfp(cfile, self._config_file)
+        return self._loaded_parser
+
 def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
     """
     Parses a given config file using SafeConfigParser. If the specified
@@ -49,8 +89,9 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
             None, searches for system-wide configuration and from
             the local user's configuration.
     """
-
-    parser = _get_parser(log, config_file, defaults)
+    global_config = SquadronConfig()
+    global_config.initialize(log, config_file, defaults)
+    parser = global_config.get_config()
 
     if parser.sections():
         log.debug("Original section squadron: %s", parser.items('squadron'))
@@ -67,7 +108,10 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
 def parse_log_config(log, config_file):
     VALID_LOG_HANDLERS = set(['file', 'stream', 'rotatingfile'])
     VALID_STREAMS = set(['stdout', 'stderr'])
-    parser = _get_parser(log, config_file, {})
+
+    global_config = SquadronConfig()
+    global_config.initialize(log, config_file, [])
+    parser = global_config.get_config()
     log.setLevel(10) #DO NOT REMOVE THIS LINE (Ideally this should be the lowest level logged)
     if 'log' in parser.sections():
         for _, value in parser.items('log'):

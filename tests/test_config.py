@@ -12,6 +12,11 @@ test_path = os.path.join(get_test_path(), 'config_tests')
 
 setup_log('DEBUG', console=True)
 
+#Called before every test
+#Resets the singleton
+def setup_function(function):
+    squadron_config.SquadronConfig()._reset()
+
 def test_no_config():
     squadron_config.CONFIG_PATHS = []
     with pytest.raises(UserException) as ex:
