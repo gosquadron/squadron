@@ -10,13 +10,6 @@ SSH_WRAPPER='''#!/bin/sh
 {} -i {} $@
 '''
 
-def _set_ssh_wrapper(contents):
-    global SSH_WRAPPER
-    SSH_WRAPPER = contents
-
-def _get_ssh_wrapper():
-    return str(SSH_WRAPPER)
-
 def write_temp_file(contents, suffix, executable):
     tmpfile = tempfile.NamedTemporaryFile(suffix=suffix,prefix='squadron',delete=False)
     try:

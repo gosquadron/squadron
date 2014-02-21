@@ -1,8 +1,9 @@
 import os
-from squadron.exthandlers.makegit import _set_ssh_wrapper, _get_ssh_wrapper, ext_git
+from squadron.exthandlers.makegit import ext_git
 from quik import FileLoader
 import pytest
 import git
+import mock
 
 def get_loader():
     return FileLoader(os.getcwd())
@@ -43,15 +44,12 @@ def test_refspec(tmpdir):
     with open(install_file) as ifile:
         assert ifile.read().strip() == 'echo "Success"'
 
-def broken_test_sshkey(tmpdir):
+
+@pytest.mark.parametrize("ssh_command", [None, "fake_ssh_command"])
+def test_sshkey(tmpdir,ssh_command):
     tmpdir = str(tmpdir)
 
-    # we need to do this to avoid ssh-agent problems
     test_path = os.path.dirname(os.path.realpath(__file__))
-    known_hosts = os.path.join(test_path, 'known_hosts')
-    ssh = _get_ssh_wrapper().format('{} -o StrictHostKeyChecking=no -o UserKnownHostsFile=' + known_hosts + ' -o IdentitiesOnly=yes ','{}')
-    _set_ssh_wrapper(ssh)
-    assert _get_ssh_wrapper() == ssh
 
     with open(os.path.join(test_path, 'private_key')) as k:
         private_key = k.read()
@@ -59,19 +57,34 @@ def broken_test_sshkey(tmpdir):
     abs_source = os.path.join(tmpdir, 'deploy~git')
     dest = os.path.join(tmpdir, 'dest-dir')
 
-    with open(abs_source, 'w') as gfile:
-        gfile.write('git@bitbucket.org:test-squadron/test-private-repo.git @version\n')
+    with mock.patch('git.Repo') as gitmock:
+        # We need a side effect to see if the env variable is being set
+        def check_environ(*args):
+            if ssh_command:
+                with open(os.environ['GIT_SSH']) as gitfile:
+                    if ssh_command not in gitfile.read():
+                        assert False
+            # We need to return a mock handle so .git.checkout can be called
+            return gitmock.clone_from
 
-    with pytest.raises(git.GitCommandError) as ex:
-        finalfile = ext_git(abs_source, dest, {'version':'a057eb0faaa8'}, get_loader(),
+        # Apply the side effect
+        gitmock.clone_from.side_effect = check_environ
+
+        # Since this is mocked, it won't actually be hit
+        url = 'git@example.org:squadron/test-repo.git'
+        version = 'a057eb0faaa8'
+        with open(abs_source, 'w') as gfile:
+            gfile.write(url + ' @version filename\n')
+
+        dest = os.path.join(tmpdir, 'dest-dir2')
+
+        # If we have a special ssh_command to use, use it
+        if ssh_command:
+            os.environ['GIT_SSH'] = ssh_command
+
+        finalfile = ext_git(abs_source, dest, {'version':version}, get_loader(),
                 {'filename': lambda: private_key})
 
-    assert 'access denied' in str(ex) or 'Permission denied' in str(ex)
-
-    with open(abs_source, 'w') as gfile:
-        gfile.write('git@bitbucket.org:test-squadron/test-private-repo.git @version filename\n')
-
-    dest = os.path.join(tmpdir, 'dest-dir2')
-    finalfile = ext_git(abs_source, dest, {'version':'a057eb0faaa8'}, get_loader(),
-            {'filename': lambda: private_key})
-    print finalfile
+        expected_calls = [mock.call.clone_from(url, finalfile),
+                mock.call.clone_from.git.checkout(version)]
+        assert expected_calls == gitmock.mock_calls
