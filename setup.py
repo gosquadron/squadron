@@ -19,7 +19,7 @@ def read(fname):
 from setuptools import setup, find_packages
 setup(
     name='squadron',
-    version='0.0.3',
+    version='0.1.0',
     author='Squadron',
     author_email='info@gosquadron.com',
     description='Easy-to-use configuration and release management tool',
