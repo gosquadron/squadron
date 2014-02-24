@@ -409,7 +409,7 @@ information.
 Returning a non-zero status code indicates a test failure.
 
 
-.. _globalconfiguration:
+.. _global-configuration:
 
 Global Configuration
 -----
@@ -445,7 +445,7 @@ Log section:
     debugonly = DEBUG file /tmp/log
 
     - debugonly - just a friendly name, not used for anything MUST BE UNIQUE.
-    - DEBUG - Level to log must match one of `these <http://docs.python.org/2/library/logging.html#logging-levels>`
+    - DEBUG - Level to log must match one of `these <http://docs.python.org/2/library/logging.html#logging-levels>`_
     - file - type of log, in this case this is a simple file log
     - /tmp/log - parameter(s) for the type of log, in this case the file to log
     to
