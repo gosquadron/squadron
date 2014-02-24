@@ -420,7 +420,7 @@ It also looks for config in the following places:
  - /usr/local/etc/squadron/config
  - ~/.squadron/config
 
-Let's go over some of the connfiguration values:
+Let's go over some of the configuration values:
 
 Daemon section:
     - polltime - frequency in seconds that we check the git repo for changes
