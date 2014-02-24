@@ -407,3 +407,61 @@ The test *must* read standard input even if it does not intend to use this
 information.
 
 Returning a non-zero status code indicates a test failure.
+
+
+.. _globalconfiguration:
+
+Global Configuration
+-----
+
+Squadron keeps system wide config by default in /home/user/.squadron
+It also looks for config in the following places:
+ - /etc/squadron/config
+ - /usr/local/etc/squadron/config
+ - ~/.squadron/config
+
+Let's go over some of the connfiguration values:
+
+Daemon section:
+    - polltime - frequency in seconds that we check the git repo for changes
+
+Squadron section:
+    - keydir - where we store any ssh keys
+    - nodename - name you want for the node, used to determine which node
+      config applies to this machine
+    - statedir - directory to keep previous state of squadron
+    - send_status - whether or not to send node status to remote server defined
+      in [status] section
+
+Status section:
+    - status_host where to send status to
+    - status_apikey - key used for identity
+    - status_secret - shared secret to verify identity
+
+Log section:
+    This section is a bit special, you can enter as many lines as you want here
+    so long as they follow the following format defined in the example:
+    
+    debugonly = DEBUG file /tmp/log
+
+    debugonly - just a friendly name, not used for anything MUST BE UNIQUE.
+    DEBUG - Level to log must match one of these
+    http://docs.python.org/2/library/logging.html#logging-levels
+    file - type of log, in this case this is a simple file log
+    /tmp/log - parameter(s) for the type of log, in this case the file to log
+    to
+
+    We support three types of logs at the moment
+        file:
+            - expects file to log to as parameter
+        stream:
+            - expects stdout or stderr as the parameter
+        rotatingfile:
+            - file to log to
+            - max file size in bytes
+            - max number of files to backup 
+    
+    Example of rotating file:
+    rotate = DEBUG rotatingfile /tmp/rot 500 2
+
+

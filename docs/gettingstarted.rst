@@ -16,11 +16,11 @@ Install Squadron
 
 First, get the prerequisites::
 
-    $ sudo apt-get install git python python-pip tree
+    $ sudo apt-get install git python python-pip
 
 or, if you're on OS X::
 
-    $ brew install python python-pip git tree (???)
+    $ brew install python python-pip git
 
 Now let's install squadron::
 
@@ -323,9 +323,12 @@ Set up git::
 
 Then set up the daemon::
 
-TODO
+    $ squadron daemon
 
 It’s really that easy. Any node running the Squadron daemon will pull down your changes over the next 30 minutes.
+
+You can configure logging for the daemon using the system config file described
+here [reference userguide->system config]
 
 More environments
 -----------------
