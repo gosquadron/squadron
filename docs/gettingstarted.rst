@@ -329,7 +329,7 @@ It’s really that easy. Any node running the Squadron daemon will pull down you
 
 You can configure the poll interval and logging for the daemon using the system config file described
 here:
-:userguide:`global-configuration`
+:ref:`global-configuration`
 
 More environments
 -----------------
