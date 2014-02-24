@@ -327,9 +327,8 @@ Then set up the daemon::
 
 It’s really that easy. Any node running the Squadron daemon will pull down your changes over the next 30 seconds.
 
-You can configure the poll interval and logging for the daemon using the system config file described
-here:
-:ref:`global-configuration`
+You can configure the poll interval and logging for the daemon using the system
+config file described in :ref:`global-configuration`.
 
 More environments
 -----------------
