@@ -444,11 +444,11 @@ Log section:
     
     debugonly = DEBUG file /tmp/log
 
-    debugonly - just a friendly name, not used for anything MUST BE UNIQUE.
-    DEBUG - Level to log must match one of these
+    - debugonly - just a friendly name, not used for anything MUST BE UNIQUE.
+    - DEBUG - Level to log must match one of these
     http://docs.python.org/2/library/logging.html#logging-levels
-    file - type of log, in this case this is a simple file log
-    /tmp/log - parameter(s) for the type of log, in this case the file to log
+    - file - type of log, in this case this is a simple file log
+    - /tmp/log - parameter(s) for the type of log, in this case the file to log
     to
 
     We support three types of logs at the moment
