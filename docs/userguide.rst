@@ -163,6 +163,36 @@ Example state.json with apt::
         "apt": ["screen","tmux"]
     }
 
+group
+""""
+
+Creates groups. Takes an object with the following fields.
+
++--------------+---------------------------+
+| **Field**    | **Description**           |
++----------+---+---------------------------+
+| name     | Required. Sets the group name |
++----------+-------------------------------+
+| gid      | Integer. Specific group id    |
++----------+-------------------------------+
+| system   | Boolean. Is a system group?   |
++----------+-------------------------------+
+
+Example state.json with group::
+
+    {
+        "group": [
+            {
+                "name": "newgroup"
+            },
+            {
+                "name": "specificgroup",
+                "gid": 555,
+                "system": true
+            }
+        ]
+    }
+
 user
 """"
 
