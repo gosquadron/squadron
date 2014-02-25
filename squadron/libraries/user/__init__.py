@@ -44,6 +44,7 @@ def schema():
         },
         'required':['username']
     })
+    return schema
 
 class VerifyError(Exception):
     pass

@@ -26,6 +26,7 @@ def schema():
         },
         'required':['name']
     })
+    return schema
 
 class VerifyError(Exception):
     pass
