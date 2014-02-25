@@ -46,17 +46,26 @@ The 'git' extension clones git repositories.
 
 **Contents**
 
-A single line, with the git remote and an optional refspec, seperated by a
-space. Will have a template applied to it, so variable substitution and logic
-is possible.
+A single line, with the git remote, an optional refspec, and an optional ssh
+private key resource, each seperated by a space. 
+
+Will have a template applied to it, so variable substitution and logic is 
+possible.
 
 Examples::
 
-    https://github.com/gosquadron/squadron.git  master
+    https://github.com/gosquadron/squadron.git master
 
 or::
 
     git@github.com:gosquadron/example-squadron-repo.git
+
+or even::
+
+    git@github.com:gosquadron/example-squadron-repo.git @release ssh_keys/deploy1
+
+The last example requires that the `ssh_keys/deploy1` resource exists and is a
+private ssh key. See the :ref:`resources` section for more information.
 
 tpl
 ^^^
@@ -315,6 +324,8 @@ Here is a list of fields that a `when` object can contain:
 +----------------+------------------------------------------------------------------------------------+
 | not_exist      | List of globs/absolute paths to run if these files don't exist                     |
 +----------------+------------------------------------------------------------------------------------+
+
+.. _resources:
 
 Resources
 ---------
