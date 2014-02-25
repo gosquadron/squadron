@@ -109,6 +109,7 @@ def apply(inputhashes, log):
                 args.append('--home')
                 args.append(user['homedir'])
 
+            args.append(username)
             result = subprocess.call(args)
 
             if result != 0:

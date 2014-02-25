@@ -73,6 +73,7 @@ def apply(inputhashes, log):
                 args.append('--gid')
                 args.append(group['gid'])
 
+            args.append(name)
             result = subprocess.call(args)
             log.debug('groupadd for %s result %s', args, result)
 
