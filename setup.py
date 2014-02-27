@@ -2,6 +2,38 @@ from setuptools.command.test import test as TestCommand
 import sys
 import os
 
+#Class that spins up various vagrant instances
+#If this gets too large we'll move it out
+class FullTestPass(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+    def run(self):
+        import vagrant
+        import pysftp
+        #Figure out how to properly install this
+        #Options: pip requires file, or test_requires below
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        test_dir = os.path.join(current_dir,"ftp")
+        if not os.path.exists(test_dir):
+            os.makedirs(test_dir)
+        print 'creating dir'
+        v = vagrant.Vagrant(test_dir)
+        print 'turning on'
+        v.up(vm_name='avm')
+        config_raw = v.ssh_config(vm_name='avm')
+        print config_raw
+        config = v.conf(vm_name='avm')
+        
+        srv = pysftp.Connection(host=config['HostName'], username=config['User'],
+                port=int(config['Port']), private_key=config['IdentityFile'])
+        print srv.execute('ls -al')
+        srv.close
+        print 'shutting down'
+       # v.halt(vm_name='avm')
+
+        pass
+
+#Runs unit tests
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -42,7 +74,7 @@ setup(
         'pytest>=2.5.1',
         'mock>=1.0.1'
         ],
-    cmdclass = {'test': PyTest},
+    cmdclass = {'test': PyTest, 'ftp': FullTestPass},
     install_requires=[
         'jsonschema>=2.3.0',
         'gitpython>=0.3.2.RC1',
