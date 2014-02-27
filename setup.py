@@ -4,7 +4,7 @@ import os
 
 #Class that spins up various vagrant instances
 #If this gets too large we'll move it out
-class FullTestPass(TestCommand):
+class VMTestPass(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
     def run(self):
@@ -21,14 +21,31 @@ class FullTestPass(TestCommand):
         print 'turning on'
         v.up(vm_name='avm')
         config_raw = v.ssh_config(vm_name='avm')
-        print config_raw
         config = v.conf(vm_name='avm')
-        
+        print "Connecting via SSH"
         srv = pysftp.Connection(host=config['HostName'], username=config['User'],
                 port=int(config['Port']), private_key=config['IdentityFile'])
-        print srv.execute('ls -al')
+        print "Installing prerequisites"
+        #This is going to be OS specific, for now assume its debian
+        package = srv.execute('export DEBIAN_FRONTEND=noninteractive; sudo apt-get -q -y install git python python-pip')
+        print "reclonening squadron git repo"
+        clone = srv.execute('rm -rf squadron; git clone https://github.com/gosquadron/squadron.git')
+        print "executing tests"
+        out = srv.execute('cd squadron; python setup.py test > /vagrant/test.out')
+        fresult = open(os.path.join(test_dir, 'test.out'), 'r')
+        tests = fresult.read()
+        fresult.close() 
+
+        package = ', '.join(package).replace(', ', '')
+        clone = ', '.join(clone).replace(', ', '')
+        out = ', '.join(out).replace(', ', '')
+
+        f = open('vmtest.output', 'w')
+        f.write("{0}\n{1}\n{2}\n{3}".format(package, clone, tests, out))
+        f.close()
+        print "Output file: vmtest.output"
         srv.close
-        print 'shutting down'
+        print 'shutting down (disabled)'
        # v.halt(vm_name='avm')
 
         pass
@@ -74,7 +91,7 @@ setup(
         'pytest>=2.5.1',
         'mock>=1.0.1'
         ],
-    cmdclass = {'test': PyTest, 'ftp': FullTestPass},
+    cmdclass = {'test': PyTest, 'vmtest': VMTestPass},
     install_requires=[
         'jsonschema>=2.3.0',
         'gitpython>=0.3.2.RC1',
