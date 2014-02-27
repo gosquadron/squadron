@@ -27,7 +27,7 @@ class VMTestPass(TestCommand):
                 port=int(config['Port']), private_key=config['IdentityFile'])
         print "Installing prerequisites"
         #This is going to be OS specific, for now assume its debian
-        package = srv.execute('export DEBIAN_FRONTEND=noninteractive; sudo apt-get -q -y install git python python-pip')
+        package = srv.execute('export DEBIAN_FRONTEND=noninteractive; sudo apt-get -q -y install git python python-pip python-virtualenv')
         print "reclonening squadron git repo"
         clone = srv.execute('rm -rf squadron; git clone https://github.com/gosquadron/squadron.git')
         print "executing tests"
