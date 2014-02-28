@@ -117,6 +117,7 @@ def parse_log_config(log, config_file):
     if 'log' in parser.sections():
         for _, value in parser.items('log'):
             logline = value.split()
+            print logline
             if len(logline) < 2:
                 raise _log_throw(log, 'Invalid log config passed: %s', value)
 
@@ -173,11 +174,12 @@ def parse_log_config(log, config_file):
             if handler == 'loggly':
                 lg = None
                 if len(logline) < 3:
-                    lg = LogglyHandler()
+                    lg = LogglyHandler.LogglyHandler()
                 else:
-                    lg = LogglyHandler(logline[3])
+                    lg = LogglyHandler.LogglyHandler(logline[3])
                 lg.setLevel(level)
-                logger.addHandler(lg)
+                log.addHandler(lg)
+                print 'setup loggly'
 
 def _log_throw(log, error, *args):
     log.error(error, *args)

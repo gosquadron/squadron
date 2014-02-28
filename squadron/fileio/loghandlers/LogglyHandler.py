@@ -15,6 +15,7 @@ class LogglyHandler(Handler):
             self.base_url = base_url
         self.localip = socket.gethostbyname(socket.gethostname())
         self.publicip = urllib2.urlopen('http://ip.42.pl/raw').read()
+        Handler.__init__(self)
 
     def emit(self, record):
         try:
