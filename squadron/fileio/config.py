@@ -31,6 +31,9 @@ CONFIG_SECTIONS = set(['squadron', 'status', 'daemon'])
 class SquadronConfig:
 
     def __init__(self):
+        """
+        Because this is a singleton this is only called once!
+        """
         self._config_file = None
         self._defaults = None
         self._log = None
@@ -54,8 +57,9 @@ class SquadronConfig:
         """
 #There is a bug when we start caching things.
 #Comment this out when it's fixed
-#        if(self._initialized):
-#            return
+        if(self._initialized):
+            #return
+            self._reset()
         self._config_file = config_file
         self._defaults = defaults
         self._log = log
@@ -69,19 +73,21 @@ class SquadronConfig:
         if not self._initialized:
             raise Exception("Must call initialize in SquadronConfig once")
 
-        #TODO: Actually cache it, there is a bug at the moment
+        #TODO: This cache doesn't work because initializing resets it until bug is fixed
         if self._loaded_parser is None:
             self._loaded_parser = SafeConfigParser()
     
-        if self._config_file is None:
-            # Try defaults
-            parsed_files = self._loaded_parser.read(CONFIG_PATHS)
-            self._log.debug("Using config files: %s", parsed_files)
+            if self._config_file is None:
+                # Try defaults
+                parsed_files = self._loaded_parser.read(CONFIG_PATHS)
+                self._log.debug("Using config files: %s", parsed_files)
+            else:
+                self._log.debug("Using config file: %s", self._config_file)
+                with open(self._config_file) as cfile:
+                    self._loaded_parser.readfp(cfile, self._config_file)
+            return self._loaded_parser
         else:
-            self._log.debug("Using config file: %s", self._config_file)
-            with open(self._config_file) as cfile:
-                self._loaded_parser.readfp(cfile, self._config_file)
-        return self._loaded_parser
+            return self._loaded_parser
         
 
 
