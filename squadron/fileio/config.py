@@ -7,6 +7,7 @@ import logging
 import logging.handlers
 from time import strftime
 from loghandlers import LogglyHandler
+from singleton import singleton
 
 def CONFIG_DEFAULTS():
     return {
@@ -25,16 +26,6 @@ CONFIG_PATHS = ['/etc/squadron/config',
 
 
 CONFIG_SECTIONS = set(['squadron', 'status', 'daemon'])
-
-#http://legacy.python.org/dev/peps/pep-0318/#examples
-#TODO: move elsewhere
-def singleton(cls):
-    instances = {}
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
 
 @singleton
 class SquadronConfig:
