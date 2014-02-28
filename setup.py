@@ -50,5 +50,6 @@ setup(
         'gitpython>=0.3.2.RC1',
         'quik>=0.2.2',
         'requests>=2.2.0',
-        'py>=1.4.19']
+        'py>=1.4.19',
+        'simplejson>=0']
 )

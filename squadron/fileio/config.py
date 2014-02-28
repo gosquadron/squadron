@@ -6,6 +6,7 @@ from ..exceptions import UserException
 import logging
 import logging.handlers
 from time import strftime
+from loghandlers import LogglyHandler
 
 def CONFIG_DEFAULTS():
     return {
@@ -106,7 +107,7 @@ def parse_config(log, config_file = None, defaults = CONFIG_DEFAULTS()):
         raise _log_throw(log, 'No config file could be loaded. Make sure at least one of these exists and can be parsed: %s', CONFIG_PATHS)
 
 def parse_log_config(log, config_file):
-    VALID_LOG_HANDLERS = set(['file', 'stream', 'rotatingfile'])
+    VALID_LOG_HANDLERS = set(['file', 'stream', 'rotatingfile', 'loggly'])
     VALID_STREAMS = set(['stdout', 'stderr'])
 
     global_config = SquadronConfig()
@@ -169,6 +170,14 @@ def parse_log_config(log, config_file):
                 rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
                 rh.setLevel(level)
                 log.addHandler(rh)
+            if handler == 'loggly':
+                lg = None
+                if len(logline) < 3:
+                    lg = LogglyHandler()
+                else:
+                    lg = LogglyHandler(logline[3])
+                lg.setLevel(level)
+                logger.addHandler(lg)
 
 def _log_throw(log, error, *args):
     log.error(error, *args)
