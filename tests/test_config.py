@@ -1,5 +1,4 @@
 import shutil
-import pytest
 from squadron.fileio import config as squadron_config
 from squadron.exceptions import UserException
 from squadron.log import log, setup_log
@@ -56,6 +55,11 @@ def create_fake_config(output_file):
 
     create_config(output_file, anon)
 
+def override_func(config):
+    config.add_section('squadron')
+    for item in squadron_config.CONFIG_DEFAULTS():
+        config.set('squadron', item, 'not-default')
+
 def test_defaults():
     squadron_config.CONFIG_PATHS = ['/tmp/test_config']
     create_fake_config(squadron_config.CONFIG_PATHS[0])
@@ -68,10 +72,6 @@ def test_defaults():
 
 
 def test_overrides():
-    def override_func(config):
-        config.add_section('squadron')
-        for item in squadron_config.CONFIG_DEFAULTS():
-            config.set('squadron', item, 'not-default')
     output_file = '/tmp/test_override_config'
     squadron_config.CONFIG_PATHS = [output_file]
     create_config(output_file, override_func)
@@ -79,6 +79,16 @@ def test_overrides():
     diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS())
     assert(len(diff) == len(squadron_config.CONFIG_DEFAULTS()))
     assert(len(diff) > 0)
+
+def test_singleton():
+    output_file = '/tmp/test_singleton_config'
+    squadron_config.CONFIG_PATHS = [output_file]
+    create_config(output_file, override_func)
+    result = squadron_config.parse_config(log)
+    another_call = squadron_config.parse_config(log)
+    diff = diff_dict(result, another_call)
+    assert(result == another_call)
+    assert(len(diff) == 0)
 
 def test_logging(tmpdir):
     tmpdir = str(tmpdir)
