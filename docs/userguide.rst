@@ -39,6 +39,38 @@ or::
 
     http://no.sha256.here.com/file.to.download.txt
 
+extract
+^^^^^^^
+
+The 'extract' extension downloads and extracts tarballs and zip files.
+
+**Contents**
+
+The extract extension handler takes a JSON object like this::
+
+    {
+        "url": "http://www.example.com/dir/file.tar.bz2"
+    }
+
+or with manually specifying the type::
+
+    {
+        "url": "https://www.example.com/dir/filename_without_ext",
+        "type": "tar.gz"
+    }
+
+The full list of supported fields is described in the following table.
+
++------------------+----------------------------------------------+
+| **Name**         | **Description**                              |
++------------------+----------------------------------------------+
+| url              | URL to download the tarball from. Required.  |
++------------------+----------------------------------------------+
+| type             | One of "tar.gz", "tar", "tar.bz2", or "zip". |
+|                  | Optional if it can be inferred from filename.|
++------------------+----------------------------------------------+
+
+
 git
 ^^^
 
