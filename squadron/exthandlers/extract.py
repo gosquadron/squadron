@@ -7,6 +7,8 @@ import zipfile
 import jsonschema
 import json
 import tempfile
+import fnmatch
+import shutil
 
 def _extract_tar(source, dest):
     tar = tarfile.open(source)
@@ -74,6 +76,34 @@ def _download_file(url, handle):
             handle.write(chunk)
     handle.close()
 
+def _copy_files(extract_dest, dest, contents):
+    to_copy = {}
+    for root, dirs, files in os.walk(extract_dest):
+        # Get a relative base path
+        base = root[len(extract_dest)+1:]
+
+        for filename in files:
+            # Get a relative filename
+            rel_path = os.path.join(base, filename)
+
+            for copy_item in contents['copy']:
+                if fnmatch.fnmatch(rel_path, copy_item['from']):
+                    # If it's a relative file, it's relative to dest
+                    if not os.path.isabs(copy_item['to']):
+                        copy_dest = os.path.join(dest, copy_item['to'])
+                    else:
+                        copy_dest = copy_item['to']
+
+                    if os.path.isdir(copy_dest):
+                        copy_dest = os.path.join(copy_dest, filename)
+
+                    to_copy[os.path.join(root, filename)] = copy_dest
+
+    # This is done in a separate loop to avoid modifying the walk as
+    # we walk
+    for sourcefile, destfile in to_copy.items():
+        shutil.copyfile(sourcefile, destfile)
+
 def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
     contents = json.loads(render(abs_source, inputhash, loader))
 
@@ -97,17 +127,28 @@ def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
             else:
                 raise UserException('No extractor found for {}'.format(local_filename))
 
-        if 'persist' in contents and not bool(contents['persist']):
+        if 'persist' in contents and not contents['persist']:
             extract_dest = tempfile.mkdtemp(prefix=local_filename, suffix='.sq')
             to_delete.append(extract_dest)
+            persist = False
         else:
             extract_dest = dest
+            persist = True
 
         extractor(tmpfile.name, extract_dest)
 
+        if 'copy' in contents:
+            _copy_files(extract_dest, dest, contents)
+
+        if persist:
+            finalfile = get_filename(dest)
+            return finalfile
+        else:
+            return None
     finally:
         for f in to_delete:
-            os.remove(f)
+            if os.path.isdir(f):
+                shutil.rmtree(f)
+            else:
+                os.remove(f)
 
-    finalfile = get_filename(dest)
-    return finalfile
