@@ -98,8 +98,6 @@ def test_copy(tmpdir, filename, persist):
         cfg = json.dumps(get_config('http://localhost:{}/data/{}'.format(port, filename),
             persist=persist, copy=copy))
 
-        print "Cfg: {}".format(cfg)
-
         abs_source = os.path.join(tmpdir, 'input_config')
         with open(abs_source, 'w') as f:
             f.write(cfg)
