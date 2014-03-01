@@ -13,7 +13,7 @@ def CONFIG_DEFAULTS():
     return {
         'polltime':'30',
         'keydir':'/etc/squadron/keydir',
-        'nodename':socket.getfqdn(),
+        'nodename':socket.gethostname(),
         'statedir':'/var/squadron',
         'send_status': 'false',
     }

@@ -25,12 +25,15 @@ def test_no_config():
 def diff_dict(a, b):
     intersect = intersect_dict(a,b)
     diff = []
+    print "diff dict"
     for item in a.keys():
         if not item in intersect:
             diff.append(item)
+    print "diff dict a {}".format(diff)
     for item in b.keys():
         if not item in intersect and not item in diff:
             diff.append(item)
+    print "diff dict b {}".format(diff)
     return diff
 
 def intersect_dict(initial, diff):
@@ -38,6 +41,7 @@ def intersect_dict(initial, diff):
     for item in initial.keys():
         if(item in diff and diff[item] == initial[item]):
             intersect.append(item)
+    print "intersect({}, {}) = {}".format(initial, diff, intersect)
     return intersect
 
 def create_config(output_file, config_func):
