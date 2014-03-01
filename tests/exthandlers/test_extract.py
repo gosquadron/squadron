@@ -6,8 +6,8 @@ import threading
 from quik import FileLoader
 import os
 import json
-
-PORT = 8903
+import pytest
+import random
 
 def get_test_path():
     return os.path.dirname(os.path.realpath(__file__))
@@ -15,12 +15,16 @@ def get_test_path():
 def get_loader():
     return FileLoader(os.getcwd())
 
+class ReuseTCPServer(SocketServer.TCPServer):
+    def __init__(self, bind, handler):
+        SocketServer.TCPServer.__init__(self, bind, handler)
+        self.allow_reuse_address = True
+
 class BackgroundHTTPServer(threading.Thread):
-    def __init__(self, directory):
+    def __init__(self, directory, port):
         threading.Thread.__init__(self)
         self.directory = directory
-        self.httpd = SocketServer.ForkingTCPServer(('127.0.0.1', PORT),
-            SimpleHTTPServer.SimpleHTTPRequestHandler)
+        self.httpd = ReuseTCPServer(('127.0.0.1', port), SimpleHTTPServer.SimpleHTTPRequestHandler)
 
     def run(self):
         with SafeChdir(self.directory):
@@ -37,15 +41,21 @@ def get_config(url, extract_type = None, persist = None):
 
     return ret
 
-def test_basic(tmpdir):
+@pytest.mark.parametrize("filename",
+        ["file.tar.gz",
+         "file.tar.bz2",
+         "file.tar",
+         "file.zip"])
+def test_basic(tmpdir, filename):
     tmpdir = str(tmpdir)
 
     # To serve the files out of the correct directory
-    http_thread = BackgroundHTTPServer(get_test_path())
+    port = random.randrange(11111,13333)
+    http_thread = BackgroundHTTPServer(get_test_path(), port)
     http_thread.start()
 
     try:
-        cfg = json.dumps(get_config('http://localhost:{}/data/file.tar.gz'.format(PORT)))
+        cfg = json.dumps(get_config('http://localhost:{}/data/{}'.format(port, filename)))
         abs_source = os.path.join(tmpdir, 'input_config')
         with open(abs_source, 'w') as f:
             f.write(cfg)

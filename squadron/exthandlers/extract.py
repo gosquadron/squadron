@@ -3,6 +3,7 @@ from template import render
 import os
 import requests
 import tarfile
+import zipfile
 import jsonschema
 import json
 import tempfile
@@ -12,7 +13,8 @@ def _extract_tar(source, dest):
     tar.extractall(dest)
 
 def _extract_zip(source, dest):
-    raise NotImplementedError()
+    f = zipfile.ZipFile(source)
+    f.extractall(dest)
 
 def _extract_jar(source, dest):
     raise NotImplementedError()
