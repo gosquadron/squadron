@@ -7,3 +7,4 @@ dist
 *.egg-info
 *.swo
 _build
+.DS_Store
