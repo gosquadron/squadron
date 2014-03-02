@@ -39,6 +39,79 @@ or::
 
     http://no.sha256.here.com/file.to.download.txt
 
+extract
+^^^^^^^
+
+The 'extract' extension downloads and extracts tarballs and zip files.
+
+**Contents**
+
+The extract extension handler takes a JSON object like this::
+
+    {
+        "url": "http://www.example.com/dir/file.tar.bz2"
+    }
+
+or with manually specifying the type::
+
+    {
+        "url": "https://www.example.com/dir/filename_without_ext",
+        "type": "tar.gz"
+    }
+
+The extract handler can also copy files out of the tarball::
+
+    {
+        "url": "https://www.example.com/dir/file.zip",
+        "persist": false,
+        "copy": [
+            {
+                "from": "test*",
+                "to": "/etc/test/"
+            },
+            {
+                "from": "dir/file.txt",
+                "to": "../file.txt"
+            }
+        ]
+    }
+
+The full list of supported fields is described in the following table.
+
++------------------+----------------------------------------------+
+| **Name**         | **Description**                              |
++------------------+----------------------------------------------+
+| url              | URL to download the tarball from. Required.  |
++------------------+----------------------------------------------+
+| type             | One of "tar.gz", "tar", "tar.bz2", or "zip". |
+|                  | Optional if it can be inferred from filename.|
++------------------+----------------------------------------------+
+| persist          | Whether or not to keep around the directory  |
+|                  | specified by this extension handler. If      |
+|                  | false, it should be used with copy, as       |
+|                  | non-copied files will be unavailable.        |
+|                  | Defaults to true.                            |
++------------------+----------------------------------------------+
+| copy             | An array of copy objects, described in the   |
+|                  | following table.                             |
++------------------+----------------------------------------------+
+
+The copy objects are described in the following table.
+
++------------------+----------------------------------------------+
+| **Name**         | **Description**                              |
++------------------+----------------------------------------------+
+| from             | A glob match which matches files based on the|
+|                  | path relative to the tarball.                |
++------------------+----------------------------------------------+
+| to               | The destination to copy the files to. If it's|
+|                  | an absolute path, it copies it there. If it's|
+|                  | a relative path, it's relative to the        |
+|                  | directory that would have been created by the|
+|                  | extension handler if persist was true. Does  |
+|                  | not create directories.                      |
++------------------+----------------------------------------------+
+
 git
 ^^^
 
