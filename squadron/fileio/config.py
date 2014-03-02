@@ -57,9 +57,9 @@ class SquadronConfig:
         """
 #There is a bug when we start caching things.
 #Comment this out when it's fixed
-        if(self._initialized):
-            #return
-            self._reset()
+#        if(self._initialized):
+#            return
+#            self._reset()
         self._config_file = config_file
         self._defaults = defaults
         self._log = log
