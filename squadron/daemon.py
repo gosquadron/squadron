@@ -27,8 +27,10 @@ def daemonize(squadron_dir, config_file, polltime, repo):
         repo = Repo.clone_from(repo, squadron_dir)
     else:
         repo = Repo(squadron_dir)
-
+    working_dir = os.path.dirname(os.path.realpath(__file__))    
     while(True):
+        #We set the working dir back here incase any action changed it
+        os.chdir(working_dir)
         git = repo.git
         log.debug("Doing git checkout")
         out = git.checkout('master')
