@@ -60,6 +60,8 @@ class SquadronConfig:
 #        if(self._initialized):
 #            return
 #            self._reset()
+        self._parsed_config = None
+        self._loaded_parser = None
         self._config_file = config_file
         self._defaults = defaults
         self._log = log
