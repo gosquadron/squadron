@@ -40,8 +40,10 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
         key = resources[sshkey]()
         if 'GIT_SSH' in os.environ:
             git_ssh = os.environ['GIT_SSH']
+            reset_to_env = True
         else:
             git_ssh = 'ssh'
+            reset_to_env = False
         
         keyfile = write_temp_file(key, '.key', False)
         wrapper = write_temp_file(SSH_WRAPPER.format(git_ssh, keyfile), '.sh', True)
@@ -51,7 +53,10 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
             os.environ['GIT_SSH'] = wrapper
             repo = git.Repo.clone_from(url, finalfile)
         finally:
-            os.environ = old_environ
+            if reset_to_env:
+                os.environ['GIT_SSH'] = git_ssh
+            else:
+                del os.environ['GIT_SSH']
             os.remove(keyfile)
             os.remove(wrapper)
     else:

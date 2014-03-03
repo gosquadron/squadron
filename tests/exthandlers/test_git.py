@@ -88,3 +88,8 @@ def test_sshkey(tmpdir,ssh_command):
         expected_calls = [mock.call.clone_from(url, finalfile),
                 mock.call.clone_from.git.checkout(version)]
         assert expected_calls == gitmock.mock_calls
+        if ssh_command:
+            assert 'GIT_SSH' in os.environ
+            assert os.environ['GIT_SSH'] == ssh_command
+        else:
+            assert 'GIT_SSH' not in os.environ
