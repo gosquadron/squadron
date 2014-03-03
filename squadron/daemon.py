@@ -22,7 +22,9 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
     parsed_config = parse_config(log, config_file)
     print "Daemon is using loglevel: " + str(log.getEffectiveLevel())
     if not polltime:
-        polltime = int(parsed_config['polltime'])
+        polltime = float(parsed_config['polltime'])
+    else:
+        polltime = float(polltime)
 
     if not os.path.exists(squadron_dir):
         repo = Repo.clone_from(repo, squadron_dir)
