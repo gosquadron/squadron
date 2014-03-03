@@ -17,7 +17,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
         node_name -- override for nodename
         loglevel -- how much to log
     """
-    log.debug('entering daemon.daemonize %s', 
+    log.debug('entering daemon.daemonize %s',
             [squadron_dir, config_file, polltime, repo])
     parsed_config = parse_config(log, config_file)
     print "Daemon is using loglevel: " + str(log.getEffectiveLevel())
@@ -27,6 +27,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
         polltime = float(polltime)
 
     if not os.path.exists(squadron_dir):
+        log.info('Cloning %s into %s', repo, squadron_dir)
         repo = Repo.clone_from(repo, squadron_dir)
     else:
         repo = Repo(squadron_dir)
