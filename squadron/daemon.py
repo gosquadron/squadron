@@ -42,7 +42,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
         out = git.pull('--rebase')
         log.debug('Git pull returned: %s', out)
 
-        ret = main.go(squadron_dir, node_name=node_name, config_file=config_file)
+        ret = main.go(squadron_dir, node_name=node_name, config_file=config_file, dry_run=False)
         log.debug('main.go returned: %s', ret)
         if ret:
             #TODO: Squadron sends bug to status API or some other remote server?
