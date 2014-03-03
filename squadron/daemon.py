@@ -33,7 +33,6 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
         repo = Repo(squadron_dir)
     while(True):
         #We set the working dir back here incase any action changed it
-        os.chdir(squadron_dir)
         git = repo.git
         log.debug("Doing git checkout")
         out = git.checkout('master')
