@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import squadron
 from squadron import main,initialize,daemon,log,setup
 from argparse import ArgumentParser, RawTextHelpFormatter
 import json
@@ -97,7 +98,7 @@ if __name__ == "__main__":
                 description='Easy configuration management tool',
                 usage='%(prog)s [command] [options]',
                 add_help=False,
-                epilog="http://gosquadron.com"
+                epilog="Version {} Website: http://gosquadron.com".format(squadron.__version__)
             )
 
     command_parser = ArgumentParser(

@@ -19,9 +19,10 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 from setuptools import setup, find_packages
+import squadron
 setup(
     name='squadron',
-    version='0.1.1',
+    version=squadron.__version__,
     author='Squadron',
     author_email='info@gosquadron.com',
     description='Easy-to-use configuration and release management tool',
