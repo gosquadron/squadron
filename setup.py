@@ -1,7 +1,6 @@
 from setuptools.command.test import test as TestCommand
 import sys
 import os
-from vmtest import VMTestPass
 
 #Runs unit tests
 class PyTest(TestCommand):
@@ -45,7 +44,7 @@ setup(
         'pytest>=2.5.1',
         'mock>=1.0.1'
         ],
-    cmdclass = {'test': PyTest, 'vmtest': VMTestPass},
+    cmdclass = {'test': PyTest},
     install_requires=[
         'jsonschema>=2.3.0',
         'gitpython>=0.3.2.RC1',
