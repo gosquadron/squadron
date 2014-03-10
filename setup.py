@@ -42,7 +42,8 @@ setup(
     scripts=['scripts/squadron'],
     tests_require=[
         'pytest>=2.5.1',
-        'mock>=1.0.1'
+        'mock>=1.0.1',
+        'pytest-timeout>=0.3'
         ],
     cmdclass = {'test': PyTest},
     install_requires=[
