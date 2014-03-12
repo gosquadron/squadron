@@ -115,7 +115,10 @@ as many Disallow directives as elements in the array.
 
 main~git looks like this::
 
-    https://github.com/cxxr/example-squadron-repo.git @release
+    {
+        "url":"https://github.com/cxxr/example-squadron-repo.git",
+        "refspec":"@release"
+    }
 
 Squadron will clone this repo when it runs, checkout the refspec simple (which
 is a branch, a tag, or a hash) and place it in the 'main' directory. The

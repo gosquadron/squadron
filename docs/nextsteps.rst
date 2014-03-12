@@ -283,9 +283,9 @@ by Squadron is different::
     Nothing changed.
 
 You can grab the completed example for this section by checking out the
-nextsteps branch from the example repo::
+nextsteps2 branch from the example repo::
 
-    $ git clone -b nextsteps https://github.com/gosquadron/example-squadron-repo.git
+    $ git clone -b nextsteps2 https://github.com/gosquadron/example-squadron-repo.git
 
 
 Where to go from here
