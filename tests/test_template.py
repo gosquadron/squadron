@@ -157,11 +157,15 @@ def test_get_config():
     config = {'conf.d/' : FileConfig('conf.d/', True, None, None, 0755),
               'conf.d/config' : FileConfig('conf.d/config', False, 'user', 'group', None)}
 
-    log.debug(get_config('conf.d/','conf.d/', config))
-    assert get_config('conf.d/','conf.d/', config) == [config['conf.d/']]
-    assert get_config('conf.d/config', 'conf.d/config', config) == [config['conf.d/'], config['conf.d/config']]
-    assert get_config('conf.d/non-existant-file', 'conf.d/non-existant-file', config) == [config['conf.d/']]
-    assert get_config('non-exist', 'non-exist', config) == []
+    already_configured = set()
+    assert get_config('conf.d/','conf.d/', config, already_configured) == [config['conf.d/']]
+    assert 'conf.d/' in already_configured
+    assert get_config('conf.d/','conf.d/', config, already_configured) == []
+    assert 'conf.d/' in already_configured
+
+    assert get_config('conf.d/config', 'conf.d/config', config, set()) == [config['conf.d/'], config['conf.d/config']]
+    assert get_config('conf.d/non-existant-file', 'conf.d/non-existant-file', config, set()) == [config['conf.d/']]
+    assert get_config('non-exist', 'non-exist', config, set()) == []
 
 def test_apply_config(tmpdir):
     tmpdir = str(tmpdir)

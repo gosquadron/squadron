@@ -80,26 +80,30 @@ def parse_config(filename):
             result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
     return result
 
-def get_config(finalfile, filename, config):
+def get_config(finalfile, filename, config, already_configured):
     path_items = filename.split(os.path.sep)
     accum = ""
     file_settings = []
     for item in path_items[:-1]:
         # loop over all the directories, but not the filename
         path = os.path.join(accum, item)
-        if path + os.path.sep in config:
+        path_and_sep = path + os.path.sep
+        if path_and_sep in config and path_and_sep not in already_configured:
             file_settings.append(config[path + os.path.sep])
+            already_configured.add(path_and_sep)
         accum = path
 
     if filename in config and config[filename] not in file_settings:
-        file_settings.append(config[filename])
+        if filename not in already_configured:
+            file_settings.append(config[filename])
+            already_configured.add(filename)
 
     if os.path.isdir(finalfile):
         new_files = os.listdir(finalfile)
         for f in new_files:
             new_finalfile = os.path.join(finalfile, f)
             new_filename = os.path.join(filename, f)
-            file_settings.extend(get_config(new_finalfile, new_filename, config))
+            file_settings.extend(get_config(new_finalfile, new_filename, config, already_configured))
 
     return file_settings
 
@@ -158,6 +162,7 @@ class DirectoryRender:
             items.remove('config.sq')
 
         result = {}
+        already_configured = set()
         for filename in items:
             # the path of the source file relative to the basedir
             relpath = os.path.join(currpath, filename)
@@ -176,7 +181,7 @@ class DirectoryRender:
                 if key in config:
                     result[key] = config[key].atomic
 
-                apply_config(destdir, get_config(dest, stripped, config), dry_run)
+                apply_config(destdir, get_config(dest, stripped, config, already_configured), dry_run)
                 result.update(self.render(destdir, inputhash, resources, dry_run, relpath, config))
             else:
                 ext = get_sq_ext(filename)
@@ -200,7 +205,7 @@ class DirectoryRender:
                     if stripped in config:
                         result[stripped] = config[stripped].atomic
 
-                apply_config(destdir, get_config(finalfile, stripped, config), dry_run)
+                apply_config(destdir, get_config(finalfile, stripped, config, already_configured), dry_run)
 
                 # if there's an automatic way to test this type of file,
                 # try it
