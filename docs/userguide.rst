@@ -119,26 +119,52 @@ The 'git' extension clones git repositories.
 
 **Contents**
 
-A single line, with the git remote, an optional refspec, and an optional ssh
-private key resource, each seperated by a space. 
-
-Will have a template applied to it, so variable substitution and logic is 
+A JSON object with properties such as "url". Will have a template applied to it, so variable substitution and logic is 
 possible.
 
 Examples::
 
-    https://github.com/gosquadron/squadron.git master
+    {
+        "url":"https://github.com/gosquadron/squadron.git"
+    }
 
 or::
 
-    git@github.com:gosquadron/example-squadron-repo.git
+    {
+        "url":"git@github.com:gosquadron/example-squadron-repo.git",
+        "refspec":"experimental"
+    }
 
 or even::
 
-    git@github.com:gosquadron/example-squadron-repo.git @release ssh_keys/deploy1
+    {
+        "url":"git@github.com:gosquadron/example-squadron-repo.git",
+        "refspec":"@release",
+        "sshkey":"ssh_keys/deploy1",
+        "args":"--depth=2"
+    }
 
 The last example requires that the `ssh_keys/deploy1` resource exists and is a
-private ssh key. See the :ref:`resources` section for more information.
+private ssh key. See the :ref:`resources` section for more information. It also
+does a shallow clone of the git repository via the --depth argument.
+
+The properties allowed in the object are described in the following table:
+
++------------------+----------------------------------------------+
+| **Name**         | **Description**                              |
++------------------+----------------------------------------------+
+| url              | URL to clone the git clone from. Required.   |
++------------------+----------------------------------------------+
+| refspec          | The branch, tag, or commit hash to checkout  |
+|                  | after clone. Optional.                       |
++------------------+----------------------------------------------+
+| sshkey           | Relative path to the sshkey resource. See the|
+|                  | :ref:`resources` section for more            |
+|                  | information. Optional.                       |
++------------------+----------------------------------------------+
+| args             | Command line arguments to pass to git clone. |
+|                  | Optional.                                    |
++------------------+----------------------------------------------+
 
 tpl
 ^^^

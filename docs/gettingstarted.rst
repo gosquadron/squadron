@@ -9,7 +9,7 @@ you don't have to type out all these commands if you don't feel like it.
 Just do this and you'll be at the end of the first part of the getting started
 guide::
 
-    $ git clone -b simple https://github.com/gosquadron/example-squadron-repo.git
+    $ git clone -b simple2 https://github.com/gosquadron/example-squadron-repo.git
 
 Install Squadron
 ----------------
