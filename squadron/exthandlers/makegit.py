@@ -5,10 +5,38 @@ from template import render
 import os
 import tempfile
 import stat
+import json
+import jsonschema
+import subprocess
 
 SSH_WRAPPER='''#!/bin/sh
 {} -i {} $@
 '''
+
+SCHEMA = {
+    '$schema': 'http://json-schema.org/draft-04/schema#',
+    'description': 'Describes the git extension handler input',
+    'type':'object',
+    'properties': {
+        'url': {
+            'description': 'git repo URL',
+            'type': 'string'
+        },
+        'refspec': {
+            'description': 'the branch, tag, or commit hash to checkout after clone',
+            'type': 'string'
+        },
+        'sshkey': {
+            'description': 'relative path to the ssh key resource',
+            'type': 'string'
+        },
+        'args': {
+            'description': 'other command line arguments to git clone',
+            'type': 'string'
+        }
+    },
+    'required': ['url']
+}
 
 def write_temp_file(contents, suffix, executable):
     tmpfile = tempfile.NamedTemporaryFile(suffix=suffix,prefix='squadron',delete=False)
@@ -20,21 +48,28 @@ def write_temp_file(contents, suffix, executable):
     finally:
         tmpfile.close()
 
+def _clone_repo(url, dest, args):
+    subprocess.check_call('git clone {} -- {} {}'.format(args, url, dest).split())
+    return git.Repo(dest)
+
 def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
     """ Clones a git repository """
-    contents = render(abs_source, inputhash, loader).split()
-
+    contents = json.loads(render(abs_source, inputhash, loader))
     finalfile = get_filename(dest)
-    url = contents[0]
-    if len(contents) > 1:
-        refspec = contents[1]
-        if len(contents) > 2:
-            sshkey = contents[2]
-        else:
-            sshkey = None
-    else:
-        refspec = None
-        sshkey = None
+
+    jsonschema.validate(contents, SCHEMA)
+    url = contents['url']
+
+    refspec = None
+    sshkey = None
+    args = ''
+
+    if 'refspec' in contents:
+        refspec = contents['refspec']
+    if 'sshkey' in contents:
+        sshkey = contents['sshkey']
+    if 'args' in contents:
+        args = contents['args']
 
     if sshkey:
         key = resources[sshkey]()
@@ -44,14 +79,14 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
         else:
             git_ssh = 'ssh'
             reset_to_env = False
-        
+
         keyfile = write_temp_file(key, '.key', False)
         wrapper = write_temp_file(SSH_WRAPPER.format(git_ssh, keyfile), '.sh', True)
-
+ 
         old_environ = os.environ.copy()
         try:
             os.environ['GIT_SSH'] = wrapper
-            repo = git.Repo.clone_from(url, finalfile)
+            repo = _clone_repo(url, finalfile, args)
         finally:
             if reset_to_env:
                 os.environ['GIT_SSH'] = git_ssh
@@ -60,7 +95,7 @@ def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
             os.remove(keyfile)
             os.remove(wrapper)
     else:
-        repo = git.Repo.clone_from(url, finalfile)
+        repo = _clone_repo(url, finalfile, args)
 
     if refspec:
         repo.git.checkout(refspec)

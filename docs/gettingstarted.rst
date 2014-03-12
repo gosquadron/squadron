@@ -9,7 +9,7 @@ you don't have to type out all these commands if you don't feel like it.
 Just do this and you'll be at the end of the first part of the getting started
 guide::
 
-    $ git clone -b simple https://github.com/gosquadron/example-squadron-repo.git
+    $ git clone -b simple2 https://github.com/gosquadron/example-squadron-repo.git
 
 Install Squadron
 ----------------
@@ -115,7 +115,10 @@ as many Disallow directives as elements in the array.
 
 main~git looks like this::
 
-    https://github.com/cxxr/example-squadron-repo.git @release
+    {
+        "url":"https://github.com/cxxr/example-squadron-repo.git",
+        "refspec":"@release"
+    }
 
 Squadron will clone this repo when it runs, checkout the refspec simple (which
 is a branch, a tag, or a hash) and place it in the 'main' directory. The

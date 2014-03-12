@@ -10,9 +10,9 @@ you don't have to type out all these commands.
 Just do this and you'll be at the start of the next steps guide (which is the
 end of the getting started guide)::
 
-    $ git clone -b simple https://github.com/gosquadron/example-squadron-repo.git
+    $ git clone -b simple2 https://github.com/gosquadron/example-squadron-repo.git
 
-The end result of this page is in the nextsteps branch of the same repo.
+The end result of this page is in the `nextsteps2` branch of the same repo.
 
 Apache configuration
 --------------------
@@ -283,9 +283,9 @@ by Squadron is different::
     Nothing changed.
 
 You can grab the completed example for this section by checking out the
-nextsteps branch from the example repo::
+nextsteps2 branch from the example repo::
 
-    $ git clone -b nextsteps https://github.com/gosquadron/example-squadron-repo.git
+    $ git clone -b nextsteps2 https://github.com/gosquadron/example-squadron-repo.git
 
 
 Where to go from here
