@@ -263,7 +263,7 @@ Example state.json with apt::
     }
 
 group
-""""
+"""""
 
 Creates groups. Takes an object with the following fields.
 
@@ -483,8 +483,10 @@ this::
     |   `-- old_keys/
     |       |-- deploy_key
     |       `-- deploy_key.pub
-    `-- other/
-        `-- script.sh
+    |-- other/
+    |   `-- file
+    |-- test.sh
+    `-- this.py
 
 So now, in ~git files within your `root` in a service, you can reference these
 keys by relative path.
@@ -492,7 +494,11 @@ keys by relative path.
 Like this::
 
     $ cat services/example/0.0.1/root/test~git
-    http://example.com/repo.git master ssh_keys/deploy1
+    {
+        "url":"git@example.com:user/repo.git",
+        "refspec":"master",
+        "sshkey":"ssh_keys/deploy1"
+    }
 
 The ~git extension knows to look in the `resources` directory for the file
 `ssh_keys/deploy1`, which is the secret key needed to deploy that git
@@ -552,7 +558,7 @@ Returning a non-zero status code indicates a test failure.
 .. _global-configuration:
 
 Global Configuration
------
+--------------------
 
 Squadron looks for config in the following places:
  - /etc/squadron/config
