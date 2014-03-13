@@ -19,6 +19,13 @@ import tempfile
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
+def get_squadron_dir(squadron_dir, config):
+    if squadron_dir is None:
+        if 'basedir' in config:
+            return config['basedir']
+        else:
+            return os.getcwd()
+    return squadron_dir
 
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None,
         dont_rollback = False, dry_run = True):
@@ -39,11 +46,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         config = parse_config(log, config_file)
         log.debug("Got config {}".format(config))
 
-        if squadron_dir is None:
-            if 'basedir' in config:
-                squadron_dir = config['basedir']
-            else:
-                squadron_dir = os.getcwd()
+        squadron_dir = get_squadron_dir(squadron_dir, config)
 
         if squadron_state_dir is None:
             squadron_state_dir = config['statedir']

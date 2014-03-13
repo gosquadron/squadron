@@ -55,7 +55,7 @@ def _init(args, parent):
                             '\tsquadron init -i squadron-repo --env dev',
                 epilog=parent.epilog,
                 parents=[parent])
-    parser.add_argument('-i', '--directory', help='Input directory')
+    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
     parser.add_argument('-e','--env', help='name of environment to initialize')
     parser.add_argument('-c','--copyfrom', help='name of environment to copy (use with -e)')
     parser.add_argument('-s', '--service', help='name of service to initialize')

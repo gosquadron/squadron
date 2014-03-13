@@ -26,6 +26,8 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
     else:
         polltime = float(polltime)
 
+    squadron_dir = main.get_squadron_dir(squadron_dir, parsed_config)
+
     if not os.path.exists(squadron_dir):
         log.info('Cloning %s into %s', repo, squadron_dir)
         repo = Repo.clone_from(repo, squadron_dir)
