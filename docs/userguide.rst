@@ -554,59 +554,125 @@ Returning a non-zero status code indicates a test failure.
 Global Configuration
 -----
 
-Squadron keeps the global config in the default location /home/user/.squadron
-If you are root the default in /etc/squadron
-
-It also looks for config in the following places:
+Squadron looks for config in the following places:
  - /etc/squadron/config
  - /usr/local/etc/squadron/config
  - ~/.squadron/config
 
-Let's go over some of the configuration values and sections:
+Here's an example a config file::
+
+    [squadron]                     
+    basedir = /config/squadron-repo
+    nodename = override.example.com
+    statedir = /var/squadron/state
+
+    [daemon]                       
+    polltime = 600 
+
+    [status]                       
+    send_status = true
+    status_host = status.gosquadron.com
+    status_apikey = ABCDEF12345    
+    status_secret = 8d4ce3db954ab1bed870ce682e6765ec24a1227352b3d2688170ecaefda1165c
+
+    [log]
+    infolog = INFO rotatingfile /var/squadron/logs/info.log 50000 10
+    runlog = DEBUG stream stderr
+
+This example configuration does a few things. The squadron configuration repo
+resides in `/config/squadron-repo`, so if it's not overridden by the `-i` flag,
+Squadron will look there for its configuration. It overrides its hostname to
+`override.example.com` and sets its between run state directory to
+`/var/squadron/state`.
+
+The daemon polls every 10 minutes, and will send status updates to
+status.gosquadron.com with the given API and secret key.
+
+Two logs are configured, one which logs to a rotating log file, and another
+which only uses standard error. Squadron will use both of these log
+destinations simultaneously.
+
+The description of the sections and their valid configuration items follows.
 
 Daemon
 ^^^^^^
 
-    - polltime - frequency in seconds that we check the git repo for changes
+This section configures the daemon.
+
++------------+-------------------------------------------------------------+
+| **Name**   | **Description**                                             |
++------------+-------------------------------------------------------------+
+| polltime   | How often in seconds that we poll the git repo for changes. |
++------------+-------------------------------------------------------------+
 
 Squadron
 ^^^^^^^^
-    - basedir - the location of the squadron config directory. Can be overridden with -i.
-    - keydir - where we store any ssh keys
-    - nodename - name you want for the node, used to determine which node config applies to this machine
-    - statedir - directory to keep previous state of squadron
-    - send_status - whether or not to send node status to remote server defined in [status] section
+
+This is the main configuration section, which configures most of Squadron's
+settings. It's used by the daemon and by running Squadron in standalone mode
+(via the check, apply, or init commands).
+
++------------+-------------------------------------------------------------+
+| **Name**   | **Description**                                             |
++------------+-------------------------------------------------------------+
+| basedir    | The location of the squadron config directory. Can be       |
+|            | overridden with -i.                                         |
++------------+-------------------------------------------------------------+
+| nodename   | Name you want for this server, used to determine which node |
+|            | config applies to this machine. Default is the hostname.    |
++------------+-------------------------------------------------------------+
+| statedir   | The directory to keep previous state of squadron.           |
++------------+-------------------------------------------------------------+
+
 
 Status
 ^^^^^^
-    - status_host where to send status to
-    - status_apikey - key used for identity
-    - status_secret - shared secret to verify identity
+
+This section controls the sending of status updates to a Squadron state server.
+
++--------------+-------------------------------------------------------------+
+| **Name**     | **Description**                                             |
++--------------+-------------------------------------------------------------+
+| send_status  | Boolean of whether or not to send node status to remote     |
+|              | server defined in this section.                             |
++--------------+-------------------------------------------------------------+
+| status_host  | Hostname of where to connect to send status updates to.     |
++--------------+-------------------------------------------------------------+
+| status_apikey| API key used with the secret. Provided by Squadron status   |
+|              | server admin.                                               |
++--------------+-------------------------------------------------------------+
+| status_secret| Secret hex string to verify identity                        |
++--------------+-------------------------------------------------------------+
 
 Log
 ^^^
-    This section is a bit special, you can enter as many lines as you want here
-    so long as they follow the following format defined in the example:
+
+This section is a bit different, as you can enter as many lines as you want here
+so long as they follow the following format defined in the example::
     
     debugonly = DEBUG file /tmp/log
 
-    - debugonly - just a friendly name, not used for anything MUST BE UNIQUE.
-    - DEBUG - Level to log must match one of `Python's log levels <http://docs.python.org/2/library/logging.html#logging-levels>`_
-    - file - type of log, in this case this is a simple file log
-    - /tmp/log - parameter(s) for the type of log, in this case the file to log
-    to
+Which means:
 
-    We support three types of logs at the moment
-        file:
-            - expects file to log to as parameter
-        stream:
-            - expects stdout or stderr as the parameter
-        rotatingfile:
-            - file to log to
-            - max file size in bytes
-            - max number of files to backup 
+    - debugonly - Just an identifier. This log name **must be unique**.
+    - DEBUG - Level to log must match one of `Python's log levels <http://docs.python.org/2/library/logging.html#logging-levels>`_.
+    - file - Type of log, in this case this is a simple file log.
+    - /tmp/log - Parameter(s) for the type of log, which is, in this case, the file to log to.
+
+Squadron supports three types of logs:
+
+    **file**:
+        - expects file to log to as parameter
+    **stream**:
+        - expects stdout or stderr as the parameter
+    **rotatingfile**:
+        - file to log to
+        - max file size in bytes
+        - max number of files to backup 
     
-    Example of rotating file:
-    rotate = DEBUG rotatingfile /tmp/rot 500 2
+Example of rotating file located at /var/log/squadron/log, which rotates every
+5000 bytes and keeps two files in backup::
+
+    rotate = DEBUG rotatingfile /var/log/squadron/log 5000 2
 
 
