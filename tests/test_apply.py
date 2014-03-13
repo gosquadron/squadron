@@ -1,9 +1,11 @@
 from squadron import commit
+from squadron.fileio.dirio import makedirsp
 import pytest
 import jsonschema
 from helper import are_dir_trees_equal, get_test_path
 import os
 import shutil
+import json
 
 from squadron.fileio.dirio import makedirsp
 
@@ -12,20 +14,44 @@ def checkfile(filename, compare):
         assert compare == ofile.read()
 
 test_path = os.path.join(get_test_path(), 'applytests')
+
 def test_apply_only(tmpdir):
     tmpdir = str(tmpdir)
-    results = commit.apply(
-            os.path.join(test_path,'applytest1'), 'node', tmpdir, {})
+
+    commit_tmp = os.path.join(tmpdir, 'tmp')
+    makedirsp(commit_tmp)
+
+    apply_dir = os.path.join(tmpdir, 'apply')
+    # apply_dir must not yet exist
+    shutil.copytree(os.path.join(test_path,'applytest1'), apply_dir)
+
+    # Write out config
+    state_tmp = os.path.join(tmpdir,'state')
+    makedirsp(state_tmp)
+    config_dir = os.path.join(apply_dir, 'config', 'dev')
+    makedirsp(config_dir)
+
+    config = {
+        'version':'0.0.1',
+        'config':{
+            'state1':os.path.join(state_tmp,'one'),
+            'state2':os.path.join(state_tmp,'two'),
+            'dbhostname':'example.com'
+        },
+        'base_dir':os.path.join(tmpdir,'basedir')
+    }
+
+    with open(os.path.join(config_dir, 'api.json'), 'w') as cfile:
+        cfile.write(json.dumps(config))
+
+    results = commit.apply(apply_dir, 'node', commit_tmp, {})
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
             os.path.join(test_path,'applytest1result'))
 
-    checkfile('/tmp/test1.out', '55')
-    checkfile('/tmp/test2.out', '0')
-    os.remove('/tmp/test1.out')
-    os.remove('/tmp/test2.out')
-    # Don't need to delete base_dir as it hasn't been created yet
+    checkfile(config['config']['state1'], '55')
+    checkfile(config['config']['state2'], '0')
 
 def test_apply_commit(tmpdir):
     # Need to delete this first in case of bad test run

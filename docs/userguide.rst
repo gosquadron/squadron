@@ -250,6 +250,10 @@ Included libraries
 Some libraries are included with Squadron so you don't have to write them
 yourself.
 
+The state.json file is passed through the template engine before being
+executed, so you can embed logic and variables within it like you would
+normally.
+
 apt
 """
 

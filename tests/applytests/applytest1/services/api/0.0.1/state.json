@@ -1,9 +1,9 @@
 {
     "test1": [{
-        "tmpfile":"/tmp/test1.out",
+        "tmpfile":"@state1",
         "num": 55
     },{
-        "tmpfile":"/tmp/test2.out",
+        "tmpfile":"@state2",
         "num" : 0
     }]
 }

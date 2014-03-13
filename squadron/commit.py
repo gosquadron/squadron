@@ -1,7 +1,6 @@
 import os
 import json
 import jsonschema
-from jsonschema import Draft4Validator, validators
 import tempfile
 from template import DirectoryRender
 from state import StateHandler
@@ -13,9 +12,10 @@ from fileio.dirio import makedirsp
 import errno
 from log import log
 from fileio.symlink import force_create_symlink
+from quik import FileLoader
 
 # This will be easy to memoize if need be
-def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False):
+def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False, config=None):
     """
     Grabs the named JSON file in a service directory
 
@@ -24,11 +24,19 @@ def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on
         service_name -- the name of the service
         service_ver -- the version of the service
         filename -- the name of the JSON file without the .json extension
+        empty_on_error -- if true, returns an empty dict instead of raising error
+        config -- if a dict, uses it to template the JSON before loading it
     """
     try:
         serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
-        with open(os.path.join(serv_dir, filename + '.json'), 'r') as jsonfile:
-            return json.loads(jsonfile.read())
+        service_json = os.path.join(serv_dir, filename + '.json')
+        if config:
+            loader = FileLoader(squadron_dir)
+            template = loader.load_template(service_json)
+            return json.loads(template.render(config, loader=loader))
+        else:
+            with open(service_json, 'r') as jsonfile:
+                return json.loads(jsonfile.read())
     except IOError as e:
         if e.errno == errno.ENOENT and empty_on_error:
             return {}
@@ -104,7 +112,7 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
 
         # Setting the state comes first, since the rest of this might
         # depend on the state of the system (like virtualenv)
-        statejson = get_service_json(squadron_dir, service, version, 'state', True)
+        statejson = get_service_json(squadron_dir, service, version, 'state', True, config=cfg)
         for library, items in statejson.items():
             # Should print these out nicely if they're just strings
             if isinstance(items[0], str) or isinstance(items[0], unicode):

@@ -3,7 +3,7 @@ import pwd
 import grp
 import errno
 from shutil import copyfile
-from quik import Template, FileLoader
+from quik import FileLoader
 import urllib
 import autotest
 from collections import namedtuple
