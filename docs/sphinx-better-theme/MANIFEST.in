@@ -1,7 +1,0 @@
-include better/*.html
-include better/static/*.css_t
-include better/*.conf
-include *.py
-include *.txt
-include *.rst
-prune docs
