@@ -1,15 +1,18 @@
 Getting Started
 ===============
 
-Squadron configures your service. It install packages, writes out templates, and tests them.
+Squadron configures your software service. It install packages, writes out 
+configuration templates, and tests them. This getting started guide tells you
+how to do all that.
 
 If you want to follow along with this guide, we've made a git repo for you so
-you don't have to type out all these commands if you don't feel like it.
-
-Just do this and you'll be at the end of the first part of the getting started
-guide::
+you don't have to type out all these commands::
 
     $ git clone -b simple2 https://github.com/gosquadron/example-squadron-repo.git
+
+You can also play with a `Vagrant box we made 
+<https://dl.dropboxusercontent.com/u/10188833/squadron-ubuntu-saucy-i686.box>`_
+to test out Squadron.
 
 Install Squadron
 ----------------
