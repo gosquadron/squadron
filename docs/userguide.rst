@@ -566,16 +566,16 @@ Let's go over some of the configuration values and sections:
 
 Daemon
 ^^^^^^
+
     - polltime - frequency in seconds that we check the git repo for changes
 
 Squadron
 ^^^^^^^^
+    - basedir - the location of the squadron config directory. Can be overridden with -i.
     - keydir - where we store any ssh keys
-    - nodename - name you want for the node, used to determine which node
-      config applies to this machine
+    - nodename - name you want for the node, used to determine which node config applies to this machine
     - statedir - directory to keep previous state of squadron
-    - send_status - whether or not to send node status to remote server defined
-      in [status] section
+    - send_status - whether or not to send node status to remote server defined in [status] section
 
 Status
 ^^^^^^

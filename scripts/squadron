@@ -13,7 +13,7 @@ def _apply(args, parent, dry_run):
                 description='Parses a squadron repo and applies configuration',
                 epilog=parent.epilog,
                 parents=[parent])
-    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
+    parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-n', '--node-name', help='Override this node\'s name')
     parser.add_argument('-t', '--status', help='Specify a status hub to register with')
     parser.add_argument('-c', '--config', help='Override which configuration file to read')
@@ -33,7 +33,7 @@ def _daemonize(args, parent):
                 description='Starts squadron up in daemonized mode',
                 epilog=parent.epilog,
                 parents=[parent])
-    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
+    parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-n', '--node-name', help='Override this node\'s name')
     parser.add_argument('-c', '--config', help='Override which configuration file to read')
     parser.add_argument('-p', '--polltime', help='How long in minutes to wait between polls')
@@ -55,7 +55,7 @@ def _init(args, parent):
                             '\tsquadron init -i squadron-repo --env dev',
                 epilog=parent.epilog,
                 parents=[parent])
-    parser.add_argument('-i', '--directory', help='Input directory', default=os.getcwd())
+    parser.add_argument('-i', '--directory', help='Input directory')
     parser.add_argument('-e','--env', help='name of environment to initialize')
     parser.add_argument('-c','--copyfrom', help='name of environment to copy (use with -e)')
     parser.add_argument('-s', '--service', help='name of service to initialize')

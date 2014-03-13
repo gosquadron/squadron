@@ -5,7 +5,7 @@ import runinfo
 from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, CONFIG_DEFAULTS
 from fileio.dirio import makedirsp
-from fileio.gotoroot import *
+from fileio.gotoroot import go_to_root
 import shutil
 import status
 from log import log
@@ -19,7 +19,7 @@ import tempfile
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
-@go_to_root
+
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None,
         dont_rollback = False, dry_run = True):
     """
@@ -38,6 +38,12 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     try:
         config = parse_config(log, config_file)
         log.debug("Got config {}".format(config))
+
+        if squadron_dir is None:
+            if 'basedir' in config:
+                squadron_dir = config['basedir']
+            else:
+                squadron_dir = os.getcwd()
 
         if squadron_state_dir is None:
             squadron_state_dir = config['statedir']

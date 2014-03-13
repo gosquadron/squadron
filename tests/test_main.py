@@ -100,6 +100,19 @@ def test_main_with_config(tmpdir):
     remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path,'main1result'), info['dir']) == True
 
+def test_config_with_bad_dir(tmpdir):
+    tmpdir = str(tmpdir)
+
+    squadron_state_dir = os.path.join(tmpdir, 'state')
+    makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
+
+    try:
+        main.go(None, squadron_state_dir, os.path.join(test_path,'bad_dir.config'), None, None, False, False)
+        assert False == "Should have thrown" # Shouldn't get here
+    except OSError as e:
+        assert e.filename.startswith('/non/existant/dir')
+
 def test_main_git(tmpdir):
     tmpdir = str(tmpdir)
 
