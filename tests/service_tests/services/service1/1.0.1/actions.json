@@ -1,6 +1,7 @@
 {
     "start" : {
-        "commands" : ["touch /tmp/service1/test.start"]
+        "commands" : ["touch /tmp/service1/test.start"],
+        "chdir" : "/tmp/service1"
     },
     "reload" : {
         "commands" : ["touch /tmp/service1/test.reload"],

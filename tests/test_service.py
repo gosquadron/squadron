@@ -24,6 +24,8 @@ def test_get_service_actions():
     assert len(actions['service1.reload']['not_after']) == 2
     assert len(actions['service1.restart']['not_after']) == 1
 
+    assert 'chdir' in actions['service1.start']
+
     assert 'service1.start' in actions['service1.reload']['not_after']
     assert 'service1.restart' in actions['service1.reload']['not_after']
 
@@ -56,6 +58,32 @@ def test_checkfiles():
     assert _checkfiles([], files) == False
     assert _checkfiles(['test*'], []) == False
 
+@pytest.mark.parametrize("dirname", [
+    "/non/existant/dir",
+    "relative/dir"
+])
+def test_chdir(tmpdir, dirname):
+    tmpdir = str(tmpdir)
+    service_name = "service1"
+
+    actions = {service_name + ".do it": {
+        "command":"never execute this",
+        "chdir": dirname
+    }}
+    reactions = [{
+        "execute": [service_name + ".do it"],
+        "when" : {
+            "always": True
+        }
+    }]
+
+    with pytest.raises(OSError) as ex:
+        react(actions, reactions, [], [], tmpdir, {})
+
+    if os.path.isabs(dirname):
+        assert ex.value.filename == dirname
+    else:
+        assert ex.value.filename == os.path.join(tmpdir, service_name, dirname)
 
 def make_react_tmp():
     makedirsp('/tmp/service1')

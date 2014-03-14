@@ -20,6 +20,10 @@ _action_schema = {
             },
             'minItems': 1
         },
+        'chdir': {
+            'description': 'directory to change to before running commands',
+            'type': 'string',
+        },
         'not_after': {
             'description': 'don\'t run this after any of these actions',
             'type' : 'array',
@@ -279,9 +283,16 @@ def react(actions, reactions, paths_changed, new_files, base_dir, resources):
                         # Let's do this
                         service_name = os.path.splitext(action)[0]
 
-                        # For the commands, put us in the service directory
-                        # so that relative commands will work
-                        with dirio.SafeChdir(os.path.join(base_dir, service_name)):
+                        if 'chdir' in action_item:
+                            chdir = action_item['chdir']
+                            if not os.path.isabs(chdir):
+                                chdir = os.path.join(base_dir, service_name, chdir)
+                        else:
+                            # For the commands, put us in the service directory
+                            # so that relative commands will work
+                            chdir = os.path.join(base_dir, service_name)
+
+                        with dirio.SafeChdir(chdir):
                             for command in action_item['commands']:
                                 try:
                                     _execute(command, resources)
@@ -293,5 +304,4 @@ def react(actions, reactions, paths_changed, new_files, base_dir, resources):
                 raise ValueError(
                         'Action {} from reaction {} not in action list'.format(
                             action, reaction))
-
 
