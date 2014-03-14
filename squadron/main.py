@@ -15,6 +15,7 @@ import tests
 import py
 import sys
 import tempfile
+import requests
 
 def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
