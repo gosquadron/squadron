@@ -86,8 +86,7 @@ def test_sshkey(tmpdir,ssh_command):
             def check_environ(*args):
                 if ssh_command:
                     with open(os.environ['GIT_SSH']) as gitfile:
-                        if ssh_command not in gitfile.read():
-                            assert False
+                        assert ssh_command in gitfile.read()
 
             # Apply the side effect
             submock.check_call.side_effect = check_environ
