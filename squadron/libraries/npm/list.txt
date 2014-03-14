@@ -1,0 +1,4 @@
+/usr/local/lib
+└─┬ npm@1.3.21
+  ├── ignore@1.2.3
+  └── ignore-ver@0.0.1
