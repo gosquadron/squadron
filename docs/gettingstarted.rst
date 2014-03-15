@@ -1,9 +1,12 @@
+.. _getstarted:
+
 Getting Started
 ===============
 
 Squadron configures your software service. It install packages, writes out 
 configuration templates, and tests them. This getting started guide tells you
-how to do all that.
+how to do all that. If you'd like to know more about what Squadron can do, 
+see the :ref:`overview` of Squadron.
 
 If you want to follow along with this guide, we've made a git repo for you so
 you don't have to type out all these commands::

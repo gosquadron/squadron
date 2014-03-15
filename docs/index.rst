@@ -1,4 +1,4 @@
-Welcome to Squadron's documentation!
+Squadron Documentation
 ====================================
 
 Contents:
@@ -6,6 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   overview
    gettingstarted
    nextsteps
    userguide
