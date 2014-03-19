@@ -1,9 +1,12 @@
-{
-    "test1": [{
-        "tmpfile":"/tmp/test1.out",
-        "num": 55
-    },{
-        "tmpfile":"/tmp/test2.out",
-        "num" : 0
-    }]
-}
+[
+    {
+        "name":"test1", 
+        "parameters":[{
+            "tmpfile":"/tmp/test1.out",
+            "num": 55
+        },{
+            "tmpfile":"/tmp/test2.out",
+            "num" : 0
+        }]
+    }
+]

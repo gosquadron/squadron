@@ -96,9 +96,12 @@ We also need to make sure that PHP is installed::
 
     $ cd ..
     $ cat > state.json
-    {
-            "apt": ["apache2", "libapache2-mod-php5"]
-    }
+    [
+        {
+            "name":"apt",
+            "parameters":["apache2", "libapache2-mod-php5"]
+        }
+    ]
 
 Now we need to run a2enmod when this is installed. We actually need to set up two files for this: `actions.json` and `react.json`.
 
@@ -218,9 +221,12 @@ installed::
 
     $ chmod +x services/website/1.0.0/tests/check_php.sh
     $ cat > services/website/1.0.0/state.json
-    {
-        "apt": ["apache2", "libapache2-mod-php5", "curl"]
-    }
+    [
+        {
+            "name":"apt",
+            "parameters":["apache2", "libapache2-mod-php5", "curl"]
+        }
+    ]
 
 And now we're done. Let's run it::
 

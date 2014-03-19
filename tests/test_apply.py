@@ -15,7 +15,11 @@ def checkfile(filename, compare):
 
 test_path = os.path.join(get_test_path(), 'applytests')
 
-def test_apply_only(tmpdir):
+@pytest.mark.parametrize("source_dir,dest_dir,do_commit",[
+    ("applytest1","applytest1result",False),
+    ("applytest2","applytest2result",True)
+])
+def test_apply(tmpdir, source_dir, dest_dir, do_commit):
     tmpdir = str(tmpdir)
 
     commit_tmp = os.path.join(tmpdir, 'tmp')
@@ -23,7 +27,7 @@ def test_apply_only(tmpdir):
 
     apply_dir = os.path.join(tmpdir, 'apply')
     # apply_dir must not yet exist
-    shutil.copytree(os.path.join(test_path,'applytest1'), apply_dir)
+    shutil.copytree(os.path.join(test_path, source_dir), apply_dir)
 
     # Write out config
     state_tmp = os.path.join(tmpdir,'state')
@@ -48,34 +52,14 @@ def test_apply_only(tmpdir):
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
-            os.path.join(test_path,'applytest1result'))
+            os.path.join(test_path, dest_dir))
 
     checkfile(config['config']['state1'], '55')
     checkfile(config['config']['state2'], '0')
 
-def test_apply_commit(tmpdir):
-    # Need to delete this first in case of bad test run
-    shutil.rmtree('/tmp/applytest2', ignore_errors=True)
-
-    tmpdir = str(tmpdir)
-    results = commit.apply(os.path.join(test_path,'applytest2'),
-            'node', tmpdir, {})
-
-    assert len(results) == 1
-    assert are_dir_trees_equal(results['api']['dir'],
-            os.path.join(test_path, 'applytest2result'))
-
-    makedirsp(results['api']['base_dir'])
-    commit.commit(results)
-
-    assert are_dir_trees_equal(results['api']['base_dir'],
-            os.path.join(test_path,'applytest2result'))
-
-    checkfile('/tmp/test1.out', '55')
-    checkfile('/tmp/test2.out', '0')
-    os.remove('/tmp/test1.out')
-    os.remove('/tmp/test2.out')
-    shutil.rmtree(results['api']['base_dir'])
+    if do_commit:
+        makedirsp(results['api']['base_dir'])
+        commit.commit(results)
 
 def test_schema_validation_error(tmpdir):
     tmpdir = str(tmpdir)

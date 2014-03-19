@@ -314,9 +314,12 @@ package to be installed via apt.
 
 Example state.json with apt::
 
-    {
-        "apt": ["screen","tmux"]
-    }
+    [
+        {
+            "name":"apt",
+            "parameters":["screen","tmux"]
+        }
+    ]
 
 group
 """""
@@ -335,18 +338,21 @@ Creates groups. Takes an object with the following fields.
 
 Example state.json with group::
 
-    {
-        "group": [
-            {
-                "name": "newgroup"
-            },
-            {
-                "name": "specificgroup",
-                "gid": 555,
-                "system": true
-            }
-        ]
-    }
+    [
+        {
+            "name":"group", 
+            "parameters":[
+                {
+                    "name": "newgroup"
+                },
+                {
+                    "name": "specificgroup",
+                    "gid": 555,
+                    "system": true
+                }
+            ]
+        }
+    ]
 
 user
 """"
@@ -373,24 +379,27 @@ Creates users. Takes an object with the following fields.
 
 Example state.json with user::
 
-    {
-        "user": [
-            {
-                "username": "newuser"
-            },
-            {
-                "username": "specificuser",
-                "shell":"/bin/bash",
-                "homedir":"/users/specificuser"
-                "realname":"Specific User"
-            },
-            {
-                "username":"windows",
-                "uid":666,
-                "system":true
-            }
-        ]
-    }
+    [
+        {
+            "name":"user": 
+            "parameters":[
+                {
+                    "username": "newuser"
+                },
+                {
+                    "username": "specificuser",
+                    "shell":"/bin/bash",
+                    "homedir":"/users/specificuser"
+                    "realname":"Specific User"
+                },
+                {
+                    "username":"windows",
+                    "uid":666,
+                    "system":true
+                }
+            ]
+        }
+    ]
 
 .. _actionreaction:
 

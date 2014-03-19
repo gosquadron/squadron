@@ -87,11 +87,15 @@ We won’t need all these files yet, and Squadron gives you sensible defaults if
 
 Let’s make a state.json to install apache2 for our simple website::
 
-    { 
-        "apt": ["apache2"]
-    }
+    [ 
+        {
+            "name":"apt", 
+            "parameters":["apache2"]
+        }
+    ]
 
-Now when we later run squadron, it'll make sure that Apache is installed.
+Now when we later run squadron, it'll make sure that Apache is installed via
+apt-get.
 
 Templating
 ^^^^^^^^^^

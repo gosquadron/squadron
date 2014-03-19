@@ -1,3 +1,6 @@
-{
-    "user": ["git"]
-}
+[
+    {
+        "name":"user",
+        "parameters":["git"]
+    }
+]
