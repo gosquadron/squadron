@@ -90,7 +90,7 @@ which means it will use a symbolic link from /var/www/ to Squadron's deployment
 directory.
 
 Apache module
-^^^^^^^^^^
+^^^^^^^^^^^^^
 
 We also need to make sure that PHP is installed::
 
