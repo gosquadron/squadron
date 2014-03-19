@@ -113,9 +113,7 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
         # Setting the state comes first, since the rest of this might
         # depend on the state of the system (like virtualenv)
         statejson = get_service_json(squadron_dir, service, version, 'state', True, config=cfg)
-        print "Got statejson: {}".format(statejson)
         for state_item in statejson:
-            print "Got state_item: {}".format(state_item)
             library = state_item['name']
             items = state_item['parameters']
 
