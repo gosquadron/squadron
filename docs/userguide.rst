@@ -5,6 +5,58 @@ User Guide
 
 This is a reference guide to the various components of Squadron.
 
+.. _configsq:
+
+Config.sq
+---------
+
+The file `config.sq` is a special file that can be put in the `root/` of a
+service. It can change the file mode, user or group ownership, and controls
+whether or not it is deployed atomically.
+
+Here's an example::
+
+    var/www/ atomic:true user:nobody group:www-data
+    var/www/file.txt user:root mode:0600
+    etc/init.d/service-script mode:0755
+
+Each line describes the file or directory that is being configured. 
+Directories must end in a slash. Spaces or newlines in filenames should be 
+escaped with a backslash.
+
+In this example, the directory `var/www/` in `root/` will be deployed 
+atomically via symlinks, and it and all of its children with be owned by the 
+`nobody` user and have its group set to `www-data`.
+
+The file `var/www/file.txt` will be in the same atomic deployment as 
+`var/www/`, and will have its user set to `root`, and its group set to
+`www-data`. Its file mode will be 0600.
+
+The following table describes the options available to config.sq and their 
+description:
+
++-------------+----------------------------------------------+
+| **Name**    | **Description**                              |
++-------------+----------------------------------------------+
+| atomic      | Whether or not to deploy this directory via  |
+|             | a symlink, so that it is atomic. Valid values|
+|             | are true or false. Defaults to false.        |
++-------------+----------------------------------------------+
+| group       | What group to chgrp this file or directory   |
+|             | to. If a directory, all children are also set|
+|             | to this group. Default: group of the user    |
+|             | running Squadron.                            |
++-------------+----------------------------------------------+
+| mode        | The numeric mode of the file or directory. If|
+|             | a directory, all children are also set to    |
+|             | this mode. Defaults to umask.                |
++-------------+----------------------------------------------+
+| user        | What user to chown this file or directory to.|
+|             | If a directory, all children are also set to |
+|             | this user. Default: the user running         |
+|             | Squadron.                                    |
++-------------+----------------------------------------------+
+
 Extensions
 ----------
 

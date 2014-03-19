@@ -82,7 +82,8 @@ Fortunately, this is really easy with Squadron::
 
 The `config.sq` file in the `root` directory of a service is special. It's not
 copied to your `base_dir`, but instead configures some metadata, such as
-setting the user, group, or mode for a file or directory.
+setting the user, group, or mode for a file or directory. For more information,
+see the :ref:`configsq` section of the :ref:`userguide`.
 
 What we've done here is to tell Squadron to do an atomic deploy of `var/www/`,
 which means it will use a symbolic link from /var/www/ to Squadron's deployment
