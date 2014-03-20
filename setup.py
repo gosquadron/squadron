@@ -43,7 +43,8 @@ setup(
     tests_require=[
         'pytest>=2.5.1',
         'mock>=1.0.1',
-        'pytest-timeout>=0.3'
+        'pytest-timeout>=0.3',
+        'webtest>=2.0.14'
         ],
     cmdclass = {'test': PyTest},
     install_requires=[
@@ -52,5 +53,7 @@ setup(
         'quik>=0.2.2',
         'requests>=2.2.0',
         'py>=1.4.19',
-        'simplejson>=0']
+        'simplejson>=0',
+        'cherrypy>=3.2.5',
+        'bottle>=0.12.5']
 )
