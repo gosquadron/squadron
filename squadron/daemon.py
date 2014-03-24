@@ -23,7 +23,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=th
     """
     log.debug('entering daemon.daemonize %s',
             [squadron_dir, config_file, polltime, repo])
-    parsed_config = parse_config(log, config_file)
+    parsed_config = parse_config(squadron_dir, log, config_file)
     print "Daemon is using loglevel: " + str(log.getEffectiveLevel())
     if not polltime:
         polltime = float(parsed_config['polltime'])

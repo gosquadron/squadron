@@ -43,8 +43,9 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         dont_rollback -- if true, doesn't automatically rollback to the previous version
         dry_run -- whether or not to apply changes
     """
+    send_status = False
     try:
-        config = parse_config(log, config_file)
+        config = parse_config(squadron_dir, log, config_file)
         log.debug("Got config {}".format(config))
 
         squadron_dir = get_squadron_dir(squadron_dir, config)
@@ -54,7 +55,6 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         if node_name is None:
             node_name = config['nodename']
 
-        send_status = False
         if config['send_status'].lower() == 'true':
             send_status = True
 

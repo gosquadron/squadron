@@ -11,15 +11,11 @@ test_path = os.path.join(get_test_path(), 'config_tests')
 
 setup_log('DEBUG', console=True)
 
-#Called before every test
-#Resets the singleton
-def setup_function(function):
-    squadron_config.SquadronConfig()._reset()
-
-def test_no_config():
+def test_no_config(tmpdir):
+    tmpdir = str(tmpdir)
     squadron_config.CONFIG_PATHS = []
     with pytest.raises(UserException) as ex:
-        squadron_config.parse_config(log)
+        squadron_config.parse_config(tmpdir, log)
     assert ex is not None
 
 def diff_dict(a, b):
@@ -64,32 +60,40 @@ def override_func(config):
     for item in squadron_config.CONFIG_DEFAULTS():
         config.set('squadron', item, 'not-default')
 
-def test_defaults():
+def test_defaults(tmpdir):
+    tmpdir = str(tmpdir)
     squadron_config.CONFIG_PATHS = ['/tmp/test_config']
     create_fake_config(squadron_config.CONFIG_PATHS[0])
-    result = squadron_config.parse_config(log)
+    result = squadron_config.parse_config(tmpdir, log)
     #We have a fake config file that is parsable, but missing everything
-    diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS()) 
+    diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS())
     #There should only be one difference, the fakesetting
     assert(len(diff) == 1)
     assert(diff[0] == 'fakesetting')
 
 
-def test_overrides():
+def test_overrides(tmpdir):
+    tmpdir = str(tmpdir)
     output_file = '/tmp/test_override_config'
     squadron_config.CONFIG_PATHS = [output_file]
+
     create_config(output_file, override_func)
-    result = squadron_config.parse_config(log)
+
+    result = squadron_config.parse_config(tmpdir, log)
+
     diff = diff_dict(result, squadron_config.CONFIG_DEFAULTS())
     assert(len(diff) == len(squadron_config.CONFIG_DEFAULTS()))
     assert(len(diff) > 0)
 
-def test_singleton():
+def test_singleton(tmpdir):
+    tmpdir = str(tmpdir)
     output_file = '/tmp/test_singleton_config'
     squadron_config.CONFIG_PATHS = [output_file]
+
     create_config(output_file, override_func)
-    result = squadron_config.parse_config(log)
-    another_call = squadron_config.parse_config(log)
+
+    result = squadron_config.parse_config(tmpdir, log)
+    another_call = squadron_config.parse_config(tmpdir, log)
     diff = diff_dict(result, another_call)
     assert(result == another_call)
     assert(len(diff) == 0)
@@ -106,7 +110,7 @@ def test_logging(tmpdir):
         with open(log_config_template) as tfile:
             lfile.write(tfile.read().format(log_file, rotate_file))
 
-    config = squadron_config.parse_log_config(log, log_config)
+    config = squadron_config.parse_log_config(tmpdir, log, log_config)
 
     debug_str = 'Log debug: %s'.format(tmpdir)
     error_str = 'Log error'
@@ -129,6 +133,8 @@ def verify_log_content(filename, verification):
     return (verification in log_content)
 
 @pytest.mark.parametrize("error_file", os.listdir(os.path.join(test_path, 'error')))
-def test_logging_error(error_file):
+def test_logging_error(tmpdir, error_file):
+    tmpdir = str(tmpdir)
     with pytest.raises(UserException) as ex:
-        squadron_config.parse_log_config(log, os.path.join(test_path, 'error', error_file))
+        squadron_config.parse_log_config(tmpdir, log,
+                os.path.join(test_path, 'error', error_file))
