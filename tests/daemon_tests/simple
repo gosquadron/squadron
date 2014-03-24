@@ -1,0 +1,16 @@
+[daemon]
+polltime = 60
+
+[squadron]
+keydir = /etc/squadron/keys
+nodename = override.example.com
+statedir = /var/squadron/state
+send_status = false
+
+[status]
+status_host = status.gosquadron.com
+status_apikey = ABCDEF12345
+status_secret = 8d4ce3db954ab1bed870ce682e6765ec24a1227352b3d2688170ecaefda1165c 
+
+[log]
+debuglog = DEBUG stream stderr

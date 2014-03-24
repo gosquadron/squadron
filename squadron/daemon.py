@@ -9,7 +9,7 @@ import notify.server
 import threading
 import time
 
-def daemonize(squadron_dir, config_file, polltime, repo, node_name):
+def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=threading.Event()):
     """
     Runs squadron every polltime minutes.
 
@@ -58,18 +58,18 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name):
             log.info('Starting webhook server on %s:%s', listen, port)
             webhook_thread.start()
 
-    while True:
-        git = repo.git
-
+    while not exit_loop.is_set():
         start_time = time.time()
-        log.debug("Doing git checkout")
-        out = git.checkout('master')
-        log.debug('Git checkout returned: %s', out)
-        log.debug('Doing git pull --rebase')
-        out = git.pull('--rebase')
-        log.debug('Git pull returned: %s', out)
 
         try:
+            git = repo.git
+            log.debug("Doing git checkout")
+            out = git.checkout('master')
+            log.debug('Git checkout returned: %s', out)
+            log.debug('Doing git pull --rebase')
+            out = git.pull('--rebase')
+            log.debug('Git pull returned: %s', out)
+
             ret = main.go(squadron_dir, node_name=node_name,
                     config_file=config_file, dry_run=False)
         except e:
