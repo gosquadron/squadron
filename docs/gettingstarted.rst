@@ -14,7 +14,7 @@ you don't have to type out all these commands::
     $ git clone -b simple2 https://github.com/gosquadron/example-squadron-repo.git
 
 You can also play with a `Vagrant box we made 
-<https://dl.dropboxusercontent.com/u/10188833/squadron-ubuntu-saucy-i686.box>`_
+<https://dl.dropboxusercontent.com/u/10188833/squadron-0.4.0-i686.box>`_
 to test out Squadron.
 
 Install Squadron
