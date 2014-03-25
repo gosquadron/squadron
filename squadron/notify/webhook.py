@@ -29,12 +29,8 @@ class WebHookHandler:
 
     @require_auth
     def handle(self):
-        data = request.json
-
         if self.log:
             self.log.debug('Webhook push request: %s', data)
 
-        if 'head_commit' in data:
-            self.callback(data['head_commit'])
-            return "OK"
-        self._raise(400, 'Request didn\'t have head')
+        self.callback(request.json)
+        return "OK"

@@ -39,10 +39,3 @@ def test_application():
     with pytest.raises(AppError) as ex:
         resp = app.post_json('/', {'head_commit':{'commit':'id'}})
     assert not called.is_set()
-
-    called.clear()
-
-    with pytest.raises(AppError) as ex:
-        resp = app.post_json('/', {'broken':True},
-            headers={'Authorization':make_auth_header(username,password)})
-    assert not called.is_set()
