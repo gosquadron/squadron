@@ -746,4 +746,35 @@ Example of rotating file located at /var/log/squadron/log, which rotates every
 
     rotate = DEBUG rotatingfile /var/log/squadron/log 5000 2
 
+.. _webhooks:
+
+Github Webhooks
+---------------
+
+If you'd like to trigger the squadron daemon sooner than polling, you can hook
+up Github Webhooks. You'll need to add this to your Squadron config file::
+
+    [webhook]
+    webhook = true
+    webhook_username = authusername
+    webhook_password = authpassword
+    webhook_listen = 0.0.0.0
+    webhook_port = 8888
+
+You should modify the username and password to be random so that attackers
+cannot trigger Squadron on demand. You can also choose whatever port you would
+like.
+
+Then run the squadron daemon like normal::
+    
+    $ squadron daemon
+    Starting webhook server on 0.0.0.0:8888
+
+Squadron will still poll for changes for however often you have set the
+polltime to in the configuration. However, now if Github (or anyone else,
+really) POSTs a Github webhook to that port, Squadron will restart.
+
+For help on setting up Github webhooks for your repository, see this Github
+documentation page: `Creating Webhooks
+<https://help.github.com/articles/creating-webhooks>`_.
 

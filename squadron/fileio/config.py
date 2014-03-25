@@ -25,7 +25,7 @@ CONFIG_PATHS = ['/etc/squadron/config',
         ]
 
 
-CONFIG_SECTIONS = set(['squadron', 'status', 'daemon'])
+CONFIG_SECTIONS = set(['squadron', 'status', 'daemon', 'webhook'])
 
 @singleton
 class SquadronConfig:
