@@ -22,7 +22,7 @@ def strip_prefix(paths, prefix):
 
 def get_squadron_dir(squadron_dir, config):
     if squadron_dir is None:
-        if 'basedir' in config:
+        if config and 'basedir' in config:
             return config['basedir']
         else:
             return os.getcwd()
@@ -45,7 +45,9 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
     """
     send_status = False
     try:
-        config = parse_config(squadron_dir, log, config_file)
+        first_squadron_dir = get_squadron_dir(squadron_dir, None)
+
+        config = parse_config(first_squadron_dir, log, config_file)
         log.debug("Got config {}".format(config))
 
         squadron_dir = get_squadron_dir(squadron_dir, config)
