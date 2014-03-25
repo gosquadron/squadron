@@ -37,15 +37,20 @@ Now let's install squadron::
     Initializing config dir /home/user/.squadron
     Initializing state dir /home/user/.squadron/state
 
-Squadron can be installed into a virtualenv. It uses a directory to store :ref:`global-configuration` and another one to store the state change of your services. 
+Squadron can be installed into a virtualenv. It uses a directory to store 
+:ref:`global-configuration` and another one to store the state change of your 
+services. 
 
 Squadron looks for config in the following places:
 
 * /etc/squadron/config
 * /usr/local/etc/squadron/config
 * ~/.squadron/config
+* or in a file called config in the Squadron repository itself
 
-From there it reads the location of its state directory.
+From there it reads the location of its state directory. The setup step is
+optional if you want to keep the config in the repository and make the state
+directory on your own.
 
 Start a Squadron repository
 ---------------------------

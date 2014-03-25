@@ -629,6 +629,7 @@ Squadron looks for config in the following places:
  - /etc/squadron/config
  - /usr/local/etc/squadron/config
  - ~/.squadron/config
+ - and in a file called config in the Squadron repository itself
 
 Here's an example a config file::
 
