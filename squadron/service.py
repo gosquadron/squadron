@@ -195,7 +195,7 @@ def _checkfiles(filepatterns, paths_changed):
     return False
 
 def _runcommand(command, retcode):
-    ret = subprocess.call(command.split())
+    ret = subprocess.call(command, shell=True)
     return ret != retcode
 
 def _checknotexists(files):

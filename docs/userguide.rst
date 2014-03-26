@@ -504,7 +504,8 @@ Here is a list of fields that a `when` object can contain:
 +----------------+------------------------------------------------------------------------------------+
 | **Field**      | **Description**                                                                    |
 +----------------+------------------------------------------------------------------------------------+
-| command        | Command to run, used with exitcode_not                                             |
+| command        | Command to run, used with exitcode_not. This is passed through a shell, so you can |
+|                | use pipes and shell logic.                                                         |
 +----------------+------------------------------------------------------------------------------------+
 | exitcode_not   | Run action if exit code for command isn't this                                     |
 +----------------+------------------------------------------------------------------------------------+
