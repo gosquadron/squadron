@@ -168,12 +168,9 @@ def get_reactions(service_dir, service_name, service_ver):
         when = reaction['when']
 
         # Prepend service name if relative path
-        if 'files_modified' in when:
-            when['files_modified'] = _prepend_service_name(service_name, when['files_modified'])
-        if 'files_created' in when:
-            when['files_created'] = _prepend_service_name(service_name, when['files_created'])
-        if 'files' in when:
-            when['files'] = _prepend_service_name(service_name, when['files'])
+        for i in ['files_modified', 'files_created', 'files']:
+            if i in when:
+                when[i] = _prepend_service_name(service_name, when[i])
 
         reaction['execute'] = actions
 
