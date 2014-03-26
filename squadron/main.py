@@ -21,7 +21,7 @@ def strip_prefix(paths, prefix):
     return [x[len(prefix)+1:] for x in paths]
 
 def get_squadron_dir(squadron_dir, config):
-    if squadron_dir is None:
+    if not squadron_dir:
         if config and 'basedir' in config:
             return config['basedir']
         else:
