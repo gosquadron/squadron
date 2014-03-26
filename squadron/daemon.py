@@ -75,7 +75,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=th
 
             ret = main.go(squadron_dir, node_name=node_name,
                     config_file=config_file, dry_run=False)
-        except e:
+        except Exception as e:
             log.exception('Caught top level exception')
 
         end_time = time.time()
