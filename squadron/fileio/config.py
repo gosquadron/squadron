@@ -119,7 +119,7 @@ def _get_config(squadron_dir, log, config_file):
             parser.readfp(cfile, config_file)
     else:
         # Try defaults
-        squadron_dir_config = os.path.join(squadron_dir, 'config')
+        squadron_dir_config = os.path.join(squadron_dir, '.squadron', 'config')
         parsed_files = parser.read(CONFIG_PATHS + [squadron_dir_config])
         log.debug("Using config files: %s", parsed_files)
     return parser

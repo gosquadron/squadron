@@ -46,7 +46,7 @@ Squadron looks for config in the following places:
 * /etc/squadron/config
 * /usr/local/etc/squadron/config
 * ~/.squadron/config
-* or in a file called config in the Squadron repository itself
+* or in .squadron/config in the Squadron repository itself
 
 From there it reads the location of its state directory. The setup step is
 optional if you want to keep the config in the repository and make the state
