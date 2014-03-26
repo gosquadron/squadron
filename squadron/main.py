@@ -29,7 +29,7 @@ def get_squadron_dir(squadron_dir, config):
     return squadron_dir
 
 def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = None, status_server = None,
-        dont_rollback = False, dry_run = True):
+        dont_rollback = False, force = False, dry_run = True):
     """
     Gets the config and applies it if it's not a dry run.
 
@@ -41,6 +41,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
         status_server -- the hostname (and optionally port) of the HTTPS server to
             send status to
         dont_rollback -- if true, doesn't automatically rollback to the previous version
+        force -- treat all files as created, always deploy
         dry_run -- whether or not to apply changes
     """
     send_status = False
@@ -67,7 +68,7 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
             status_secret = config['status_secret']
             log.info("Sending status to {} with {}/{}".format(status_server, status_apikey, status_secret))
 
-        info = _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run)
+        info = _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, force, dry_run)
     except UserException as e:
         # This is a user error, don't print a stack trace
         log.error(e.message)
@@ -121,8 +122,15 @@ def _is_current_last(prefix, tempdir, last_run_dir):
                 matched = bn == path
     return matched
 
+def _get_hash_diff(last_run_sum, this_run_sum, force):
+    if force:
+        return ([], this_run_sum.keys())
+    else:
+        return hash_diff(last_run_sum, this_run_sum)
+
 @go_to_root
-def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dry_run):
+def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback,
+        force, dry_run):
     """
     Runs apply to set up the temp directory, and then runs commit if
     dry_run is false.
@@ -132,6 +140,7 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
         squadron_state_dir -- where Squadron should store its state between runs
         node_name -- what this node is called
         dont_rollback -- if true, doesn't automatically rollback to the previous version
+        force -- treat all files as created, always deploy
         dry_run -- whether or not to apply changes
     """
     log.debug('entering _run_squadron')
@@ -171,11 +180,12 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback, dr
     log.debug("Last run sum: %s", last_run_sum)
     log.debug("This run sum: %s", this_run_sum)
 
-    if this_run_sum != last_run_sum:
-        paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
+    if this_run_sum != last_run_sum or force:
+        paths_changed, new_paths = _get_hash_diff(last_run_sum, this_run_sum, force)
         if not dry_run:
             _deploy(squadron_dir, new_dir, last_run_dir, result,
-                    this_run_sum, last_run_sum, last_commit, dont_rollback, resources)
+                    this_run_sum, last_run_sum, last_commit, dont_rollback,
+                    resources, force)
             info = {'dir': new_dir, 'commit':result, 'checksum': this_run_sum}
             log.debug("Writing run info to %s: %s", squadron_state_dir, info)
 
@@ -219,7 +229,7 @@ def _get_action_reaction(squadron_dir, commit_info):
 
 @go_to_root
 def _deploy(squadron_dir, new_dir, last_dir, commit_info,
-        this_run_sum, last_run_sum, last_commit, dont_rollback, resources):
+        this_run_sum, last_run_sum, last_commit, dont_rollback, resources, force):
     log.info("Applying changes")
     log.debug("Changes: %s", commit_info)
     commit.commit(commit_info)
@@ -230,7 +240,7 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
     log.debug("Reacting to changes: %s actions and %s reactions to run",
             len(actions), len(reactions))
 
-    paths_changed, new_paths = hash_diff(last_run_sum, this_run_sum)
+    paths_changed, new_paths = _get_hash_diff(last_run_sum, this_run_sum, force)
 
     log.debug("Paths changed: %s", paths_changed)
     log.debug("New paths: %s", new_paths)
@@ -245,7 +255,7 @@ def _deploy(squadron_dir, new_dir, last_dir, commit_info,
             log.error("Rolling back to %s because tests failed", last_commit)
             # Flip around the paths changed and new_paths
             _deploy(squadron_dir, last_dir, None, last_commit, last_run_sum,
-                    {}, None, dont_rollback, resources)
+                    {}, None, dont_rollback, resources, False)
         raise
 
 @go_to_root

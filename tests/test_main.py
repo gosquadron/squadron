@@ -38,7 +38,9 @@ def test_main_basic(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main1')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, False)
+    main.go(squadron_dir, squadron_state_dir,
+            os.path.join(test_path, 'main1.config'), 'dev',
+            None, False, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -51,7 +53,9 @@ def test_main_basic(tmpdir):
 
     old_dir = info['dir']
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, False)
+    main.go(squadron_dir, squadron_state_dir,
+            os.path.join(test_path, 'main1.config'), 'dev',
+            None, False, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -74,7 +78,9 @@ def test_main_dryrun(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main1')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path, 'main1.config'), 'dev', None, False, True)
+    main.go(squadron_dir, squadron_state_dir,
+            os.path.join(test_path, 'main1.config'), 'dev',
+            None, False, False, True)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         assert "" == infojson.read()
@@ -90,7 +96,9 @@ def test_main_with_config(tmpdir):
     squadron_dir = os.path.join(test_path, 'main1')
 
     # Gets the node name from the config file
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), None, None, False, False)
+    main.go(squadron_dir, squadron_state_dir,
+            os.path.join(test_path,'main1.config'), None,
+            None, False, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -108,7 +116,9 @@ def test_config_with_bad_dir(tmpdir):
     create_blank_infojson(squadron_state_dir)
 
     try:
-        main.go(None, squadron_state_dir, os.path.join(test_path,'bad_dir.config'), None, None, False, False)
+        main.go(None, squadron_state_dir,
+                os.path.join(test_path,'bad_dir.config'), None,
+                None, False, False, False)
         assert False == "Should have thrown" # Shouldn't get here
     except OSError as e:
         assert e.filename.startswith('/non/existant/dir')
@@ -122,7 +132,9 @@ def test_main_git(tmpdir):
 
     squadron_dir = os.path.join(test_path, 'main2')
 
-    main.go(squadron_dir, squadron_state_dir, os.path.join(test_path,'main1.config'), 'dev', None, False, False)
+    main.go(squadron_dir, squadron_state_dir,
+            os.path.join(test_path,'main1.config'), 'dev',
+            None, False, False, False)
 
     with open(os.path.join(squadron_state_dir, 'info.json')) as infojson:
         info = json.loads(infojson.read())
@@ -172,13 +184,17 @@ def test_rollback(tmpdir, dry_run, dont_rollback):
 
     if dry_run:
         # Should not raise
-        main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dont_rollback, dry_run)
+        main.go(squadron_dir, tmpdir,
+                os.path.join(test_path,'main1.config'), 'dev',
+                None, dont_rollback, False, dry_run)
     else:
         # This should raise every time
         for i in range(3):
             with pytest.raises(squadron.exceptions.TestException) as ex:
                 makedirsp('/tmp/main2test/')
-                main.go(squadron_dir, tmpdir, os.path.join(test_path,'main1.config'), 'dev', None, dont_rollback, dry_run)
+                main.go(squadron_dir, tmpdir,
+                        os.path.join(test_path,'main1.config'), 'dev', None,
+                        dont_rollback, False, dry_run)
 
             assert ex is not None
 
@@ -190,4 +206,42 @@ def test_rollback(tmpdir, dry_run, dont_rollback):
             remove_lock_file(info['dir'])
             assert are_dir_trees_equal(old_dir, info['dir'])
             shutil.rmtree('/tmp/main2test/')
+
+@pytest.mark.parametrize("use_the_force", [
+    False,
+    True,
+])
+def test_force(tmpdir, use_the_force):
+    tmpdir = str(tmpdir)
+    force_test = os.path.join(test_path, 'force1')
+    force_dir = os.path.join(tmpdir, 'force')
+
+    shutil.copytree(force_test, force_dir)
+
+    action_file = os.path.join(force_dir, 'services', 'api', '0.0.1', 'actions.json')
+    result_file = os.path.join(tmpdir,'result')
+    with open(action_file, 'w') as afile:
+        afile.write(json.dumps({'test':{
+            'commands':['touch {}'.format(result_file)]
+        }}))
+
+    squadron_state_dir = os.path.join(tmpdir, 'state')
+    makedirsp(squadron_state_dir)
+    create_blank_infojson(squadron_state_dir)
+
+    main.go(force_dir, squadron_state_dir,
+            os.path.join(test_path, 'main1.config'), 'dev',
+            None, False, use_the_force, False)
+
+    assert os.path.exists(result_file)
+    os.remove(result_file)
+
+    main.go(force_dir, squadron_state_dir,
+            os.path.join(test_path, 'main1.config'), 'dev',
+            None, False, use_the_force, False)
+
+    if use_the_force:
+        assert os.path.exists(result_file)
+    else:
+        assert not os.path.exists(result_file)
 
