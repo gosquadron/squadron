@@ -1,6 +1,8 @@
 import logging
 import datetime
 from fileio.config import parse_log_config
+import os
+
 log = logging.getLogger('normal')
 
 class SpecialFormatter(logging.Formatter):
@@ -13,7 +15,7 @@ class SpecialFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-def setup_log(loglevel, config_file=None, console=False):
+def setup_log(loglevel, config_file=None, console=False, squadron_dir=None):
     if console:
         level = getattr(logging, loglevel.upper(), None)
         if not isinstance(level, int):
@@ -26,5 +28,7 @@ def setup_log(loglevel, config_file=None, console=False):
         ch.setFormatter(SpecialFormatter())
         log.addHandler(ch)
     else:
-        parse_log_config(log, config_file)
+        if not squadron_dir:
+            squadron_dir = os.getcwd()
+        parse_log_config(squadron_dir, log, config_file)
 

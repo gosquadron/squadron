@@ -24,7 +24,7 @@ def _apply(args, parent, dry_run):
 
     output = parser.parse_args(args)
 
-    log.setup_log(output.loglevel, console=True)
+    log.setup_log(output.loglevel, console=True, squadron_dir=output.directory)
 
     return main.go(output.directory, output.sysdir, output.config,
             output.node_name, output.status, output.dontrollback, output.force, dry_run)
@@ -42,7 +42,7 @@ def _daemonize(args, parent):
     parser.add_argument('-l', '--loglevel', help='What log level to run at', default='INFO')
 
     output = parser.parse_args(args)
-    log.setup_log(output.loglevel, output.config, False)
+    log.setup_log(output.loglevel, output.config, False, squadron_dir=output.directory)
 
     return daemon.daemonize(output.directory, output.config, output.polltime, output.repo, output.node_name)
 
@@ -68,7 +68,7 @@ def _init(args, parent):
 
     output = parser.parse_args(args)
 
-    log.setup_log(output.loglevel, console=True)
+    log.setup_log(output.loglevel, console=True, squadron_dir=output.directory)
 
     if output.service:
         return initialize.init_service(output.directory, output.service, output.version)
