@@ -67,9 +67,6 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=th
 
         try:
             git = repo.git
-            log.debug("Doing git checkout")
-            out = git.checkout('master')
-            log.debug('Git checkout returned: %s', out)
             log.debug('Doing git pull --rebase')
             out = git.pull('--rebase')
             log.debug('Git pull returned: %s', out)
