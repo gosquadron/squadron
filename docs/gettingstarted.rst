@@ -79,14 +79,15 @@ of our website, but instead the version of this deployment configuration::
     $ squadron init --service website --version 0.0.1
     $ tree -F services/website
     website/
-    └── 0.0.1/
-        ├── actions.json
-        ├── defaults.json
-        ├── react.json
-        ├── root/
-        ├── schema.json
-        ├── state.json
-        └── tests/
+    `-- 0.0.1/
+        |-- actions.json
+        |-- copy.json
+        |-- defaults.json
+        |-- react.json
+        |-- root/
+        |-- schema.json
+        |-- state.json
+        `-- tests/
 
 We won’t need all these files yet, and Squadron gives you sensible defaults if you don’t need the features they provide.
 

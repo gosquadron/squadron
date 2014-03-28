@@ -245,6 +245,9 @@ Creates a Python `virtualenv <http://www.virtualenv.org>`_. The virtualenv and
 current user's PATH. Run through a template so variable substitution is
 possible.
 
+Since it's typically expensive to install a virtualenv, you should copy the
+previous version with `copy.json`. See :ref:`copy` for more information.
+
 **Contents**
 
 The contents of this file are passed to pip as if they were a requirements.txt
@@ -520,6 +523,36 @@ Here is a list of fields that a `when` object can contain:
 | not_exist      | List of globs/absolute paths to run if these files don't exist                     |
 +----------------+------------------------------------------------------------------------------------+
 
+.. _copy:
+
+Copying from previous runs
+--------------------------
+
+Squadron keeps around a history of your last few deployments. Since building
+some aspects of your deployment are expensive (such as installing npm or
+virtualenv dependencies), you can list which paths to copy from your last
+successful deployment.
+
+You do this with a `copy.json` file in your service. It looks like this::
+
+    [
+        {
+            "path": "code/deps/"
+        },
+        {
+            "path": "env/"
+        }
+    ]
+
+So on each run of Squadron, first it checks if there was a previous version of
+your deployment that was successfully deployed. If so, it checks if the paths
+listed existed in the previous deployment. If they did, it copies them
+recursively.
+
+This happens before :ref:`actionreaction` are triggered. It is important to
+have an action that installs these dependencies if they weren't copied over, as
+it can't be guaranteed that there was a previous successful run.
+
 .. _resources:
 
 Resources
@@ -779,4 +812,3 @@ really) POSTs a Github webhook to that port, Squadron will restart.
 For help on setting up Github webhooks for your repository, see this Github
 documentation page: `Creating Webhooks
 <https://help.github.com/articles/creating-webhooks>`_.
-
