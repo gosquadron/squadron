@@ -180,8 +180,8 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback,
     log.debug("Last run sum: %s", last_run_sum)
     log.debug("This run sum: %s", this_run_sum)
 
+    paths_changed, new_paths = _get_hash_diff(last_run_sum, this_run_sum, force)
     if this_run_sum != last_run_sum or force:
-        paths_changed, new_paths = _get_hash_diff(last_run_sum, this_run_sum, force)
         if not dry_run:
             _deploy(squadron_dir, new_dir, last_run_dir, result,
                     this_run_sum, last_run_sum, last_commit, dont_rollback,
@@ -209,6 +209,8 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback,
             log.info("\t%s", path)
     else:
         if not dry_run:
+            _run_actions(squadron_dir, new_dir, result, resources,
+                    paths_changed, new_paths)
             _run_tests(squadron_dir, result)
         log.info("Nothing changed.")
     return None
@@ -227,25 +229,33 @@ def _get_action_reaction(squadron_dir, commit_info):
             service_name, version))
     return (actions, reactions)
 
-@go_to_root
-def _deploy(squadron_dir, new_dir, last_dir, commit_info,
-        this_run_sum, last_run_sum, last_commit, dont_rollback, resources, force):
-    log.info("Applying changes")
-    log.debug("Changes: %s", commit_info)
-    commit.commit(commit_info)
-
+def _run_actions(squadron_dir, new_dir, commit_info, resources,
+        paths_changed, new_paths):
     actions, reactions = _get_action_reaction(squadron_dir, commit_info)
 
     # Then react to the changes
-    log.debug("Reacting to changes: %s actions and %s reactions to run",
+    log.info("Reacting to changes: %s actions and %s reactions to run",
             len(actions), len(reactions))
+
+    service.react(actions, reactions, paths_changed, new_paths, new_dir,
+            resources)
+
+@go_to_root
+def _deploy(squadron_dir, new_dir, last_dir, commit_info,
+        this_run_sum, last_run_sum, last_commit, dont_rollback,
+        resources, force):
+    log.info("Applying changes")
+    log.debug("Changes: %s", commit_info)
+    commit.commit(commit_info)
 
     paths_changed, new_paths = _get_hash_diff(last_run_sum, this_run_sum, force)
 
     log.debug("Paths changed: %s", paths_changed)
     log.debug("New paths: %s", new_paths)
 
-    service.react(actions, reactions, paths_changed, new_paths, new_dir, resources)
+    _run_actions(squadron_dir, new_dir, commit_info, resources, paths_changed,
+            new_paths)
+
     # Now test
     try:
         _run_tests(squadron_dir, commit_info)
