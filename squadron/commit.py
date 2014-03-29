@@ -37,9 +37,9 @@ def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on
         else:
             with open(service_json, 'r') as jsonfile:
                 return json.loads(jsonfile.read())
-    except IOError as e:
-        if e.errno == errno.ENOENT and empty_on_error:
-            return {}
+    except (OSError, IOError) as e:
+        if e.errno == errno.ENOENT and on_error is not None:
+            return on_error
         else:
             raise e
 
