@@ -172,7 +172,8 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback,
     resources = load_resources(squadron_dir)
 
     log.info("Staging directory: %s", new_dir)
-    result = commit.apply(squadron_dir, node_name, new_dir, resources, dry_run)
+    result = commit.apply(squadron_dir, node_name, new_dir, resources,
+            last_run_dir, dry_run)
     log.debug("commit.apply returned: %s", result)
     # Is this different from the last time we ran?
     this_run_sum = walk_hash(new_dir)

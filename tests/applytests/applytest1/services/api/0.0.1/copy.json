@@ -1,0 +1,8 @@
+[
+    {
+        "path": "example/path/"
+    },
+    {
+        "path": "non/existant/path"
+    }
+]

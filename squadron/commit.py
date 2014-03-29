@@ -13,9 +13,9 @@ import errno
 from log import log
 from fileio.symlink import force_create_symlink
 from quik import FileLoader
+import functools
 
-# This will be easy to memoize if need be
-def get_service_json(squadron_dir, service_name, service_ver, filename, empty_on_error=False, config=None):
+def _get_service_json(squadron_dir, service_name, service_ver, filename, on_error=None, config=None):
     """
     Grabs the named JSON file in a service directory
 
@@ -65,7 +65,8 @@ def check_node_info(node_info):
 
     return True
 
-def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
+def apply(squadron_dir, node_name, tempdir, resources, previous_run,
+        dry_run=False):
     """
     This method takes input from the given squadron_dir and configures
     a temporary directory according to that information
@@ -74,10 +75,11 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
         squadron_dir -- configuration directory for input
         node_name -- this node's name
         tempdir -- the base temporary directory to use
+        previous_run -- the previous successfully applied dir
         dry_run -- whether or not to actually create the temp directory
             or change any system-wide configuration via state.json
     """
-    log.debug('entering commit.apply %s', 
+    log.debug('entering commit.apply %s',
             [squadron_dir, node_name, tempdir, resources, dry_run])
     node_info = get_node_info(os.path.join(squadron_dir, 'nodes'), node_name)
 
@@ -95,24 +97,26 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
     library_dir = os.path.join(squadron_dir, 'libraries')
     state = StateHandler(library_dir)
     for service in node_info['services']:
+
         with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
             configdata = json.loads(cfile.read())
             version = configdata['version']
             base_dir = configdata['base_dir']
 
-            # defaults file is optional
-            cfg = get_service_json(squadron_dir, service, version, 'defaults', True)
-            cfg.update(configdata['config'])
+        get_service_json = functools.partial(_get_service_json, squadron_dir, service, version)
 
+        # defaults file is optional
+        cfg = get_service_json('defaults', {})
+        cfg.update(configdata['config'])
 
         # validate each schema
-        schema = get_service_json(squadron_dir, service, version, 'schema', True)
+        schema = get_service_json('schema', {})
         if schema:
             jsonschema.validate(cfg, schema)
 
         # Setting the state comes first, since the rest of this might
         # depend on the state of the system (like virtualenv)
-        statejson = get_service_json(squadron_dir, service, version, 'state', True, config=cfg)
+        statejson = get_service_json('state', {}, config=cfg)
         for state_item in statejson:
             library = state_item['name']
             items = state_item['parameters']
@@ -136,6 +140,23 @@ def apply(squadron_dir, node_name, tempdir, resources, dry_run=False):
         tmp_serv_dir = os.path.join(tempdir, service)
         makedirsp(tmp_serv_dir)
         atomic = render.render(tmp_serv_dir, cfg, resources, dry_run)
+
+        copy_config = get_service_json('copy', [], config=cfg)
+        if previous_run:
+            source_dir = os.path.join(previous_run, service)
+            for copy_item in copy_config:
+                if 'path' in copy_item:
+                    source = os.path.join(source_dir, copy_item['path'])
+                    dest = os.path.join(tmp_serv_dir, copy_item['path'])
+                    if os.path.isdir(source):
+                        log.debug('Copying directory %s to %s', source, dest)
+                        _smart_copytree(source, dest)
+                    elif os.path.exists(source):
+                        log.debug('Copying file %s to %s', source, dest)
+                        shutil.copyfile(source, dest)
+                    else:
+                        log.info('Copy file %s does not exist: %s',
+                                copy_item['path'], source)
 
         result[service] = {
                 'atomic': atomic,

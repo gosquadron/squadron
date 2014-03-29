@@ -15,11 +15,12 @@ def checkfile(filename, compare):
 
 test_path = os.path.join(get_test_path(), 'applytests')
 
-@pytest.mark.parametrize("source_dir,dest_dir,do_commit",[
-    ("applytest1","applytest1result",False),
-    ("applytest2","applytest2result",True)
+@pytest.mark.parametrize("source_dir,dest_dir,do_commit,do_copy",[
+    ("applytest1","applytest1result",False, False),
+    ("applytest2","applytest2result",True, False),
+    ("applytest1","applytest1result",False, True),
 ])
-def test_apply(tmpdir, source_dir, dest_dir, do_commit):
+def test_apply(tmpdir, source_dir, dest_dir, do_commit, do_copy):
     tmpdir = str(tmpdir)
 
     commit_tmp = os.path.join(tmpdir, 'tmp')
@@ -48,7 +49,14 @@ def test_apply(tmpdir, source_dir, dest_dir, do_commit):
     with open(os.path.join(config_dir, 'api.json'), 'w') as cfile:
         cfile.write(json.dumps(config))
 
-    results = commit.apply(apply_dir, 'node', commit_tmp, {})
+    previous_dir = None
+    if do_copy:
+        previous_dir = os.path.join(tmpdir, 'previous', 'example', 'path')
+        makedirsp(previous_dir)
+        with open(os.path.join(previous_dir, 'test.txt'), 'w') as copy_file:
+            copy_file.write('You did it!\n')
+
+    results = commit.apply(apply_dir, 'node', commit_tmp, {}, previous_dir)
 
     assert len(results) == 1
     assert are_dir_trees_equal(results['api']['dir'],
@@ -65,7 +73,7 @@ def test_schema_validation_error(tmpdir):
     tmpdir = str(tmpdir)
     with pytest.raises(jsonschema.ValidationError) as ex:
         commit.apply(os.path.join(test_path, 'applytest1-exception'),
-                'node', tmpdir, {})
+                'node', tmpdir, {}, None)
 
     assert ex.value.cause is None # make sure it was a validation error
     assert ex.value.validator_value == 'integer'
