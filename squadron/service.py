@@ -227,8 +227,8 @@ def _execute(command, resources):
             tmp_file.close()
             args[0] = tmp_file.name
 
-        log.debug('Executing %s', args)
-        subprocess.check_call(args)
+        log.debug('Executing %s in dir %s', args, os.getcwd())
+        subprocess.check_call(' '.join(args), shell=True)
     finally:
         if tmp_file:
             os.remove(tmp_file.name)
