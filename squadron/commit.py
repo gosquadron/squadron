@@ -65,6 +65,23 @@ def check_node_info(node_info):
 
     return True
 
+def _apply_copy(copy_config, previous_run, service, tmp_serv_dir):
+    if previous_run:
+        source_dir = os.path.join(previous_run, service)
+        for copy_item in copy_config:
+            if 'path' in copy_item:
+                source = os.path.join(source_dir, copy_item['path'])
+                dest = os.path.join(tmp_serv_dir, copy_item['path'])
+                if os.path.isdir(source):
+                    log.debug('Copying directory %s to %s', source, dest)
+                    _smart_copytree(source, dest)
+                elif os.path.exists(source):
+                    log.debug('Copying file %s to %s', source, dest)
+                    shutil.copyfile(source, dest)
+                else:
+                    log.info('Copy file %s does not exist: %s',
+                            copy_item['path'], source)
+
 def apply(squadron_dir, node_name, tempdir, resources, previous_run,
         dry_run=False):
     """
@@ -97,7 +114,7 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
     library_dir = os.path.join(squadron_dir, 'libraries')
     state = StateHandler(library_dir)
     for service in node_info['services']:
-
+        # Get config
         with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
             configdata = json.loads(cfile.read())
             version = configdata['version']
@@ -139,24 +156,12 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
 
         tmp_serv_dir = os.path.join(tempdir, service)
         makedirsp(tmp_serv_dir)
+        # Apply templates
         atomic = render.render(tmp_serv_dir, cfg, resources, dry_run)
 
+        # Copy files from previous runs if applicable
         copy_config = get_service_json('copy', [], config=cfg)
-        if previous_run:
-            source_dir = os.path.join(previous_run, service)
-            for copy_item in copy_config:
-                if 'path' in copy_item:
-                    source = os.path.join(source_dir, copy_item['path'])
-                    dest = os.path.join(tmp_serv_dir, copy_item['path'])
-                    if os.path.isdir(source):
-                        log.debug('Copying directory %s to %s', source, dest)
-                        _smart_copytree(source, dest)
-                    elif os.path.exists(source):
-                        log.debug('Copying file %s to %s', source, dest)
-                        shutil.copyfile(source, dest)
-                    else:
-                        log.info('Copy file %s does not exist: %s',
-                                copy_item['path'], source)
+        _apply_copy(copy_config, previous_run, service, tmp_serv_dir)
 
         result[service] = {
                 'atomic': atomic,
