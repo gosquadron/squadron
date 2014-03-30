@@ -1,4 +1,4 @@
-from commit import get_service_json
+from commit import _get_service_json
 import jsonschema
 import subprocess
 import fnmatch
@@ -109,7 +109,8 @@ def get_service_actions(service_dir, service_name, service_ver):
         service_name -- name of service
         service_ver -- service version
     """
-    action_desc = get_service_json(service_dir, service_name, service_ver, 'actions')
+    action_desc = _get_service_json(service_dir, service_name, service_ver,
+            'actions')
 
     result = {}
     for k,v in action_desc.items():
@@ -153,7 +154,8 @@ def get_reactions(service_dir, service_name, service_ver):
         service_name -- name of service
         service_ver -- service version
     """
-    reactions_desc = get_service_json(service_dir, service_name, service_ver, 'react')
+    reactions_desc = _get_service_json(service_dir, service_name, service_ver,
+            'react')
 
     jsonschema.validate(reactions_desc, _reaction_schema)
 
@@ -225,8 +227,8 @@ def _execute(command, resources):
             tmp_file.close()
             args[0] = tmp_file.name
 
-        log.debug('Executing %s', args)
-        subprocess.check_call(args)
+        log.debug('Executing %s in dir %s', args, os.getcwd())
+        subprocess.check_call(' '.join(args), shell=True)
     finally:
         if tmp_file:
             os.remove(tmp_file.name)

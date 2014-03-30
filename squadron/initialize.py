@@ -99,8 +99,11 @@ done
     # Create the base files
     create_json(os.path.join(service_dir, 'actions.json'))
     create_json(os.path.join(service_dir, 'defaults.json'))
-    # react.json's top level is an array
+
+    # copy.json and react.json's top level are arrays
+    create_json(os.path.join(service_dir, 'copy.json'), [])
     create_json(os.path.join(service_dir, 'react.json'), [])
+
     create_json(os.path.join(service_dir, 'schema.json'), default_schema)
     create_json(os.path.join(service_dir, 'state.json'))
 

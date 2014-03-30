@@ -35,6 +35,7 @@ with::
         `-- website/
             `-- 0.0.1/
                 |-- actions.json
+                |-- copy.json
                 |-- defaults.json
                 |-- react.json
                 |-- root/
