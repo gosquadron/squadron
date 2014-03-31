@@ -9,6 +9,7 @@ Contents:
    overview
    gettingstarted
    nextsteps
+   examples
    userguide
 
 
