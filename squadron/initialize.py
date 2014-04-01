@@ -105,7 +105,7 @@ done
     create_json(os.path.join(service_dir, 'react.json'), [])
 
     create_json(os.path.join(service_dir, 'schema.json'), default_schema)
-    create_json(os.path.join(service_dir, 'state.json'))
+    create_json(os.path.join(service_dir, 'state.json'), [])
 
     log.info("Initialized service {} version {}".format(service_name,
             service_ver))
