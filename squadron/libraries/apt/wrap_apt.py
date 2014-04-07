@@ -31,7 +31,6 @@ def check_package_is_installed(package):
             return False
         return True
     else:
-        print ("Detected invalid OS, returning FAKE_RETURN: " + str(FAKE_RETURN))
         return FAKE_RETURN
 
 #TODO: Add a check and return True/False
@@ -40,7 +39,6 @@ def uninstall_package(package):
         out = run_command(["apt-get", "--purge", "remove", "-y", package])
         return out
     else:
-        print ("Detected invalid OS or permissions")
         return FAKE_RETURN
 
 def install_package(package):
@@ -52,5 +50,4 @@ def install_package(package):
             return False
         return True
     else:
-        print ("Detected invalid OS or permissions")
         return FAKE_RETURN
