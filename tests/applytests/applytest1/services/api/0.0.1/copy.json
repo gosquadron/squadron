@@ -1,8 +1,5 @@
-[
-    {
-        "path": "example/path/"
-    },
-    {
-        "path": "non/existant/path"
-    }
-]
+---
+  - 
+    path: "example/path/"
+  - 
+    path: "non/existant/path"

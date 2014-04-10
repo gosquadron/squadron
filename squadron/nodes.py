@@ -1,12 +1,12 @@
 import os
 import fnmatch
-import json
+import yaml
 from log import log
 
 def get_node_info(node_dir, node_name):
     """
     Recurses down the directory trying to find filename wildcards that
-    match the given filename. Returns the JSON node info for the closest
+    match the given filename. Returns the node info for the closest
     match.
 
     If there are two wildcards that match, the one that is more
@@ -17,7 +17,7 @@ def get_node_info(node_dir, node_name):
 
         files = os.listdir(node_dir)
         # Returns ['dev%','dev%.api.example.com', 'staging%']
-        get_node_info(node_dir, node_name) = json of 'dev%.api.example.com'
+        get_node_info(node_dir, node_name) = node info of 'dev%.api.example.com'
 
     Keyword arguments:
         node_dir -- the directory to start
@@ -35,7 +35,7 @@ def get_node_info(node_dir, node_name):
     ret = {}
     for r in result:
         with open(r) as node_file:
-            ret.update(json.loads(node_file.read()))
+            ret.update(yaml.load(node_file.read()))
 
     log.debug('leaving node.get_node_info: %s', ret)
     return ret

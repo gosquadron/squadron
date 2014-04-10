@@ -25,7 +25,7 @@ def test_service(tmpdir):
     items = os.listdir(service_dir)
 
     assert len(items) > 0
-    schema_path = os.path.join(version_dir, 'schema.json')
+    schema_path = os.path.join(version_dir, 'schema')
     schema_handle = open(schema_path, 'r')
     json.load(schema_handle)
 
@@ -49,7 +49,7 @@ def test_environment(tmpdir):
     subitems = os.listdir(dev_dir)
 
     assert len(subitems) == 1
-    assert 'api.json' in subitems
+    assert 'api' in subitems
 
     # Check that config was put in
     with open(os.path.join(dev_dir, subitems[0])) as jsonfile:

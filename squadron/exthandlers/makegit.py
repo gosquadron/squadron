@@ -5,7 +5,7 @@ from template import render
 import os
 import tempfile
 import stat
-import json
+import yaml
 import jsonschema
 import subprocess
 
@@ -54,7 +54,7 @@ def _clone_repo(url, dest, args):
 
 def ext_git(abs_source, dest, inputhash, loader, resources, **kwargs):
     """ Clones a git repository """
-    contents = json.loads(render(abs_source, inputhash, loader))
+    contents = yaml.load(render(abs_source, inputhash, loader))
     finalfile = get_filename(dest)
 
     jsonschema.validate(contents, SCHEMA)

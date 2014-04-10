@@ -98,7 +98,7 @@ The 'extract' extension downloads and extracts tarballs and zip files.
 
 **Contents**
 
-The extract extension handler takes a JSON object like this::
+The extract extension handler takes a YAML or JSON object like this::
 
     {
         "url": "http://www.example.com/dir/file.tar.bz2"
@@ -171,7 +171,7 @@ The 'git' extension clones git repositories.
 
 **Contents**
 
-A JSON object with properties such as "url". Will have a template applied to it, so variable substitution and logic is 
+A YAML or JSON object with properties such as "url". Will have a template applied to it, so variable substitution and logic is 
 possible.
 
 Examples::
@@ -187,14 +187,13 @@ or::
         "refspec":"experimental"
     }
 
-or even::
+or even, in YAML::
 
-    {
-        "url":"git@github.com:gosquadron/example-squadron-repo.git",
-        "refspec":"@release",
-        "sshkey":"ssh_keys/deploy1",
-        "args":"--depth=2"
-    }
+    ---
+      url: "git@github.com:gosquadron/example-squadron-repo.git"
+      refspec: "@release"
+      sshkey: "ssh_keys/deploy1"
+      args: "--depth=2"
 
 The last example requires that the `ssh_keys/deploy1` resource exists and is a
 private ssh key. See the :ref:`resources` section for more information. It also
@@ -268,7 +267,9 @@ Example::
 Libraries
 ---------
 
-Libraries are Python modules which are applied through `state.json`.
+Libraries are Python modules which are applied through `state.json`,
+`state.yml`, or plain old `state` in the service directory for each service.
+These state files can be written in YAML or JSON.
 
 How to write a library
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -416,8 +417,9 @@ reaction to trigger it.
 Actions
 ^^^^^^^
 
-Actions are described in `actions.json` in each service. An action has a name,
-a list of commands to run, and a list of actions to not run this one after.
+Actions are described in YAML/JSON in `actions.json`, `actions.yml` or just 
+plain `actions` in each service. An action has a name, a list of commands to 
+run, and a list of actions to not run this one after.
 
 Here's what one might look like::
 
@@ -454,8 +456,8 @@ Reactions
 ^^^^^^^^^
 
 Reaction trigger actions in this service or other services based on files
-being created or modified. The reactions are described in `react.json` in each
-service.
+being created or modified. The reactions are described in `react.json`,
+`react.yml` or `react` in each service.
 
 One might look like this::
 
@@ -533,7 +535,8 @@ some aspects of your deployment are expensive (such as installing npm or
 virtualenv dependencies), you can list which paths to copy from your last
 successful deployment.
 
-You do this with a `copy.json` file in your service. It looks like this::
+You do this with YAML or JSON in `copy.json`, `copy.yml`, or plain old `copy`
+file in your service directory. It looks like this::
 
     [
         {

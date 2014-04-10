@@ -4,8 +4,8 @@ import os
 import requests
 import tarfile
 import zipfile
+import yaml
 import jsonschema
-import json
 import tempfile
 import fnmatch
 import shutil
@@ -105,7 +105,7 @@ def _copy_files(extract_dest, dest, contents):
         shutil.copyfile(sourcefile, destfile)
 
 def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
-    contents = json.loads(render(abs_source, inputhash, loader))
+    contents = yaml.load(render(abs_source, inputhash, loader))
 
     jsonschema.validate(contents, SCHEMA)
 

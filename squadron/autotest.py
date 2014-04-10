@@ -10,4 +10,13 @@ def verify_json(filename):
     except ValueError:
         return False
 
-testable = {'json':verify_json}
+def verify_yaml(filename):
+    """ Checks that a YAML file is valid YAML """
+    try:
+        with open(filename) as yamlfile:
+            yaml.load(yamlfile.read())
+        return True
+    except yaml.error.YAMLError:
+        return False
+
+testable = {'json':verify_json, 'yml':verify_yaml}

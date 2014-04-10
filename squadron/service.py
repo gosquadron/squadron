@@ -1,4 +1,4 @@
-from commit import _get_service_json
+from commit import _get_service_file
 import jsonschema
 import subprocess
 import fnmatch
@@ -109,7 +109,7 @@ def get_service_actions(service_dir, service_name, service_ver):
         service_name -- name of service
         service_ver -- service version
     """
-    action_desc = _get_service_json(service_dir, service_name, service_ver,
+    action_desc = _get_service_file(service_dir, service_name, service_ver,
             'actions')
 
     result = {}
@@ -154,7 +154,7 @@ def get_reactions(service_dir, service_name, service_ver):
         service_name -- name of service
         service_ver -- service version
     """
-    reactions_desc = _get_service_json(service_dir, service_name, service_ver,
+    reactions_desc = _get_service_file(service_dir, service_name, service_ver,
             'react')
 
     jsonschema.validate(reactions_desc, _reaction_schema)

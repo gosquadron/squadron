@@ -97,15 +97,15 @@ done
 """)
 
     # Create the base files
-    create_json(os.path.join(service_dir, 'actions.json'))
-    create_json(os.path.join(service_dir, 'defaults.json'))
+    create_json(os.path.join(service_dir, 'actions'))
+    create_json(os.path.join(service_dir, 'defaults'))
 
-    # copy.json and react.json's top level are arrays
-    create_json(os.path.join(service_dir, 'copy.json'), [])
-    create_json(os.path.join(service_dir, 'react.json'), [])
+    # copy and react's top level are arrays
+    create_json(os.path.join(service_dir, 'copy'), [])
+    create_json(os.path.join(service_dir, 'react'), [])
 
-    create_json(os.path.join(service_dir, 'schema.json'), default_schema)
-    create_json(os.path.join(service_dir, 'state.json'), [])
+    create_json(os.path.join(service_dir, 'schema'), default_schema)
+    create_json(os.path.join(service_dir, 'state'), [])
 
     log.info("Initialized service {} version {}".format(service_name,
             service_ver))
@@ -150,7 +150,7 @@ def init_environment(squadron_dir, environment_name, copy_from):
         to_make = _get_latest_service_versions(service_dir)
 
         for service_name, service_version in to_make.items():
-            create_json(os.path.join(new_env, service_name + '.json'),
+            create_json(os.path.join(new_env, service_name),
                     {'version': service_version, 'config':{},
                      'base_dir': 'TODO'})
 

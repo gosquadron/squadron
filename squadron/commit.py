@@ -1,5 +1,5 @@
 import os
-import json
+import yaml
 import jsonschema
 import tempfile
 from template import DirectoryRender
@@ -15,33 +15,62 @@ from fileio.symlink import force_create_symlink
 from quik import FileLoader
 import functools
 
-def _get_service_json(squadron_dir, service_name, service_ver, filename, on_error=None, config=None):
+extensions = ['', '.json', '.yml']
+
+def _get_service_file(squadron_dir, service_name, service_ver, filename, on_error=None, config=None):
     """
-    Grabs the named JSON file in a service directory
+    Grabs the named service file in a service directory
 
     Keyword arguments:
         squadron_dir -- base directory
         service_name -- the name of the service
         service_ver -- the version of the service
-        filename -- the name of the JSON file without the .json extension
+        filename -- the name of the service file without the extension
         empty_on_error -- if true, returns an empty dict instead of raising error
-        config -- if a dict, uses it to template the JSON before loading it
+        config -- if a dict, uses it to template the file before loading it
     """
-    try:
-        serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
-        service_json = os.path.join(serv_dir, filename + '.json')
-        if config:
-            loader = FileLoader(squadron_dir)
-            template = loader.load_template(service_json)
-            return json.loads(template.render(config, loader=loader))
-        else:
-            with open(service_json, 'r') as jsonfile:
-                return json.loads(jsonfile.read())
-    except (OSError, IOError) as e:
-        if e.errno == errno.ENOENT and on_error is not None:
-            return on_error
-        else:
-            raise e
+    ex = None
+    for ext in extensions:
+        try:
+            serv_dir = os.path.join(squadron_dir, 'services', service_name, service_ver)
+            service_file = os.path.join(serv_dir, filename + ext)
+            if config:
+                loader = FileLoader(squadron_dir)
+                template = loader.load_template(service_file)
+                return yaml.load(template.render(config, loader=loader))
+            else:
+                with open(service_file, 'r') as sfile:
+                    return yaml.load(sfile.read())
+        except (OSError, IOError) as e:
+            if e.errno == errno.ENOENT:
+                ex = e
+            else:
+                raise e
+
+    if on_error is not None:
+        return on_error
+    raise ex
+
+def _get_config(conf_dir, service):
+    """
+    Gets the service configuration
+
+    Keyword arguments:
+        conf_dir -- the location of the configuration directory
+        service -- the name of the service
+    """
+    ex = None
+    for ext in extensions:
+        try:
+            with open(os.path.join(conf_dir, service + ext), 'r') as cfile:
+                return yaml.load(cfile.read())
+        except (OSError, IOError) as e:
+            if e.errno == errno.ENOENT:
+                ex = e
+            else:
+                raise e
+    raise ex
+
 
 def check_node_info(node_info):
     """
@@ -94,7 +123,7 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
         tempdir -- the base temporary directory to use
         previous_run -- the previous successfully applied dir
         dry_run -- whether or not to actually create the temp directory
-            or change any system-wide configuration via state.json
+            or change any system-wide configuration via state file
     """
     log.debug('entering commit.apply %s',
             [squadron_dir, node_name, tempdir, resources, dry_run])
@@ -115,26 +144,25 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
     state = StateHandler(library_dir)
     for service in node_info['services']:
         # Get config
-        with open(os.path.join(conf_dir, service + '.json'), 'r') as cfile:
-            configdata = json.loads(cfile.read())
-            version = configdata['version']
-            base_dir = configdata['base_dir']
+        configdata = _get_config(conf_dir, service)
+        version = configdata['version']
+        base_dir = configdata['base_dir']
 
-        get_service_json = functools.partial(_get_service_json, squadron_dir, service, version)
+        get_service_file = functools.partial(_get_service_file, squadron_dir, service, version)
 
         # defaults file is optional
-        cfg = get_service_json('defaults', {})
+        cfg = get_service_file('defaults', {})
         cfg.update(configdata['config'])
 
         # validate each schema
-        schema = get_service_json('schema', {})
+        schema = get_service_file('schema', {})
         if schema:
             jsonschema.validate(cfg, schema)
 
         # Setting the state comes first, since the rest of this might
         # depend on the state of the system (like virtualenv)
-        statejson = get_service_json('state', {}, config=cfg)
-        for state_item in statejson:
+        stateinfo = get_service_file('state', {}, config=cfg)
+        for state_item in stateinfo:
             library = state_item['name']
             items = state_item['parameters']
 
@@ -160,7 +188,7 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
         atomic = render.render(tmp_serv_dir, cfg, resources, dry_run)
 
         # Copy files from previous runs if applicable
-        copy_config = get_service_json('copy', [], config=cfg)
+        copy_config = get_service_file('copy', [], config=cfg)
         _apply_copy(copy_config, previous_run, service, tmp_serv_dir)
 
         result[service] = {
