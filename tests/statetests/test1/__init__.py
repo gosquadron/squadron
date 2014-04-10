@@ -14,7 +14,7 @@ def schema():
             }
         }
 
-def verify(inputhashes):
+def verify(inputhashes, log):
     failed = []
     for ih in inputhashes:
         if os.path.isfile(ih['tmpfile']):
@@ -25,7 +25,7 @@ def verify(inputhashes):
             failed.append(ih)
     return failed
 
-def apply(inputhashes):
+def apply(inputhashes, log):
     failed = []
     for ih in inputhashes:
         try:

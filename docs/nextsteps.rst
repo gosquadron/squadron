@@ -24,9 +24,9 @@ with::
     .
     |-- config/
     |   |-- dev/
-    |   |   `-- website.json
+    |   |   `-- website
     |   `-- prod/
-    |       `-- website.json
+    |       `-- website
     |-- libraries/
     |-- nodes/
     |   |-- dev%
@@ -34,15 +34,15 @@ with::
     `-- services/
         `-- website/
             `-- 0.0.1/
-                |-- actions.json
-                |-- copy.json
-                |-- defaults.json
-                |-- react.json
+                |-- actions
+                |-- copy
+                |-- defaults
+                |-- react
                 |-- root/
                 |   |-- main~git
                 |   `-- robots.txt~tpl
-                |-- schema.json
-                |-- state.json
+                |-- schema
+                |-- state
                 `-- tests/
 
 Okay, so let's make a new dev version of our service::
@@ -51,7 +51,7 @@ Okay, so let's make a new dev version of our service::
 
 It's important to use `semantic versioning <http://semver.org/>`_ for your services, as it communicates vital information to the user. This new version will be backwards incompatible. Let's update our dev environment::
 
-    $ cat > config/dev/website.json
+    $ cat > config/dev/website
     {
         "base_dir": "/",
         "config": {
@@ -96,7 +96,7 @@ Apache module
 We also need to make sure that PHP is installed::
 
     $ cd ..
-    $ cat > state.json
+    $ cat > state
     [
         {
             "name":"apt",
@@ -104,9 +104,11 @@ We also need to make sure that PHP is installed::
         }
     ]
 
-Now we need to run a2enmod when this is installed. We actually need to set up two files for this: `actions.json` and `react.json`.
+Now we need to run a2enmod when this is installed. We actually need to set up two files for this: `actions` and `react`.
 
-The file `actions.json` describes the possible actions that can take place. These are commands that are run. Sometimes restarting the service, sometimes starting it. Ours will look like this::
+The file `actions` describes the possible actions that can take place. These 
+are commands that are run, such as starting or restarting the service. Ours
+will look like this::
 
     {
         "run a2enmod php": {
@@ -125,9 +127,12 @@ The file `actions.json` describes the possible actions that can take place. Thes
         }
     }
 
-So we have four actions. Three are easy enough to understand: they control the running of the service. Starting apache, reloading it, and restarting it. The `not_after` property means that if there are several actions to run for a deployment, that these should not be run after successful invocations of those. This will be more clear after understanding `react.json`.
+This file can be written in YAML or JSON.
 
-The file `react.json` describes how to react to various events. It gives criteria for the events and then which actions to execute. Ours looks like this::
+So we have four actions. Three are easy enough to understand: they control the running of the service. Starting apache, reloading it, and restarting it. The `not_after` property means that if there are several actions to run for a deployment, that these should not be run after successful invocations of those. This will be more clear after understanding `react`.
+
+The file `react` describes how to react to various events. It gives criteria
+for the events and then which actions to execute. Ours looks like this::
 
     [
         {
@@ -221,7 +226,7 @@ Almost done. We just need to make sure this test is executable and that curl is
 installed::
 
     $ chmod +x services/website/1.0.0/tests/check_php.sh
-    $ cat > services/website/1.0.0/state.json
+    $ cat > services/website/1.0.0/state
     [
         {
             "name":"apt",

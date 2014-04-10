@@ -80,18 +80,19 @@ of our website, but instead the version of this deployment configuration::
     $ tree -F services/website
     website/
     `-- 0.0.1/
-        |-- actions.json
-        |-- copy.json
-        |-- defaults.json
-        |-- react.json
+        |-- actions
+        |-- copy
+        |-- defaults
+        |-- react
         |-- root/
-        |-- schema.json
-        |-- state.json
+        |-- schema
+        |-- state
         `-- tests/
 
 We won’t need all these files yet, and Squadron gives you sensible defaults if you don’t need the features they provide.
 
-Let’s make a state.json to install apache2 for our simple website::
+Let’s make a `state` to install apache2 for our simple website. The format is
+YAML or JSON, both are supported::
 
     [ 
         {
@@ -154,8 +155,8 @@ Environments are distinct places you can deploy your code to that don’t intera
     config/ services/ nodes/ libraries/
     $ squadron init --env dev
 
-Now there's a file called config/dev/website.json, which is prepopulated with
-the latest version number. Let's add the disallow config so the file looks like
+Now there's a file called config/dev/website, which is pre-populated with the 
+latest version number. Let's add the disallow config so the file looks like
 this::
 
     {
@@ -169,15 +170,18 @@ this::
 
 The "version" field tells Squadron which service description version to use. Different environments can use different service description versions at the same time.
 
-The “config” field is a JSON object that will be given to your service. These fields can be used in templates. If you have config that is often the same between environments, you can put it in another place.
+The “config” field is a object that will be given to your service. These fields
+can be used in templates. If you have config that is often the same between
+environments, you can put it in another place.
 
-The "base_dir" field tells Squadron where the root/ directory should be written to. Since we’re just deploying files to our web root, it’s /var/www.
+The "base_dir" field tells Squadron where the root/ directory should be written 
+to. Since we’re just deploying files to our web root, it’s `/var/www`.
 
-The second way in which these values are set is via defaults.json. This file
+The second way in which these values are set is via `defaults`. This file
 can be used to set default values in case none are set. Keys are the key in
 question, and the values are the values you would set in the config.
 
-An equivalent defaults.json for our website would be::
+An equivalent `defaults` file for our website would be::
     
     {
         "disallow":["/secret/*","/admin/*"]
@@ -185,7 +189,9 @@ An equivalent defaults.json for our website would be::
 
 Schema
 ^^^^^^
-Squadron includes one very useful file with every service description called services/website/0.0.1/schema.json. This is a `JSON schema`_ describing the configuration that your service accepts. For our service it looks like this::
+Squadron includes one very useful file with every service description called 
+`schema`. This is a `JSON schema`_ describing the configuration that your
+service accepts. For our service it looks like this::
 
     {
         "$schema": "http://json-schema.org/draft-04/schema#",
@@ -362,10 +368,10 @@ This is another way to initialize environments. It copies all the config from th
     $ tree -F config
     config/
     |-- dev
-    |   `-- website.json
+    |   `-- website
     `-- prod
-        `-- website.json
-    $ diff -u config/dev/website.json config/prod/website.json
+        `-- website
+    $ diff -u config/dev/website config/prod/website
     $
 
 No differences because they're the same!

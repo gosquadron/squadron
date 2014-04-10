@@ -55,5 +55,6 @@ setup(
         'py>=1.4.19',
         'simplejson>=0',
         'cherrypy>=3.2.5',
-        'bottle>=0.12.5']
+        'bottle>=0.12.5',
+        'pyyaml>=3.11']
 )
