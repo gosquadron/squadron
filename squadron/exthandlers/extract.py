@@ -1,5 +1,6 @@
 from extutils import get_filename
 from template import render
+from download import _download_file
 import os
 import requests
 import tarfile
@@ -67,14 +68,6 @@ SCHEMA = {
     },
     'required': ['url']
 }
-
-def _download_file(url, handle):
-    r = requests.get(url, stream=True)
-
-    for chunk in r.iter_content(chunk_size=4096):
-        if chunk: # filter out keep-alive new chunks
-            handle.write(chunk)
-    handle.close()
 
 def _copy_files(extract_dest, dest, contents):
     to_copy = {}

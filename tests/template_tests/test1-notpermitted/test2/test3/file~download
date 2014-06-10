@@ -1,1 +1,3 @@
-http://www.google.com/crossdomain.xml checksum
+{
+    'url':'http://www.google.com/crossdomain.xml'
+}
