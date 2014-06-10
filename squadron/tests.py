@@ -28,7 +28,7 @@ def get_tests(squadron_dir, service_name, service_version):
     test_path = os.path.join(squadron_dir, 'services', service_name, service_version, 'tests')
     return [os.path.join(test_path, x) for x in get_all_executable_files(test_path)]
 
-def run_tests(tests, test_input, timeout = 10, waittime = 0.1):
+def run_tests(tests, test_input, timeout = 60, waittime = 0.1):
     """
     Runs all the tests given by directly executing them. If they return
     with a non-zero exit code, it adds them to the dictionary returned.
