@@ -100,7 +100,7 @@ _reaction_schema = {
     }
 }
 
-def get_service_actions(service_dir, service_name, service_ver):
+def get_service_actions(service_dir, service_name, service_ver, config):
     """
     Gets the actions supported by a service
 
@@ -108,9 +108,10 @@ def get_service_actions(service_dir, service_name, service_ver):
         service_dir -- top level service directory
         service_name -- name of service
         service_ver -- service version
+        config -- dict to template action with
     """
     action_desc = _get_service_file(service_dir, service_name, service_ver,
-            'actions')
+            'actions', config=config)
 
     result = {}
     for k,v in action_desc.items():
@@ -145,7 +146,7 @@ def _prepend_service_name(service_name, files):
             ret.append(f)
     return ret
 
-def get_reactions(service_dir, service_name, service_ver):
+def get_reactions(service_dir, service_name, service_ver, config):
     """
     Gets the reaction description from a service.
 
@@ -153,9 +154,10 @@ def get_reactions(service_dir, service_name, service_ver):
         service_dir -- top level service directory
         service_name -- name of service
         service_ver -- service version
+        config -- dict to template reaction with
     """
     reactions_desc = _get_service_file(service_dir, service_name, service_ver,
-            'react')
+            'react', config=config)
 
     jsonschema.validate(reactions_desc, _reaction_schema)
 

@@ -1,6 +1,6 @@
 [   
     {
-        "execute": ["start", "apache2.restart"],
+        "execute": ["start", "@{SERVICE}.restart"],
         "when" : {
             "command": "false",
             "exitcode_not": 0

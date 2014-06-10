@@ -9,7 +9,7 @@ import pytest
 test_path = os.path.join(get_test_path(), 'service_tests')
 
 def test_get_service_actions():
-    actions = get_service_actions(test_path, 'service1', '1.0.1')
+    actions = get_service_actions(test_path, 'service1', '1.0.1', {'TEST':'test'})
     print "actions {}".format(actions)
 
     assert len(actions) == 3
@@ -32,7 +32,7 @@ def test_get_service_actions():
     assert 'service1.start' in actions['service1.restart']['not_after']
 
 def test_get_reactions():
-    reactions = get_reactions(test_path, 'service1', '1.0.1')
+    reactions = get_reactions(test_path, 'service1', '1.0.1', {'SERVICE':'apache2'})
 
     assert len(reactions) == 3
 
@@ -100,7 +100,8 @@ def test_react_basic():
     try:
         args = {'service_dir':test_path,
                 'service_name':'service1',
-                'service_ver':'1.0.1'}
+                'service_ver':'1.0.1',
+                'config': {'TEST':'test','SERVICE':'apache2'}}
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
@@ -124,7 +125,8 @@ def test_react_precendence():
     try:
         args = {'service_dir':test_path,
                 'service_name':'service1',
-                'service_ver':'2.0'}
+                'service_ver':'2.0',
+                'config': {}}
 
         actions = get_service_actions(**args)
         actions.update({'apache2.restart': {
@@ -152,7 +154,7 @@ def test_react_precendence():
         delete_react_tmp()
 
 def test_not_exists():
-    reactions = get_reactions(test_path, 'service1', '3.0')
+    reactions = get_reactions(test_path, 'service1', '3.0', {})
 
     assert len(reactions) == 2
 
@@ -190,8 +192,8 @@ def test_resource_react(tmpdir):
     fi
     '''.format(check_file, check_file)
 
-    actions = get_service_actions(test_path, 'resources', '1.0')
-    reactions = get_reactions(test_path, 'resources', '1.0')
+    actions = get_service_actions(test_path, 'resources', '1.0', {})
+    reactions = get_reactions(test_path, 'resources', '1.0', {})
 
     assert len(actions) == 1
     assert len(reactions) == 1

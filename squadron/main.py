@@ -224,10 +224,15 @@ def _get_action_reaction(squadron_dir, commit_info):
     # Get all available actions and reactions
     for service_name in commit_keys:
         version = commit_info[service_name]['version']
+        config = {}
+        if 'config' in commit_info[service_name]:
+            # For dry runs
+            config = commit_info[service_name]['config']
+
         actions.update(service.get_service_actions(squadron_dir,
-            service_name, version))
+            service_name, version, config))
         reactions.extend(service.get_reactions(squadron_dir,
-            service_name, version))
+            service_name, version, config))
     return (actions, reactions)
 
 def _run_actions(squadron_dir, new_dir, commit_info, resources,

@@ -1,14 +1,14 @@
 {
     "start" : {
-        "commands" : ["touch /tmp/service1/test.start"],
+        "commands" : ["touch /tmp/service1/@{TEST}.start"],
         "chdir" : "/tmp/service1"
     },
     "reload" : {
-        "commands" : ["touch /tmp/service1/test.reload"],
+        "commands" : ["touch /tmp/service1/@{TEST}.reload"],
         "not_after" : ["start", "restart"]
     },
     "restart" : {
-        "commands" : ["touch /tmp/service1/test.restart"],
+        "commands" : ["touch /tmp/service1/@{TEST}.restart"],
         "not_after" : ["start"]
     }
 }
