@@ -56,5 +56,6 @@ setup(
         'simplejson>=0',
         'cherrypy>=3.2.5',
         'bottle>=0.12.5',
-        'pyyaml>=3.11']
+        'pyyaml>=3.11',
+        'urllib3>=1.7.1']
 )
