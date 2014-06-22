@@ -17,12 +17,15 @@ whether or not it is deployed atomically.
 Here's an example::
 
     var/www/ atomic:true user:nobody group:www-data
-    var/www/file.txt user:root mode:0600
+    var/www/@file_path user:root mode:0600
+
+    # The init script needs to be +x
     etc/init.d/service-script mode:0755
 
 Each line describes the file or directory that is being configured. 
 Directories must end in a slash. Spaces or newlines in filenames should be 
-escaped with a backslash.
+escaped with a backslash. Comments start with a #. This file is templated,
+so you can use variables such as `@file_path` or conditionals or loops.
 
 In this example, the directory `var/www/` in `root/` will be deployed 
 atomically via symlinks, and it and all of its children with be owned by the 

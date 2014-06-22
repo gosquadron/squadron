@@ -107,10 +107,14 @@ def test_autotest_fail(tmpdir):
 def test_parse_config(tmpdir):
     conf_file = os.path.join(str(tmpdir), 'config.sq')
     with open(conf_file, 'w') as wfile:
-        print('conf.d/ atomic:true', file=wfile)
-        print('httpd.conf user:sean group:dudes mode:0644', file=wfile)
+        print('# this is a comment', file=wfile)
+        print('conf.d/ atomic:@atomic', file=wfile)
+        print('', file=wfile)
+        print('httpd.conf user:sean group:@{group.name} mode:0644', file=wfile)
 
-    result = template.parse_config(conf_file)
+    cfg = {'atomic':True, 'group': {'name': 'dudes'}}
+    render = template.DirectoryRender(test_path)
+    result = render.parse_config_sq(conf_file, cfg)
 
     assert len(result) == 2
     assert result[0].filepath == 'conf.d/'
@@ -130,8 +134,9 @@ def test_parse_config_error(tmpdir):
     with open(conf_file, 'w') as wfile:
         print('conf.d', file=wfile)
 
+    render = template.DirectoryRender(test_path)
     with pytest.raises(ValueError) as ex:
-        template.parse_config(conf_file)
+        render.parse_config_sq(conf_file, {})
 
     assert ex is not None
 
@@ -140,7 +145,7 @@ def test_parse_config_error(tmpdir):
         print('conf.d/ atomic:true mdoe:0000', file=wfile)
 
     with pytest.raises(ValueError) as ex:
-        template.parse_config(conf_file)
+        render.parse_config_sq(conf_file, {})
 
     assert ex is not None
 
@@ -149,7 +154,7 @@ def test_parse_config_error(tmpdir):
         print('conf.d/', file=wfile)
 
     with pytest.raises(ValueError) as ex:
-        template.parse_config(conf_file)
+        render.parse_config_sq(conf_file, {})
 
     assert ex is not None
 

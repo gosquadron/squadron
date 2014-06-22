@@ -41,44 +41,6 @@ def get_file_ext(filename):
 
 
 FileConfig = namedtuple('FileConfig', 'filepath atomic user group mode')
-def parse_config(filename):
-    """
-    Parses a config.sq file which contains metadata about files in this
-    directory.
-
-    Keyword arguments:
-        filename -- the config.sq file to open
-    """
-    # Conversion functions from string to the correct type, str is identity
-    convert = {'atomic': bool, 'user':str, 'group':str, 'mode':str}
-    require_dir = set(['atomic'])
-    result = []
-    with open(filename) as cfile:
-        for line in cfile:
-            # These are the default values
-            item = {'atomic': False, 'user':None, 'group':None, 'mode':None}
-
-            args = line.split()
-            if len(args) < 2:
-                raise ValueError('Line "{}" in file {} isn\'t formatted correctly'.format(line, filename))
-
-            filepath = args[0]
-            for arg in args[1:]:
-                (key, value) = arg.split(':', 2)
-
-                if key in require_dir:
-                    # if this key requires us to be a directory, check
-                    if not filepath.endswith(os.path.sep):
-                        raise ValueError('Key {} requires entry {} to end with' +
-                                ' a slash (must be directory) in file {}'.format(key, filepath, filename))
-
-                #Only do work if we know about this parameter
-                if key in convert:
-                    item[key] = convert[key](value)
-                else:
-                    raise ValueError('Unknown config.sq value {} in file {}'.format(key, filename))
-            result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
-    return result
 
 def get_config(finalfile, filename, config, already_configured):
     path_items = filename.split(os.path.sep)
@@ -153,7 +115,9 @@ class DirectoryRender:
 
         if currpath == "" and 'config.sq' in items:
             # do config.sq stuff only in the top level directory
-            config_items = parse_config(os.path.join(self.basedir, 'config.sq'))
+            config_items = self.parse_config_sq(
+                    os.path.join(self.basedir, 'config.sq'), inputhash)
+
             real_config = {}
             for config_item in config_items:
                 real_config[config_item.filepath] = config_item
@@ -212,6 +176,53 @@ class DirectoryRender:
                 if finalext in autotest.testable:
                     if not autotest.testable[finalext](finalfile):
                         raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
+
+        return result
+
+    def parse_config_sq(self, filename, inputhash):
+        """
+        Parses a config.sq file which contains metadata about files in this
+        directory.
+
+        Keyword arguments:
+            filename -- the config.sq file to open
+            inputhash -- the service variables to template config.sq with
+        """
+        # Conversion functions from string to the correct type, str is identity
+        convert = {'atomic': bool, 'user':str, 'group':str, 'mode':str}
+        require_dir = set(['atomic'])
+        result = []
+
+        template = self.loader.load_template(filename)
+        contents = template.render(inputhash, loader=self.loader)
+
+        for line in contents.split('\n'):
+            # These are the default values
+            item = {'atomic': False, 'user':None, 'group':None, 'mode':None}
+
+            if line == "" or line.startswith("#"):
+                continue
+
+            args = line.split()
+            if len(args) < 2:
+                raise ValueError('Line "{}" in file {} isn\'t formatted correctly'.format(line, filename))
+
+            filepath = args[0]
+            for arg in args[1:]:
+                (key, value) = arg.split(':', 2)
+
+                if key in require_dir:
+                    # if this key requires us to be a directory, check
+                    if not filepath.endswith(os.path.sep):
+                        raise ValueError('Key {} requires entry {} to end with' +
+                                ' a slash (must be directory) in file {}'.format(key, filepath, filename))
+
+                #Only do work if we know about this parameter
+                if key in convert:
+                    item[key] = convert[key](value)
+                else:
+                    raise ValueError('Unknown config.sq value {} in file {}'.format(key, filename))
+            result.append(FileConfig(filepath, item['atomic'], item['user'], item['group'], item['mode']))
 
         return result
 
