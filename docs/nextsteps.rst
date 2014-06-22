@@ -90,6 +90,16 @@ What we've done here is to tell Squadron to do an atomic deploy of `var/www/`,
 which means it will use a symbolic link from /var/www/ to Squadron's deployment
 directory.
 
+If we wanted `var/www/` to be configurable on a per-environment basis, we could
+put it into a variable and template the path like so::
+
+    $ mkdir -p var/@www_location/
+    $ cat > config.sq
+    var/@www_location/ atomic:true user:nobody group:nobody
+
+Then you could define `www_location` in the configuration or in this service's
+defauts. You can only template one directory level at a time at the moment.
+
 Apache module
 ^^^^^^^^^^^^^
 

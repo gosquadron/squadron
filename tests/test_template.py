@@ -17,7 +17,7 @@ test_path = os.path.join(get_test_path(), 'template_tests')
 def test_template_basic(tmpdir):
     dirname = str(tmpdir)
     test = template.DirectoryRender(os.path.join(test_path, 'test1'))
-    test.render(dirname, {'name':'user'}, {})
+    test.render(dirname, {'name':'user', 'variable': 'test3'}, {})
 
     assert are_dir_trees_equal(dirname, os.path.join(test_path, 'test1result'))
 

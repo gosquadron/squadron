@@ -3,7 +3,7 @@ import pwd
 import grp
 import errno
 from shutil import copyfile
-from quik import FileLoader
+from quik import FileLoader, Template
 import urllib
 import autotest
 from collections import namedtuple
@@ -134,8 +134,9 @@ class DirectoryRender:
             # the absolute path of the source file
             abs_source = os.path.join(self.basedir, relpath)
 
-            # the absolute path of the destination file
-            dest = os.path.join(destdir, relpath)
+            # the absolute path of the destination file, templated
+            dest = self._template(os.path.join(destdir, relpath), inputhash)
+
             if os.path.isdir(abs_source):
                 mkdirp(dest)
                 # Needs a slash because this is a directory
@@ -178,6 +179,10 @@ class DirectoryRender:
                         raise ValueError('File {} didn\'t pass validation for {}'.format(finalfile, finalext))
 
         return result
+
+    def _template(self, item, config):
+        template = Template(item)
+        return template.render(config)
 
     def parse_config_sq(self, filename, inputhash):
         """
