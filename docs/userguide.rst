@@ -82,17 +82,36 @@ The 'download' extension downloads a file over HTTP.
 
 **Contents**
 
-A single line of the HTTP endpoint with an optional SHA256 prefix hash of the
-file. Will have a template applied to it, so variable substitution and logic
-is possible.
+A YAML or JSON object of the HTTP endpoint, and optionally a username and
+password for HTTP BASIC authentication. Will have a template applied to it, so
+variable substitution and logic is possible.
 
 Examples::
 
-    http://www.example.com/filename.ext a7898bc
+    {
+        "url": "http://example.com/file.txt"
+    }
 
-or::
+or, for HTTP BASIC authentication with templating::
 
-    http://no.sha256.here.com/file.to.download.txt
+    {
+        "url": "http://www.example.com/@{file}.txt",
+        "username": "@username",
+        "password": "@password"
+    }
+
+The full list of acceptable parameters for the config object are in the
+following table.
+
++------------------+----------------------------------------------+
+| **Name**         | **Description**                              |
++------------------+----------------------------------------------+
+| url              | URL to download the file from. Required.     |
++------------------+----------------------------------------------+
+| username         | Username for HTTP BASIC authentication.      |
++------------------+----------------------------------------------+
+| password         | Password for HTTP BASIC authentication.      |
++------------------+----------------------------------------------+
 
 extract
 ^^^^^^^
@@ -137,6 +156,10 @@ The full list of supported fields is described in the following table.
 | **Name**         | **Description**                              |
 +------------------+----------------------------------------------+
 | url              | URL to download the tarball from. Required.  |
++------------------+----------------------------------------------+
+| username         | Username for HTTP BASIC authentication.      |
++------------------+----------------------------------------------+
+| password         | Passwprd for HTTP BASIC authentication.      |
 +------------------+----------------------------------------------+
 | type             | One of "tar.gz", "tar", "tar.bz2", or "zip". |
 |                  | Optional if it can be inferred from filename.|

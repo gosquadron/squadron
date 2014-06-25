@@ -43,6 +43,14 @@ SCHEMA = {
             'description': 'What type of file this is',
             'enum': EXTRACTORS.keys()
         },
+        'username': {
+            'description': 'Username to login with BASIC Auth',
+            'type':'string'
+        },
+        'password': {
+            'description': 'Password to use with BASIC Auth',
+            'type':'string'
+        },
         'copy': {
             'description': 'Where to copy files within this file to',
             'type': 'array',
@@ -108,7 +116,10 @@ def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
     tmpfile = tempfile.NamedTemporaryFile(prefix=local_filename, suffix='.download', delete=False)
     to_delete = [tmpfile.name]
     try:
-        _download_file(url, tmpfile)
+        auth = None
+        if 'username' in contents and 'password' in contents:
+            auth = (contents['username'], contents['password'])
+        _download_file(url, tmpfile, auth)
 
         if 'type' in contents:
             extractor = EXTRACTORS[contents['type']]
