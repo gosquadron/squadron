@@ -110,6 +110,7 @@ def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
 
     jsonschema.validate(contents, SCHEMA)
 
+    finalfile = get_filename(dest)
     url = contents['url']
     local_filename = url.split('/')[-1]
 
@@ -129,26 +130,22 @@ def ext_extract(abs_source, dest, inputhash, loader, **kwargs):
                     extractor = EXTRACTORS[k]
                     break
             else:
-                raise UserException('No extractor found for {}'.format(local_filename))
+                raise TypeError('No extractor found for {}'.format(local_filename))
 
         if 'persist' in contents and not contents['persist']:
             extract_dest = tempfile.mkdtemp(prefix=local_filename, suffix='.sq')
             to_delete.append(extract_dest)
             persist = False
         else:
-            extract_dest = dest
+            extract_dest = finalfile
             persist = True
 
         extractor(tmpfile.name, extract_dest)
 
         if 'copy' in contents:
-            _copy_files(extract_dest, dest, contents)
+            _copy_files(extract_dest, finalfile, contents)
 
-        if persist:
-            finalfile = get_filename(dest)
-            return finalfile
-        else:
-            return None
+        return finalfile
     finally:
         for f in to_delete:
             if os.path.isdir(f):
