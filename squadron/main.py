@@ -13,7 +13,6 @@ from log import log
 from exceptions import TestException, UserException
 from resources import load_resources
 import tests
-import py
 import sys
 import tempfile
 import requests
