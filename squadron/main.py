@@ -6,6 +6,7 @@ from fileio.walkhash import walk_hash, hash_diff
 from fileio.config import parse_config, CONFIG_DEFAULTS
 from fileio.dirio import makedirsp
 from fileio.gotoroot import go_to_root
+from fileio.make_temp import make_temp
 import shutil
 import status
 from log import log
@@ -83,45 +84,6 @@ def go(squadron_dir, squadron_state_dir = None, config_file = None, node_name = 
             status.report_status(requests.session(), status_server, status_apikey, status_secret, str(uuid.uuid4()),
                 True, status='OK', hostname=node_name, info=info)
 
-def _is_current_last(prefix, tempdir, last_run_dir):
-    """
-    This method checks if the current directory in use (last_run_dir) is
-    going to be removed (has the lowest number).
-
-    Keyword arguments:
-        prefix -- The prefix of the temp directories
-        tempdir -- the path to the temp directory
-        last_run_dir -- the path to the in use directory
-    """
-
-    def parse_num(path):
-        """
-        parse the number out of a path (if it matches the prefix)
-
-        Borrowed from py.path
-        """
-        if path.startswith(prefix):
-            try:
-                return int(path[len(prefix):])
-            except ValueError:
-                pass
-
-    if not last_run_dir:
-        return False
-
-    bn = os.path.basename(os.path.normpath(last_run_dir))
-    lastmin = None
-    matched = False
-
-    minnum = sys.maxint
-    for path in os.listdir(tempdir):
-        num = parse_num(path)
-        if num is not None:
-            if minnum > num:
-                minnum = num
-                matched = bn == path
-    return matched
-
 def _get_hash_diff(last_run_sum, this_run_sum, force):
     if force:
         return ([], this_run_sum.keys())
@@ -160,14 +122,9 @@ def _run_squadron(squadron_dir, squadron_state_dir, node_name, dont_rollback,
         tempdir = os.path.join(squadron_state_dir, 'tmp')
         makedirsp(tempdir)
 
-        local_tempdir = py.path.local(tempdir)
-        if _is_current_last(prefix, tempdir, last_run_dir):
-            new_dir = py.path.local.make_numbered_dir(rootdir=local_tempdir, prefix=prefix, keep=0)
-        else:
-            new_dir = py.path.local.make_numbered_dir(rootdir=local_tempdir, prefix=prefix)
-        new_dir = str(new_dir) # we want a str not a LocalPath
+        new_dir = make_temp(tempdir, prefix, last_run_dir)
     else:
-        new_dir = str(py.path.local.make_numbered_dir(prefix='squadron'))
+        new_dir = make_temp(tempfile.gettempdir(), 'squadron')
 
     resources = load_resources(squadron_dir)
 

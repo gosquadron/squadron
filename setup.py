@@ -52,7 +52,6 @@ setup(
         'gitpython>=0.3.2.RC1',
         'quik>=0.2.2',
         'requests>=2.2.0',
-        'py>=1.4.19',
         'simplejson>=0',
         'cherrypy>=3.2.5',
         'bottle>=0.12.5',

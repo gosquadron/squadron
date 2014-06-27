@@ -145,15 +145,6 @@ def test_main_git(tmpdir):
     remove_lock_file(info['dir'])
     assert are_dir_trees_equal(os.path.join(test_path,'main2result'), info['dir']) == True
 
-def test_dont_current():
-    prefix = 'test1-'
-    tempdir = os.path.join(test_path, 'current')
-
-    assert not main._is_current_last(prefix, tempdir,
-            os.path.join(tempdir, 'test1-2'))
-    assert main._is_current_last(prefix, tempdir,
-            os.path.join(tempdir, 'test1-1'))
-
 
 @pytest.mark.parametrize("dry_run,dont_rollback", [
     (True, False),
