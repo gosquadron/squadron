@@ -4,6 +4,7 @@ import os
 from fileio.dirio import makedirsp
 from initialize import create_json
 from pkg_resources import resource_string
+import stat
 
 config = """
 [daemon]
@@ -50,6 +51,8 @@ def setup(etcdir, vardir):
                     os.path.join('init', 'init-script-ubuntu'))
             with open('/etc/init.d/squadron', 'w') as init_file:
                 init_file.write(init_script.format(vardir))
+                os.fchmod(init_file.fileno(),
+                         stat.S_IRWXU |  stat.S_IRGRP | stat.S_IROTH)
 
     return ret
 
