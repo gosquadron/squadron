@@ -2,7 +2,7 @@
 # Starts and stops the squadron daemon
 #
 
-SQUADRON="squadron"
+SQUADRON=`which squadron`
 DIR="{}"
 SQUADRON_PID="$DIR/squadron.pid"
 SQUADRON_ARGS="daemon"
