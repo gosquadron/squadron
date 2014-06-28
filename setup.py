@@ -39,6 +39,7 @@ setup(
         'Topic :: Utilities',
     ],
     packages=find_packages(),
+    include_package_data = True,
     scripts=['scripts/squadron'],
     tests_require=[
         'pytest>=2.5.1',

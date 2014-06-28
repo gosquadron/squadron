@@ -1,0 +1,45 @@
+#!/bin/sh
+# Starts and stops the squadron daemon
+#
+
+SQUADRON="squadron"
+DIR="{}"
+SQUADRON_PID="$DIR/squadron.pid"
+SQUADRON_ARGS="daemon"
+
+EXIT=0
+
+case "$1" in
+start)
+    echo "Starting..."
+    start-stop-daemon --background --chdir $DIR --pidfile $SQUADRON_PID --exec $SQUADRON --make-pidfile --start -- $SQUADRON_ARGS
+;;
+
+stop)
+    echo "Stopping..."
+    start-stop-daemon --stop --pidfile $SQUADRON_PID
+    rm $SQUADRON_PID 2>/dev/null
+;;
+
+restart)
+    $0 stop
+    $0 start
+;;
+
+status)
+    if start-stop-daemon -T --pidfile $SQUADRON_PID > /dev/null; then
+        echo "Running"
+        exit 0
+    fi
+
+    echo "Not running"
+    rm $SQUADRON_PID 2>/dev/null
+    EXIT=1
+;;
+
+*)
+    echo "Usage: $0 {start|stop|restart|status}"
+    EXIT=1
+esac
+
+exit $EXIT

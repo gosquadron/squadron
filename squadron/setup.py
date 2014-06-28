@@ -3,6 +3,7 @@ import readline
 import os
 from fileio.dirio import makedirsp
 from initialize import create_json
+from pkg_resources import resource_string
 
 config = """
 [daemon]
@@ -40,7 +41,17 @@ def setup(etcdir, vardir):
         result = raw_input("Location for state [{}]: ".format(default_var[is_root]))
         vardir = result if result else default_var[is_root]
 
-    return init_system(etcdir, vardir)
+    ret = init_system(etcdir, vardir)
+
+    if is_root:
+        result = raw_input("Install init script? [N/y] ")
+        if result == "Y" or result == "y":
+            init_script = resource_string(__name__,
+                    os.path.join('init', 'init-script-ubuntu'))
+            with open('/etc/init.d/squadron', 'w') as init_file:
+                init_file.write(init_script.format(vardir))
+
+    return ret
 
 
 def init_system(etcdir, vardir):
