@@ -12,7 +12,7 @@ EXIT=0
 case "$1" in
 start)
     echo "Starting..."
-    start-stop-daemon --background --chdir $DIR --pidfile $SQUADRON_PID --exec $SQUADRON --make-pidfile --start -- $SQUADRON_ARGS
+    start-stop-daemon --background --chdir $DIR --pidfile $SQUADRON_PID --exec $SQUADRON --make-pidfile --start --no-close -- $SQUADRON_ARGS >> $DIR/init.log
 ;;
 
 stop)
