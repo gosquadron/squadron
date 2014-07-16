@@ -204,15 +204,19 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
 
 ignore_copy = shutil.ignore_patterns('.git')
 
-def _smart_copyfile(src, dst):
-    shutil.copy2(src, dst)
-    # now get the user/group of the source
+def _smart_copymode(src, dst):
     stat_info = os.stat(src)
     os.chown(dst, stat_info.st_uid, stat_info.st_gid)
+
+def _smart_copyfile(src, dst):
+    shutil.copy2(src, dst)
+    _smart_copymode(src, dst)
 
 def _smart_copytree(src, dst, symlinks=False, ignore=None):
     if not os.path.exists(dst):
         os.makedirs(dst)
+
+    _smart_copymode(src, dst)
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
