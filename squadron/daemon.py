@@ -72,7 +72,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=th
             log.debug('Git pull returned: %s', out)
 
             ret = main.go(squadron_dir, node_name=node_name,
-                    config_file=config_file, dry_run=False)
+                    config_file=config_file, dry_run=False, dont_rollback=True)
         except Exception as e:
             log.exception('Caught top level exception')
 

@@ -54,7 +54,7 @@ def test_basic(tmpdir, webhooks, config_file):
                             node_name, exit_loop)
 
                     mainmock.assert_called_with(tmpdir, node_name=node_name,
-                            config_file=config_file, dry_run=False)
+                            config_file=config_file, dry_run=False, dont_rollback=True)
 
                 if webhooks:
                     assert getservermock.called
