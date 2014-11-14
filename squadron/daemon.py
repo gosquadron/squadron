@@ -16,7 +16,7 @@ def daemonize(squadron_dir, config_file, polltime, repo, node_name, exit_loop=th
     Keyword arguments:
         squadron_dir -- squadron directory
         config_file -- config file or None for defaults
-        polltime -- minutes to sleep in between runs
+        polltime -- seconds to sleep in between runs
         repo -- source code for the squadron_dir for updating
         node_name -- override for nodename
         loglevel -- how much to log
