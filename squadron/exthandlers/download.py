@@ -28,6 +28,7 @@ SCHEMA = {
 
 def _download_file(url, handle, auth=None):
     r = requests.get(url, auth=auth, stream=True)
+    r.raise_for_status()
 
     for chunk in r.iter_content(chunk_size=4096):
         if chunk: # filter out keep-alive new chunks
