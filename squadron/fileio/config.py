@@ -26,6 +26,8 @@ CONFIG_PATHS = ['/etc/squadron/config',
 
 CONFIG_SECTIONS = set(['squadron', 'status', 'daemon', 'webhook'])
 
+LOG_FORMAT = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
 def log_file_parse(log, logline, level):
     if len(logline) < 3:
         raise _log_throw(log, 'File log handler needs output file as last parameter: %s', logline)
@@ -33,6 +35,7 @@ def log_file_parse(log, logline, level):
     param = logline[2]
     fh = logging.FileHandler(param, 'a', None, False)
     fh.setLevel(level)
+    fh.setFormatter(LOG_FORMAT)
 
     # Send an event only to this logger so we know when it started since we append
     timestr = strftime("%Y-%m-%d %H:%M:%S")
@@ -57,6 +60,7 @@ def log_stream_parse(log, logline, level):
 
     sh = logging.StreamHandler(param)
     sh.setLevel(level)
+    sh.setFormatter(LOG_FORMAT)
     return sh
 
 def log_rotate_parse(log, logline, level):
@@ -65,6 +69,7 @@ def log_rotate_parse(log, logline, level):
 
     rh = logging.handlers.RotatingFileHandler(logline[2], 'a', logline[3], logline[4])
     rh.setLevel(level)
+    rh.setFormatter(LOG_FORMAT)
     return rh
 
 def log_loggly_parse(log, logline, level):
@@ -74,6 +79,7 @@ def log_loggly_parse(log, logline, level):
     else:
         lg = LogglyHandler.LogglyHandler(logline[3])
     lg.setLevel(level)
+    lg.setFormatter(LOG_FORMAT)
     return lg
 
 LOG_FUNC = {
