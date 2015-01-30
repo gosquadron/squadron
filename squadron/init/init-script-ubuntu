@@ -2,6 +2,7 @@
 # Starts and stops the squadron daemon
 #
 
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 SQUADRON=`which squadron`
 DIR="{}"
 SQUADRON_PID="$DIR/squadron.pid"
