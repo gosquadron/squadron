@@ -152,6 +152,7 @@ def apply(squadron_dir, node_name, tempdir, resources, previous_run,
 
         # defaults file is optional
         cfg = get_service_file('defaults', {})
+        cfg.update({'node_name': node_name})
         cfg.update(configdata['config'])
 
         # validate each schema
