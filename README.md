@@ -11,12 +11,12 @@ Squadron is an easy-to-use configuration tool designed for programmers. Deploy y
 * Test your changes locally
 * Atomic releases
 
-Visit our [overview](http://docs.gosquadron.com/en/latest/overview.html) for 
+Visit our [overview](http://squadron.readthedocs.io/en/latest/overview.html) for 
 more details on what Squadron can do and if it's right for you.
 
 ## Installing
 
-To get started using Squadron, head over to the [Squadron docs page](http://docs.gosquadron.com/en/latest/gettingstarted.html).
+To get started using Squadron, head over to the [Squadron docs page](http://squadron.readthedocs.io/en/0.6.3/gettingstarted.html).
 
 # Contact us
 
