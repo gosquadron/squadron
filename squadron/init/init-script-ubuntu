@@ -1,6 +1,13 @@
 #!/bin/sh
-# Starts and stops the squadron daemon
-#
+
+### BEGIN INIT INFO
+# Provides:          squadron
+# Required-Start:    $network $syslog
+# Required-Stop:     $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Squadron
+### END INIT INFO
 
 SQUADRON=`which squadron`
 DIR="{}"
