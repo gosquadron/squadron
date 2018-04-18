@@ -16,7 +16,7 @@ more details on what Squadron can do and if it's right for you.
 
 ## Installing
 
-To get started using Squadron, head over to the [Squadron docs page](http://squadron.readthedocs.io/en/0.6.3/gettingstarted.html).
+To get started using Squadron, head over to the [Squadron docs page](http://squadron.readthedocs.io/en/latest/gettingstarted.html).
 
 # Contact us
 
